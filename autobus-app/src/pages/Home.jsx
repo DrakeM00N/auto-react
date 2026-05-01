@@ -1,0 +1,199 @@
+import { Link } from 'react-router-dom'
+import { useApp } from '../context/AppContext'
+
+function Home() {
+  const { routes, trips } = useApp()
+
+  // Считаем ближайшие рейсы — берём первые 3
+  const upcomingTrips = trips.slice(0, 3)
+
+  return (
+    <div>
+
+      {/* ГЕРОЙ — главный блок */}
+      <section style={{
+        padding: '80px 2rem',
+        textAlign: 'center',
+        background: 'var(--bg2)',
+        borderBottom: '1px solid var(--border)',
+      }}>
+        <p style={{
+          color: 'var(--accent)',
+          fontFamily: 'Unbounded',
+          fontSize: '0.75rem',
+          letterSpacing: '0.15em',
+          textTransform: 'uppercase',
+          marginBottom: '16px',
+        }}>
+          Зручні подорожі Україною
+        </p>
+
+        <h1 style={{
+          fontFamily: 'Unbounded',
+          fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+          fontWeight: 700,
+          lineHeight: 1.15,
+          marginBottom: '24px',
+        }}>
+          Автобусні рейси<br />
+          <span style={{ color: 'var(--accent)' }}>швидко та зручно</span>
+        </h1>
+
+        <p style={{
+          color: 'var(--text2)',
+          fontSize: '1.1rem',
+          maxWidth: '480px',
+          margin: '0 auto 40px',
+          lineHeight: 1.7,
+        }}>
+          Бронюйте квитки онлайн, обирайте зручний час відправлення та подорожуйте з комфортом
+        </p>
+
+        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+          <Link to="/schedule" style={{
+            background: 'var(--accent)',
+            color: '#1A1814',
+            padding: '14px 32px',
+            borderRadius: '8px',
+            fontWeight: 600,
+            fontSize: '1rem',
+            fontFamily: 'Unbounded',
+          }}>
+            Дивитись розклад
+          </Link>
+          <Link to="/routes" style={{
+            background: 'transparent',
+            color: 'var(--text)',
+            padding: '14px 32px',
+            borderRadius: '8px',
+            fontWeight: 500,
+            fontSize: '1rem',
+            border: '1px solid var(--border2)',
+          }}>
+            Всі маршрути
+          </Link>
+        </div>
+      </section>
+
+      {/* СТАТИСТИКА */}
+      <section style={{
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '2px',
+        background: 'var(--border)',
+      }}>
+        {[
+          { value: routes.length, label: 'Маршрутів' },
+          { value: trips.length, label: 'Рейсів' },
+          { value: '40', label: 'Місць у автобусі' },
+        ].map((stat, i) => (
+          <div key={i} style={{
+            flex: 1,
+            maxWidth: '200px',
+            padding: '32px 16px',
+            textAlign: 'center',
+            background: 'var(--bg)',
+          }}>
+            <div style={{
+              fontFamily: 'Unbounded',
+              fontSize: '2rem',
+              fontWeight: 700,
+              color: 'var(--accent)',
+            }}>
+              {stat.value}
+            </div>
+            <div style={{ color: 'var(--text2)', fontSize: '0.9rem', marginTop: '4px' }}>
+              {stat.label}
+            </div>
+          </div>
+        ))}
+      </section>
+
+      {/* БЛИЖАЙШИЕ РЕЙСЫ */}
+      <section style={{ padding: '60px 2rem', maxWidth: '900px', margin: '0 auto' }}>
+        <h2 style={{
+          fontFamily: 'Unbounded',
+          fontSize: '1.4rem',
+          marginBottom: '8px',
+        }}>
+          Найближчі рейси
+        </h2>
+        <p style={{ color: 'var(--text2)', marginBottom: '32px' }}>
+          Актуальні рейси на найближчі дні
+        </p>
+
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {upcomingTrips.map(trip => {
+            const route = routes.find(r => r.id === trip.routeId)
+            const freeSeats = trip.seats - trip.bookedSeats.length
+            return (
+              <div key={trip.id} style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                padding: '20px 24px',
+                background: 'var(--bg2)',
+                borderRadius: '12px',
+                border: '1px solid var(--border)',
+                flexWrap: 'wrap',
+                gap: '16px',
+              }}>
+                <div>
+                  <div style={{ fontWeight: 600, fontSize: '1.05rem', marginBottom: '4px' }}>
+                    {route?.from} → {route?.to}
+                  </div>
+                  <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
+                    {trip.date} • відправлення о {trip.time}
+                  </div>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text2)' }}>Місць</div>
+                    <div style={{
+                      fontWeight: 600,
+                      color: freeSeats < 10 ? '#E74C3C' : 'var(--accent)',
+                    }}>
+                      {freeSeats}
+                    </div>
+                  </div>
+
+                  <div style={{ textAlign: 'center' }}>
+                    <div style={{ fontSize: '0.8rem', color: 'var(--text2)' }}>Ціна</div>
+                    <div style={{ fontWeight: 600 }}>{trip.price} грн</div>
+                  </div>
+
+                  <Link to="/booking" style={{
+                    background: 'var(--accent)',
+                    color: '#1A1814',
+                    padding: '10px 20px',
+                    borderRadius: '8px',
+                    fontWeight: 600,
+                    fontSize: '0.9rem',
+                    whiteSpace: 'nowrap',
+                  }}>
+                    Забронювати
+                  </Link>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        <div style={{ textAlign: 'center', marginTop: '32px' }}>
+          <Link to="/schedule" style={{
+            color: 'var(--accent)',
+            fontWeight: 500,
+            borderBottom: '1px solid var(--accent)',
+            paddingBottom: '2px',
+          }}>
+            Переглянути всі рейси →
+          </Link>
+        </div>
+      </section>
+
+    </div>
+  )
+}
+
+export default Home

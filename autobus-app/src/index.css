@@ -1,0 +1,88 @@
+@import url('https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Onest:wght@300;400;500;600&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ТЁМНАЯ ТЕМА (по умолчанию) */
+:root {
+  --bg: #0B0F1A;
+  --bg2: #131929;
+  --bg3: #1C2438;
+  --accent: #E8A020;
+  --accent-hover: #F5C842;
+  --text: #F0EDE6;
+  --text2: #9CA3B0;
+  --border: rgba(255, 255, 255, 0.08);
+  --border2: rgba(255, 255, 255, 0.15);
+  --radius: 12px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3);
+  --button-bg: var(--accent);
+  --button-text: #1A1814;
+}
+
+/* СВЕТЛАЯ ТЕМА */
+[data-theme="light"] {
+  --bg: #F6EEE2;
+  --bg2: #EEE3D5;
+  --bg3: #E3D5C6;
+  --accent: #A97B2E;
+  --accent-hover: #C19545;
+  --text: #342C22;
+  --text2: #7A6D5D;
+  --border: rgba(0, 0, 0, 0.06);
+  --border2: rgba(0, 0, 0, 0.09);
+  --shadow: 0 4px 24px rgba(0,0,0,0.06);
+  --button-bg: #C19545;
+  --button-text: #1A1814;
+}
+
+body {
+  font-family: 'Onest', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  transition: background 0.3s, color 0.3s;
+}
+
+main {
+  min-height: calc(100vh - 130px);
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  font-family: 'Onest', sans-serif;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border: 1px solid transparent;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+}
+
+button:hover {
+  border-color: rgba(0,0,0,0.08);
+}
+
+input,
+select,
+textarea {
+  color: var(--text);
+  background: var(--bg);
+  border-color: var(--border);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(1) brightness(1.2);
+}
+
+[data-theme="light"] input[type="date"]::-webkit-calendar-picker-indicator,
+[data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator {
+  filter: invert(0.3) brightness(1);
+}
