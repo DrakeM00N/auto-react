@@ -1,234 +1,265 @@
-import { createContext, useContext, useState, useEffect } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback } from 'react'
 
 const AppContext = createContext()
 
-// Начальные данные — маршруты
-const initialRoutes = [
-  { id: 1, from: 'Кременчук', to: 'Київ', distance: '475 км', duration: '6 год', stops: ['Миколаїв', 'Житомир'] },
-  { id: 2, from: 'Кременчук', to: 'Харків', distance: '680 км', duration: '8 год', stops: ['Полтава'] },
-  { id: 3, from: 'Кременчук', to: 'Львів', distance: '810 км', duration: '10 год', stops: ['Кропивницький'] },
-]
+const BASE = 'http://localhost:3001/api'
 
-// Начальные данные — рейсы
-const initialTrips = [
-  { id: 1, routeId: 1, date: '2026-05-05', time: '07:00', price: 350, seats: 40, bookedSeats: [] },
-  { id: 2, routeId: 1, date: '2026-05-05', time: '14:00', price: 320, seats: 40, bookedSeats: [] },
-  { id: 3, routeId: 2, date: '2026-05-06', time: '08:00', price: 480, seats: 40, bookedSeats: [] },
-  { id: 4, routeId: 3, date: '2026-05-07', time: '09:00', price: 550, seats: 40, bookedSeats: [] },
-]
+function getToken() {
+  return localStorage.getItem('token')
+}
+
+async function request(method, path, body) {
+  const token = getToken()
+  const res = await fetch(BASE + path, {
+    method,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    body: body ? JSON.stringify(body) : undefined,
+  })
+  const data = await res.json()
+  if (!res.ok) throw new Error(data.error || 'Помилка сервера')
+  return data
+}
 
 export function AppProvider({ children }) {
-  const [theme, setTheme] = useState(() => {
-    const saved = localStorage.getItem('app-theme')
-    return saved || 'dark'
-  })
-  const [routes, setRoutes] = useState(() => {
-    const saved = localStorage.getItem('app-routes')
-    if (!saved) return initialRoutes
-    try { return JSON.parse(saved) } catch { return initialRoutes }
-  })
-  const [trips, setTrips] = useState(() => {
-    const saved = localStorage.getItem('app-trips')
-    if (!saved) return initialTrips
-    try { return JSON.parse(saved) } catch { return initialTrips }
-  })
-  const [users, setUsers] = useState(() => {
-    const saved = localStorage.getItem('app-users')
-    if (!saved) return [
-      { id: 1, name: 'Адмін', email: 'drakeokay@gmail.com', password: 'Drake1410', role: 'admin' }
-    ]
-    try { return JSON.parse(saved) } catch { return [
-      { id: 1, name: 'Адмін', email: 'drakeokay@gmail.com', password: 'Drake1410', role: 'admin' }
-    ] }
-  })
+  const [theme, setTheme] = useState(() => localStorage.getItem('app-theme') || 'dark')
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('app-current-user')
-    if (!saved) return null
-    try { return JSON.parse(saved) } catch { return null }
+    try { return saved ? JSON.parse(saved) : null } catch { return null }
   })
-  const [bookings, setBookings] = useState(() => {
-    const saved = localStorage.getItem('app-bookings')
-    if (!saved) return []
-    try { return JSON.parse(saved) } catch { return [] }
-  })
+  const [routes, setRoutes] = useState([])
+  const [trips, setTrips] = useState([])
+  const [users, setUsers] = useState([])
+  const [bookings, setBookings] = useState([])
+  const [loading, setLoading] = useState(true)
 
+  // Тема
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme)
     localStorage.setItem('app-theme', theme)
   }, [theme])
 
-  useEffect(() => {
-    localStorage.setItem('app-routes', JSON.stringify(routes))
-  }, [routes])
+  const toggleTheme = () => setTheme(prev => prev === 'dark' ? 'light' : 'dark')
 
-  useEffect(() => {
-    localStorage.setItem('app-trips', JSON.stringify(trips))
-  }, [trips])
+  // Завантажуємо дані з сервера
+  const loadData = useCallback(async () => {
+    try {
+      const [routesData, tripsData] = await Promise.all([
+        request('GET', '/routes'),
+        request('GET', '/trips'),
+      ])
+      setRoutes(routesData)
+      setTrips(tripsData)
 
-  useEffect(() => {
-    localStorage.setItem('app-users', JSON.stringify(users))
-  }, [users])
+      if (currentUser) {
+        const bookingsData = await request('GET', '/bookings/my')
+        setBookings(bookingsData)
 
-  useEffect(() => {
-    if (currentUser) {
-      localStorage.setItem('app-current-user', JSON.stringify(currentUser))
-    } else {
-      localStorage.removeItem('app-current-user')
+        if (currentUser.role === 'admin') {
+          const [allBookings, usersData] = await Promise.all([
+            request('GET', '/bookings'),
+            request('GET', '/users'),
+          ])
+          setBookings(allBookings)
+          setUsers(usersData)
+        }
+      }
+    } catch (e) {
+      console.error('Помилка завантаження даних:', e.message)
+    } finally {
+      setLoading(false)
     }
   }, [currentUser])
 
   useEffect(() => {
-    localStorage.setItem('app-bookings', JSON.stringify(bookings))
-  }, [bookings])
+    loadData()
+  }, [loadData])
 
-  const toggleTheme = () => {
-    setTheme(prev => prev === 'dark' ? 'light' : 'dark')
-  }
-
-  // --- Функции для пользователей ---
-  const register = (name, email, password, role = 'user') => {
-    const exists = users.find(u => u.email === email)
-    if (exists) return { success: false, message: 'Користувач з таким email вже існує' }
-
-    const newUser = { id: Date.now(), name, email, password, role }
-    setUsers(prev => [...prev, newUser])
-    setCurrentUser(newUser)
-    return { success: true }
-  }
-
-  const login = (email, password) => {
-    const user = users.find(u => u.email === email && u.password === password)
-    if (!user) return { success: false, message: 'Невірний email або пароль' }
-
-    const now = new Date().toLocaleString('uk-UA')
-    const updatedUser = { ...user, lastLogin: now }
-    setUsers(prev => prev.map(u => u.id === user.id ? updatedUser : u))
-    setCurrentUser(updatedUser)
-    return { success: true }
-  }
-
-  const logout = () => setCurrentUser(null)
-
-  const promoteUser = (userId) => {
-    setUsers(prev => prev.map(u =>
-      u.id === userId ? { ...u, role: 'admin' } : u
-    ))
-    if (currentUser?.id === userId) {
-      setCurrentUser(prev => prev ? { ...prev, role: 'admin' } : prev)
+  // --- Авторизація ---
+  const register = async (name, email, password) => {
+    try {
+      const { token, user } = await request('POST', '/auth/register', { name, email, password })
+      localStorage.setItem('token', token)
+      localStorage.setItem('app-current-user', JSON.stringify(user))
+      setCurrentUser(user)
+      return { success: true }
+    } catch (e) {
+      return { success: false, message: e.message }
     }
   }
 
-  // --- Функции для маршрутов ---
-  const addRoute = (route) => {
-    const newRoute = { ...route, id: Date.now() }
-    setRoutes(prev => [...prev, newRoute])
-  }
-
-  const deleteRoute = (id) => {
-    setRoutes(prev => prev.filter(r => r.id !== id))
-    setTrips(prevTrips => {
-      const remainingTrips = prevTrips.filter(t => t.routeId !== id)
-      setBookings(prevBookings => prevBookings.filter(b => remainingTrips.some(t => t.id === b.tripId)))
-      return remainingTrips
-    })
-  }
-
-  const updateRoute = (routeId, data) => {
-    setRoutes(prev => prev.map(r => r.id === routeId ? { ...r, ...data } : r))
-  }
-
-  // --- Функции для рейсов ---
-  const addTrip = (trip) => {
-    const newTrip = { ...trip, id: Date.now(), bookedSeats: [] }
-    setTrips(prev => [...prev, newTrip])
-  }
-
-  const updateTrip = (tripId, data) => {
-    setTrips(prev => prev.map(t => t.id === tripId ? { ...t, ...data } : t))
-  }
-
-  const deleteTrip = (id) => {
-    setTrips(prevTrips => prevTrips.filter(t => t.id !== id))
-    setBookings(prevBookings => prevBookings.filter(b => b.tripId !== id))
-  }
-
-  // --- Функции для бронирования ---
-  const bookTrip = (tripId, passengerName, passengerPhone) => {
-    const trip = trips.find(t => t.id === tripId)
-    const freeSeats = trip.seats - trip.bookedSeats.length
-    if (freeSeats <= 0) return { success: false, message: 'Місць немає' }
-
-    const booking = {
-      id: Date.now(),
-      tripId,
-      userId: currentUser?.id || null,
-      passengerName,
-      passengerPhone,
-      createdAt: new Date().toLocaleDateString('uk-UA'),
+  const login = async (email, password) => {
+    try {
+      const { token, user } = await request('POST', '/auth/login', { email, password })
+      localStorage.setItem('token', token)
+      localStorage.setItem('app-current-user', JSON.stringify(user))
+      setCurrentUser(user)
+      return { success: true }
+    } catch (e) {
+      return { success: false, message: e.message }
     }
-
-    setBookings(prev => [...prev, booking])
-    setTrips(prev => prev.map(t =>
-      t.id === tripId
-        ? { ...t, bookedSeats: [...t.bookedSeats, booking.id] }
-        : t
-    ))
-
-    return { success: true, booking }
   }
 
-  const cancelBooking = (bookingId) => {
-    const booking = bookings.find(b => b.id === bookingId)
-    if (!booking) return { success: false, message: 'Бронювання не знайдено' }
-
-    setBookings(prev => prev.filter(b => b.id !== bookingId))
-    setTrips(prev => prev.map(t =>
-      t.id === booking.tripId
-        ? { ...t, bookedSeats: t.bookedSeats.filter(id => id !== bookingId) }
-        : t
-    ))
-    return { success: true }
+  const logout = () => {
+    localStorage.removeItem('token')
+    localStorage.removeItem('app-current-user')
+    setCurrentUser(null)
+    setBookings([])
+    setUsers([])
   }
 
-  const updateBooking = (bookingId, updates) => {
-    setBookings(prev => prev.map(b =>
-      b.id === bookingId ? { ...b, ...updates } : b
-    ))
-  }
-
-  const changePassword = (currentPassword, newPassword) => {
-    if (!currentUser) return { success: false, message: 'Користувач не знайдений' }
-    if (currentUser.password !== currentPassword) return { success: false, message: 'Невірний поточний пароль' }
-
-    setUsers(prev => prev.map(u =>
-      u.id === currentUser.id ? { ...u, password: newPassword } : u
-    ))
-    setCurrentUser(prev => prev ? { ...prev, password: newPassword } : prev)
-    return { success: true }
-  }
-
-  const resetPassword = (email, newPassword) => {
-    const normalizedEmail = email.trim().toLowerCase()
-    const user = users.find(u => u.email === normalizedEmail)
-    if (!user) return { success: false, message: 'Користувача з таким email не знайдено' }
-
-    setUsers(prev => prev.map(u =>
-      u.email === normalizedEmail ? { ...u, password: newPassword } : u
-    ))
-    if (currentUser?.email === normalizedEmail) {
-      setCurrentUser(prev => prev ? { ...prev, password: newPassword } : prev)
+  const promoteUser = async (userId) => {
+    try {
+      await request('POST', `/users/${userId}/promote`)
+      setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: 'admin' } : u))
+    } catch (e) {
+      console.error(e.message)
     }
-    return { success: true }
+  }
+
+  const changePassword = async (currentPassword, newPassword) => {
+    try {
+      await request('POST', '/auth/change-password', { currentPassword, newPassword })
+      return { success: true }
+    } catch (e) {
+      return { success: false, message: e.message }
+    }
+  }
+
+  const resetPassword = async (email, newPassword) => {
+    try {
+      await request('POST', '/auth/reset-password', { email, newPassword })
+      return { success: true }
+    } catch (e) {
+      return { success: false, message: e.message }
+    }
+  }
+
+  // --- Маршрути ---
+  const addRoute = async (route) => {
+    try {
+      const newRoute = await request('POST', '/routes', {
+        ...route,
+        stops: typeof route.stops === 'string'
+          ? route.stops.split(',').map(s => s.trim()).filter(Boolean)
+          : route.stops,
+      })
+      setRoutes(prev => [...prev, newRoute])
+    } catch (e) { console.error(e.message) }
+  }
+
+  const updateRoute = async (id, data) => {
+    try {
+      await request('PUT', `/routes/${id}`, {
+        ...data,
+        stops: typeof data.stops === 'string'
+          ? data.stops.split(',').map(s => s.trim()).filter(Boolean)
+          : (data.stops || []),
+      })
+      const updated = await request('GET', '/routes')
+      setRoutes(updated)
+    } catch (e) { console.error(e.message) }
+  }
+
+  const deleteRoute = async (id) => {
+    try {
+      await request('DELETE', `/routes/${id}`)
+      setRoutes(prev => prev.filter(r => r.id !== id))
+      // рейси і бронювання видаляються каскадно на сервері
+      const tripsData = await request('GET', '/trips')
+      setTrips(tripsData)
+      if (currentUser?.role === 'admin') {
+        const allBookings = await request('GET', '/bookings')
+        setBookings(allBookings)
+      }
+    } catch (e) { console.error(e.message) }
+  }
+
+  // --- Рейси ---
+  const addTrip = async (trip) => {
+    try {
+      const newTrip = await request('POST', '/trips', {
+        routeId: Number(trip.routeId),
+        date: trip.date,
+        time: trip.time,
+        price: Number(trip.price),
+        seats: Number(trip.seats),
+      })
+      setTrips(prev => [...prev, newTrip])
+    } catch (e) { console.error(e.message) }
+  }
+
+  const updateTrip = async (id, data) => {
+    try {
+      const updated = await request('PUT', `/trips/${id}`, {
+        routeId: Number(data.routeId),
+        date: data.date,
+        time: data.time,
+        price: Number(data.price),
+        seats: Number(data.seats),
+      })
+      setTrips(prev => prev.map(t => t.id === id ? updated : t))
+    } catch (e) { console.error(e.message) }
+  }
+
+  const deleteTrip = async (id) => {
+    try {
+      await request('DELETE', `/trips/${id}`)
+      setTrips(prev => prev.filter(t => t.id !== id))
+      if (currentUser?.role === 'admin') {
+        const allBookings = await request('GET', '/bookings')
+        setBookings(allBookings)
+      }
+    } catch (e) { console.error(e.message) }
+  }
+
+  // --- Бронювання ---
+  const bookTrip = async (tripId, passengerName, passengerPhone) => {
+    try {
+      const result = await request('POST', '/bookings', { tripId, passengerName, passengerPhone })
+      // Оновлюємо рейси щоб показати нову кількість місць
+      const tripsData = await request('GET', '/trips')
+      setTrips(tripsData)
+      // Оновлюємо бронювання користувача
+      const myBookings = await request('GET', '/bookings/my')
+      setBookings(myBookings)
+      return { success: true, booking: result.booking }
+    } catch (e) {
+      return { success: false, message: e.message }
+    }
+  }
+
+  const cancelBooking = async (bookingId) => {
+    try {
+      await request('DELETE', `/bookings/${bookingId}`)
+      setBookings(prev => prev.filter(b => b.id !== bookingId))
+      const tripsData = await request('GET', '/trips')
+      setTrips(tripsData)
+      return { success: true }
+    } catch (e) {
+      return { success: false, message: e.message }
+    }
+  }
+
+  const updateBooking = async (bookingId, updates) => {
+    try {
+      await request('PUT', `/bookings/${bookingId}`, updates)
+      setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, ...updates } : b))
+    } catch (e) { console.error(e.message) }
   }
 
   return (
     <AppContext.Provider value={{
       theme, toggleTheme,
-      routes, addRoute, deleteRoute,
-      trips, addTrip, deleteTrip,
+      loading,
+      routes, addRoute, deleteRoute, updateRoute,
+      trips, addTrip, deleteTrip, updateTrip,
       users,
       currentUser, register, login, logout, promoteUser,
-      bookings, bookTrip, cancelBooking, updateBooking, changePassword, resetPassword,
+      bookings, bookTrip, cancelBooking, updateBooking,
+      changePassword, resetPassword,
     }}>
       {children}
     </AppContext.Provider>
