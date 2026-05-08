@@ -2,6 +2,13 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useApp } from '../context/AppContext'
 
+const UKRAINE_CITIES = [
+  'Київ', 'Харків', 'Дніпро', 'Одеса', 'Запоріжжя', 'Львів', 'Кривий Ріг',
+  'Миколаїв', 'Вінниця', 'Херсон', 'Полтава', 'Чернігів', 'Черкаси',
+  'Хмельницький', 'Житомир', 'Суми', 'Рівне', 'Івано-Франківськ', 'Тернопіль',
+  'Кропивницький', 'Луцьк', 'Ужгород', 'Чернівці', 'Кременчук'
+].sort((a, b) => a.localeCompare(b, 'uk'))
+
 function Schedule() {
   const { trips, routes } = useApp()
   const [searchParams] = useSearchParams()
@@ -18,21 +25,45 @@ function Schedule() {
   }, [searchParams, today])
 
   const filteredTrips = useMemo(() => {
-    return trips.filter(trip => {
-      const route = routes.find(r => r.id === trip.routeId)
-      if (!route) return false
-      const fromMatch = filterFrom ? route.from === filterFrom : true
-      const toMatch = filterTo ? route.to === filterTo : true
-      const dateMatch = filterDate ? trip.date === filterDate : true
-      const stopsText = route.stops?.join(' ') || ''
-      const searchText = `${route.from} ${route.to} ${stopsText} ${trip.date} ${trip.time}`.toLowerCase()
-      const searchMatch = searchQuery ? searchText.includes(searchQuery.toLowerCase()) : true
-      return fromMatch && toMatch && dateMatch && searchMatch
-    })
-  }, [trips, routes, filterFrom, filterTo, filterDate, searchQuery])
+  return trips.filter(trip => {
+    const route = routes.find(r => r.id === trip.routeId)
+    if (!route) return false
 
-  const fromOptions = [...new Set(routes.map(route => route.from))]
-  const toOptions = [...new Set(routes.map(route => route.to))]
+    // Повний список точок маршруту: від → зупинки → до
+    const allPoints = [route.from, ...(route.stops || []), route.to]
+
+    const fromIndex = filterFrom
+      ? allPoints.findIndex(p => p === filterFrom)
+      : 0
+    const toIndex = filterTo
+      ? allPoints.findLastIndex(p => p === filterTo)
+      : allPoints.length - 1
+
+    // Місто "звідки" має бути раніше міста "куди" в маршруті
+    const routeMatch = filterFrom && filterTo
+      ? fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex
+      : filterFrom
+        ? fromIndex !== -1
+        : filterTo
+          ? toIndex !== -1
+          : true
+
+    const dateMatch = filterDate ? trip.date === filterDate : true
+    const stopsText = route.stops?.join(' ') || ''
+    const searchText = `${route.from} ${route.to} ${stopsText} ${trip.date} ${trip.time}`.toLowerCase()
+    const searchMatch = searchQuery ? searchText.includes(searchQuery.toLowerCase()) : true
+
+    return routeMatch && dateMatch && searchMatch
+  })
+}, [trips, routes, filterFrom, filterTo, filterDate, searchQuery])
+
+  const selectStyle = {
+    padding: '14px 16px',
+    borderRadius: '14px',
+    border: '1px solid var(--border)',
+    background: 'var(--bg)',
+    color: 'var(--text)',
+  }
 
   return (
     <div style={{ padding: '40px 2rem', maxWidth: '1000px', margin: '0 auto' }}>
@@ -47,48 +78,44 @@ function Schedule() {
 
       <section style={{ marginBottom: '28px', display: 'grid', gap: '14px' }}>
         <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+
           <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
             Пошук маршруту
             <input
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
               placeholder="Одеса, Київ, дата або час"
-              style={{ padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={selectStyle}
             />
           </label>
+
           <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
             Відправлення
-            <select
-              value={filterFrom}
-              onChange={e => setFilterFrom(e.target.value)}
-              style={{ padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
-            >
-              <option value="">Усі</option>
-              {fromOptions.map(from => (
-                <option key={from} value={from}>{from}</option>
+            <select value={filterFrom} onChange={e => setFilterFrom(e.target.value)} style={selectStyle}>
+              <option value="">Усі міста</option>
+              {UKRAINE_CITIES.map(city => (
+                <option key={city} value={city}>{city}</option>
               ))}
             </select>
           </label>
+
           <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
             Напрямок
-            <select
-              value={filterTo}
-              onChange={e => setFilterTo(e.target.value)}
-              style={{ padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
-            >
-              <option value="">Усі</option>
-              {toOptions.map(to => (
-                <option key={to} value={to}>{to}</option>
+            <select value={filterTo} onChange={e => setFilterTo(e.target.value)} style={selectStyle}>
+              <option value="">Усі напрямки</option>
+              {UKRAINE_CITIES.filter(c => c !== filterFrom).map(city => (
+                <option key={city} value={city}>{city}</option>
               ))}
             </select>
           </label>
+
           <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
             Дата
             <input
               type="date"
               value={filterDate}
               onChange={e => setFilterDate(e.target.value)}
-              style={{ padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={selectStyle}
             />
           </label>
         </div>
@@ -100,11 +127,11 @@ function Schedule() {
       <div style={{ display: 'grid', gap: '18px' }}>
         {filteredTrips.length === 0 ? (
           <div style={{ padding: '24px', background: 'var(--bg2)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-            Немає доступних рейсів.
+            Немає доступних рейсів за обраними параметрами.
           </div>
         ) : filteredTrips.map(trip => {
           const route = routes.find(r => r.id === trip.routeId)
-          const freeSeats = trip.seats - trip.bookedSeats.length
+          const freeSeats = trip.seats - (trip.bookedSeats?.length || 0)
 
           return (
             <article key={trip.id} style={{

@@ -2,6 +2,14 @@ import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
+const UKRAINE_CITIES = [
+  'Київ', 'Харків', 'Дніпро', 'Одеса', 'Запоріжжя', 'Львів', 'Кривий Ріг',
+  'Миколаїв', 'Вінниця', 'Херсон', 'Полтава', 'Чернігів', 'Черкаси',
+  'Хмельницький', 'Житомир', 'Суми', 'Рівне', 'Івано-Франківськ', 'Тернопіль',
+  'Кропивницький', 'Луцьк', 'Ужгород', 'Чернівці', 'Кременчук',
+  
+].sort()
+
 function RoutesPage() {
   const { routes } = useApp()
   const navigate = useNavigate()
@@ -11,30 +19,45 @@ function RoutesPage() {
   const [travelDate, setTravelDate] = useState(today)
   const [passengers, setPassengers] = useState('1')
 
-  const origins = useMemo(() => [...new Set(routes.map(route => route.from))], [routes])
-
   useEffect(() => {
     if (!routes.length) return
-    if (!routes.some(route => route.from === fromFilter)) {
-      const defaultOrigin = routes.some(route => route.from === 'Кременчук')
-        ? 'Кременчук'
-        : routes[0].from
+    if (!fromFilter) {
+      const defaultOrigin = routes.some(r => r.from === 'Кременчук') ? 'Кременчук' : routes[0].from
       setFromFilter(defaultOrigin)
     }
   }, [routes, fromFilter])
-  const destinations = useMemo(() => [...new Set(routes.map(route => route.to))], [routes])
 
   const filteredRoutes = useMemo(() => routes.filter(route => {
-    const fromMatch = fromFilter ? route.from === fromFilter : true
-    const toMatch = toFilter ? route.to === toFilter : true
-    return fromMatch && toMatch
-  }), [routes, fromFilter, toFilter])
+  const allPoints = [route.from, ...(route.stops || []), route.to]
+
+  const fromIndex = fromFilter
+    ? allPoints.findIndex(p => p === fromFilter)
+    : 0
+  const toIndex = toFilter
+    ? allPoints.findLastIndex(p => p === toFilter)
+    : allPoints.length - 1
+
+  if (fromFilter && toFilter) {
+    return fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex
+  }
+  if (fromFilter) return fromIndex !== -1
+  if (toFilter) return toIndex !== -1
+  return true
+}), [routes, fromFilter, toFilter]) 
 
   const handleSearch = () => {
     const passengersCount = Number(passengers) > 0 ? Number(passengers) : 1
     navigate(
       `/schedule?from=${encodeURIComponent(fromFilter)}&to=${encodeURIComponent(toFilter)}&date=${travelDate}&passengers=${passengersCount}`
     )
+  }
+
+  const selectStyle = {
+    padding: '14px 16px',
+    borderRadius: '16px',
+    border: '1px solid var(--border)',
+    background: 'var(--bg)',
+    color: 'var(--text)',
   }
 
   return (
@@ -50,29 +73,23 @@ function RoutesPage() {
 
       <section style={{ marginBottom: '28px' }}>
         <div style={{ display: 'grid', gap: '16px', padding: '22px', borderRadius: '24px', background: 'var(--bg2)', border: '1px solid var(--border)', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', alignItems: 'end' }}>
+
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--text2)' }}>
             Звідки
-            <select
-              value={fromFilter}
-              onChange={e => setFromFilter(e.target.value)}
-              style={{ padding: '14px 16px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
-            >
-              {origins.map(origin => (
-                <option key={origin} value={origin}>{origin}</option>
+            <select value={fromFilter} onChange={e => setFromFilter(e.target.value)} style={selectStyle}>
+              <option value="">Оберіть місто</option>
+              {UKRAINE_CITIES.map(city => (
+                <option key={city} value={city}>{city}</option>
               ))}
             </select>
           </label>
 
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--text2)' }}>
             Куди
-            <select
-              value={toFilter}
-              onChange={e => setToFilter(e.target.value)}
-              style={{ padding: '14px 16px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
-            >
+            <select value={toFilter} onChange={e => setToFilter(e.target.value)} style={selectStyle}>
               <option value="">Оберіть напрямок</option>
-              {destinations.map(destination => (
-                <option key={destination} value={destination}>{destination}</option>
+              {UKRAINE_CITIES.filter(c => c !== fromFilter).map(city => (
+                <option key={city} value={city}>{city}</option>
               ))}
             </select>
           </label>
@@ -83,7 +100,7 @@ function RoutesPage() {
               type="date"
               value={travelDate}
               onChange={e => setTravelDate(e.target.value)}
-              style={{ padding: '14px 16px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={selectStyle}
             />
           </label>
 
@@ -94,7 +111,7 @@ function RoutesPage() {
               min="1"
               value={passengers}
               onChange={e => setPassengers(e.target.value)}
-              style={{ padding: '14px 16px', borderRadius: '16px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+              style={selectStyle}
             />
           </label>
 
