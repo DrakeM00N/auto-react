@@ -14,6 +14,7 @@ app.use('/api/routes', require('./routes/routes'))
 app.use('/api/trips', require('./routes/trips'))
 app.use('/api/bookings', require('./routes/bookings'))
 app.use('/api/users', require('./routes/users'))
+app.use('/api/liqpay', require('./routes/liqpay'))
 
 // Перевірка що сервер живий
 app.get('/api/health', (req, res) => res.json({ ok: true }))

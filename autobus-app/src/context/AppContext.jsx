@@ -138,17 +138,19 @@ export function AppProvider({ children }) {
   }
 
   // --- Маршрути ---
-  const addRoute = async (route) => {
-    try {
-      const newRoute = await request('POST', '/routes', {
-        ...route,
-        stops: typeof route.stops === 'string'
-          ? route.stops.split(',').map(s => s.trim()).filter(Boolean)
-          : route.stops,
-      })
-      setRoutes(prev => [...prev, newRoute])
-    } catch (e) { console.error(e.message) }
-  }
+const addRoute = async (route) => {
+  try {
+    await request('POST', '/routes', {
+      ...route,
+      stops: typeof route.stops === 'string'
+        ? route.stops.split(',').map(s => s.trim()).filter(Boolean)
+        : route.stops,
+    })
+    // Перезавантажуємо всі маршрути з сервера
+    const updated = await request('GET', '/routes')
+    setRoutes(updated)
+  } catch (e) { console.error(e.message) }
+}
 
   const updateRoute = async (id, data) => {
     try {
@@ -178,18 +180,20 @@ export function AppProvider({ children }) {
   }
 
   // --- Рейси ---
-  const addTrip = async (trip) => {
-    try {
-      const newTrip = await request('POST', '/trips', {
-        routeId: Number(trip.routeId),
-        date: trip.date,
-        time: trip.time,
-        price: Number(trip.price),
-        seats: Number(trip.seats),
-      })
-      setTrips(prev => [...prev, newTrip])
-    } catch (e) { console.error(e.message) }
-  }
+const addTrip = async (trip) => {
+  try {
+    await request('POST', '/trips', {
+      routeId: Number(trip.routeId),
+      date: trip.date,
+      time: trip.time,
+      price: Number(trip.price),
+      seats: Number(trip.seats),
+    })
+    // Перезавантажуємо всі рейси з сервера
+    const updated = await request('GET', '/trips')
+    setTrips(updated)
+  } catch (e) { console.error(e.message) }
+}
 
   const updateTrip = async (id, data) => {
     try {

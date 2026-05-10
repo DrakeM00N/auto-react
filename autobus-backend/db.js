@@ -40,6 +40,15 @@ async function initDB() {
       FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
     )`,
+    `CREATE TABLE IF NOT EXISTS pending_bookings (
+      order_id TEXT PRIMARY KEY,
+      trip_id INTEGER NOT NULL,
+      passenger_name TEXT NOT NULL,
+      passenger_phone TEXT NOT NULL,
+      boarding_point TEXT,
+      alighting_point TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`,
   ])
 
   // Seed initial data if empty

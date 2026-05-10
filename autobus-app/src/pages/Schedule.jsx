@@ -152,7 +152,7 @@ function Schedule() {
                   {trip.date} • {trip.time}
                 </h2>
                 <p style={{ margin: '12px 0 0', color: 'var(--text2)' }}>
-                  Пробіг: {route?.distance} • Тривалість: {route?.duration}
+                  Відстань: {route?.distance} • Тривалість: {route?.duration}
                 </p>
               </div>
 
