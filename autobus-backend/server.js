@@ -5,7 +5,7 @@ const { initDB } = require('./db')
 
 const app = express()
 
-app.use(cors({ origin: 'http://localhost:5173' }))
+app.use(cors({ origin: '*' }))
 app.use(express.json())
 
 // Маршрути API

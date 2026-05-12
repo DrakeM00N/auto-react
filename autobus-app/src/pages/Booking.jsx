@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
-const BASE = 'http://localhost:3001/api'
+const BASE = 'http://192.168.0.103:3001/api'
 
 function TicketCard({ booking, trip, route }) {
   return (

@@ -13,13 +13,13 @@ function Schedule() {
   const { trips, routes } = useApp()
   const [searchParams] = useSearchParams()
   const today = new Date().toISOString().split('T')[0]
-  const [filterFrom, setFilterFrom] = useState(searchParams.get('from') || 'Кременчук')
+  const [filterFrom, setFilterFrom] = useState(searchParams.get('from') || '')
   const [filterTo, setFilterTo] = useState(searchParams.get('to') || '')
   const [filterDate, setFilterDate] = useState(searchParams.get('date') || today)
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
-    setFilterFrom(searchParams.get('from') || 'Кременчук')
+    setFilterFrom(searchParams.get('from') || '')
     setFilterTo(searchParams.get('to') || '')
     setFilterDate(searchParams.get('date') || today)
   }, [searchParams, today])

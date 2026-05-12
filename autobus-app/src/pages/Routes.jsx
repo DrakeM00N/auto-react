@@ -19,13 +19,6 @@ function RoutesPage() {
   const [travelDate, setTravelDate] = useState(today)
   const [passengers, setPassengers] = useState('1')
 
-  useEffect(() => {
-    if (!routes.length) return
-    if (!fromFilter) {
-      const defaultOrigin = routes.some(r => r.from === 'Кременчук') ? 'Кременчук' : routes[0].from
-      setFromFilter(defaultOrigin)
-    }
-  }, [routes, fromFilter])
 
   const filteredRoutes = useMemo(() => routes.filter(route => {
   const allPoints = [route.from, ...(route.stops || []), route.to]
