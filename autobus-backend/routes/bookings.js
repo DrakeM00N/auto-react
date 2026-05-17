@@ -7,8 +7,7 @@ const router = express.Router()
 // POST /api/bookings  (можна без авторизації)
 router.post('/', async (req, res) => {
   try {
-    const { tripId, passengerName, passengerPhone } = req.body
-    const userId = req.headers.authorization ? null : null // буде визначено нижче
+    const { tripId, passengerName, passengerPhone, boardingPoint = '', alightingPoint = '' } = req.body
 
     if (!tripId || !passengerName || !passengerPhone) {
       return res.status(400).json({ error: 'Заповніть всі поля' })
@@ -33,18 +32,27 @@ router.post('/', async (req, res) => {
         const jwt = require('jsonwebtoken')
         const user = jwt.verify(header.slice(7), process.env.JWT_SECRET || 'autobus-secret-key')
         resolvedUserId = user.id
-      } catch {}
+      } catch (err) {
+        console.warn('JWT verification failed:', err.message)
+        // Continue with resolvedUserId = null (guest booking)
+      }
     }
 
-    const { boardingPoint = '', alightingPoint = '' } = req.body;
+    // Ensure string values for text fields to avoid .trim() errors
+    const safePassengerName = String(passengerName).trim()
+    const safePassengerPhone = String(passengerPhone).trim()
+    const safeBoardingPoint = String(boardingPoint).trim()
+    const safeAlightingPoint = String(alightingPoint).trim()
+
     const result = await db.execute({
       sql: 'INSERT INTO bookings (trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point) VALUES (?, ?, ?, ?, ?, ?)',
-      args: [tripId, resolvedUserId, passengerName.trim(), passengerPhone.trim(), boardingPoint.trim(), alightingPoint.trim()]
+      args: [tripId, resolvedUserId, safePassengerName, safePassengerPhone, safeBoardingPoint, safeAlightingPoint]
     })
 
     res.json({ success: true, booking: { id: Number(result.lastInsertRowid) } })
   } catch (e) {
-    res.status(500).json({ error: 'Помилка сервера' })
+    console.error('Error in POST /api/bookings:', e)
+    res.status(500).json({ error: 'Помилка сервера', message: e.message })
   }
 })
 
