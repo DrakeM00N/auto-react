@@ -36,6 +36,8 @@ async function initDB() {
       user_id INTEGER,
       passenger_name TEXT NOT NULL,
       passenger_phone TEXT NOT NULL,
+      boarding_point TEXT,
+      alighting_point TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
@@ -47,6 +49,7 @@ async function initDB() {
       passenger_phone TEXT NOT NULL,
       boarding_point TEXT,
       alighting_point TEXT,
+      booking_id INTEGER,
       created_at TEXT DEFAULT (datetime('now'))
     )`,
   ])

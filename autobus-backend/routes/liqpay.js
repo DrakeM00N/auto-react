@@ -48,20 +48,20 @@ router.post('/checkout', async (req, res) => {
       order_id: orderId,
       language: 'uk',
       sandbox: '1',
-    result_url: 'https://www.liqpay.ua',
-    //server_url: 'https://www.liqpay.ua',
+      result_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/booking/success`,
+      //server_url: 'https://www.liqpay.ua',
     }
 
     const data = liqpayData(params)
     const signature = liqpaySign(data)
 
-    // Зберігаємо pending бронювання
+    // Зберігаємо pending бронювання (без booking_id наразі)
     await db.execute({
       sql: 'INSERT OR REPLACE INTO pending_bookings (order_id, trip_id, passenger_name, passenger_phone, boarding_point, alighting_point) VALUES (?, ?, ?, ?, ?, ?)',
       args: [orderId, tripId, passengerName, passengerPhone, boardingPoint || '', alightingPoint || '']
     })
 
-    res.json({ data, signature })
+    res.json({ data, signature, orderId })
   } catch (e) {
     console.error(e)
     res.status(500).json({ error: 'Помилка сервера' })
@@ -92,12 +92,17 @@ router.post('/callback', async (req, res) => {
 
       if (pending) {
         // Створюємо реальне бронювання
-        await db.execute({
-          sql: 'INSERT INTO bookings (trip_id, passenger_name, passenger_phone) VALUES (?, ?, ?)',
-          args: [pending.trip_id, pending.passenger_name, pending.passenger_phone]
+        const bookingResult = await db.execute({
+          sql: 'INSERT INTO bookings (trip_id, passenger_name, passenger_phone, boarding_point, alighting_point) VALUES (?, ?, ?, ?, ?)',
+          args: [pending.trip_id, pending.passenger_name, pending.passenger_phone, pending.boarding_point, pending.alighting_point]
         })
-        // Видаляємо pending
-        await db.execute({ sql: 'DELETE FROM pending_bookings WHERE order_id = ?', args: [order_id] })
+        const bookingId = Number(bookingResult.lastInsertRowid)
+
+        // Оновлюємо pending бронювання ID реального бронювання (не видаляємо)
+        await db.execute({
+          sql: 'UPDATE pending_bookings SET booking_id = ? WHERE order_id = ?',
+          args: [bookingId, order_id]
+        })
       }
     }
 
@@ -121,9 +126,50 @@ router.get('/status/:orderId', async (req, res) => {
     })
 
     if (pendingRes.rows.length === 0) {
-      // pending видалено — значить callback спрацював і бронювання створено
-      res.json({ paid: true })
+      // pending видалено (або був обновлений з booking_id) — значить callback спрацював і бронювання створено
+      // Шукаємо реальне бронювання через booking_id в pending_bookings (якщо там збережено)
+      const pendingWithBookingIdRes = await db.execute({
+        sql: 'SELECT booking_id FROM pending_bookings WHERE order_id = ?',
+        args: [orderId]
+      })
+
+      if (pendingWithBookingIdRes.rows.length > 0 && pendingWithBookingIdRes.rows[0].booking_id) {
+        const bookingId = pendingWithBookingIdRes.rows[0].booking_id
+        // Отримуємо дані бронювання
+        const bookingRes = await db.execute({
+          sql: 'SELECT b.*, t.date as trip_date, t.time as trip_time, t.price, r.from_city, r.to_city ' +
+               'FROM bookings b ' +
+               'JOIN trips t ON b.trip_id = t.id ' +
+               'JOIN routes r ON t.route_id = r.id ' +
+               'WHERE b.id = ?',
+          args: [bookingId]
+        })
+
+        if (bookingRes.rows.length > 0) {
+          const booking = bookingRes.rows[0]
+          res.json({
+            paid: true,
+            bookingId: booking.id,
+            tripId: booking.trip_id,
+            passengerName: booking.passenger_name,
+            passengerPhone: booking.passenger_phone,
+            boardingPoint: booking.boarding_point,
+            alightingPoint: booking.alighting_point,
+            tripDate: booking.trip_date,
+            tripTime: booking.trip_time,
+            tripPrice: booking.price,
+            fromCity: booking.from_city,
+            toCity: booking.to_city
+          })
+        } else {
+          res.json({ paid: true })
+        }
+      } else {
+        // Якщо немає booking_id в pending, просто повертаємо paid: true
+        res.json({ paid: true })
+      }
     } else {
+      // У pending ще є запис — оплата не завершена
       res.json({ paid: false })
     }
   } catch (e) {

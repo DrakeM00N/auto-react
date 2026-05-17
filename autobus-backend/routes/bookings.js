@@ -37,8 +37,8 @@ router.post('/', async (req, res) => {
     }
 
     const result = await db.execute({
-      sql: 'INSERT INTO bookings (trip_id, user_id, passenger_name, passenger_phone) VALUES (?, ?, ?, ?)',
-      args: [tripId, resolvedUserId, passengerName.trim(), passengerPhone.trim()]
+      sql: 'INSERT INTO bookings (trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point) VALUES (?, ?, ?, ?, ?, ?)',
+      args: [tripId, resolvedUserId, passengerName.trim(), passengerPhone.trim(), boardingPoint || '', alightingPoint || '']
     })
 
     res.json({ success: true, booking: { id: Number(result.lastInsertRowid) } })
