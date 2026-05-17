@@ -2,7 +2,7 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 
 const AppContext = createContext()
 
-const BASE = 'http://192.168.0.103:3001/api'
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
 function getToken() {
   return localStorage.getItem('token')

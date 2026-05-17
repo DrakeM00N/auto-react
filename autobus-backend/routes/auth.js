@@ -4,6 +4,24 @@ const jwt = require('jsonwebtoken')
 const { db } = require('../db')
 const { authMiddleware } = require('../middleware')
 
+// In-memory storage for reset codes
+const resetCodes = new Map() // email => { code, expiresAt }
+
+// Generate a 6-digit numeric code
+function generateResetCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString()
+}
+
+// Clean up expired codes (called on each request for simplicity)
+function cleanupExpiredCodes() {
+  const now = Date.now()
+  for (const [email, { expiresAt }] of resetCodes.entries()) {
+    if (now > expiresAt) {
+      resetCodes.delete(email)
+    }
+  }
+}
+
 const router = express.Router()
 const SECRET = process.env.JWT_SECRET || 'autobus-secret-key'
 
@@ -75,12 +93,56 @@ router.post('/login', async (req, res) => {
   }
 })
 
+// POST /api/auth/request-reset
+router.post('/request-reset', async (req, res) => {
+  try {
+    const { email } = req.body
+    if (!email) {
+      return res.status(400).json({ error: 'Email обов\'язковий' })
+    }
+
+    const result = await db.execute({
+      sql: 'SELECT id FROM users WHERE email = ?',
+      args: [email.toLowerCase()]
+    })
+    if (result.rows.length === 0) {
+      // Don't reveal that email doesn't exist - for security
+      console.log(`Password reset requested for non-existent email: ${email}`)
+      return res.json({ success: true, message: 'Если email существует, инструкции отправлены' })
+    }
+
+    // Generate and store reset code
+    cleanupExpiredCodes()
+    const code = generateResetCode()
+    const expiresAt = Date.now() + 15 * 60 * 1000 // 15 minutes
+    resetCodes.set(email.toLowerCase(), { code, expiresAt })
+
+    // Log the code (in production, this would be sent via email)
+    console.log(`Password reset code for ${email}: ${code}`)
+
+    res.json({ success: true, message: 'Если email существует, код отправлен на email' })
+  } catch (e) {
+    console.error('Error in request-reset:', e)
+    res.status(500).json({ error: 'Помилка сервера' })
+  }
+})
+
 // POST /api/auth/reset-password
 router.post('/reset-password', async (req, res) => {
   try {
-    const { email, newPassword } = req.body
-    if (!email || !newPassword) {
+    const { email, newPassword, code } = req.body
+    if (!email || !newPassword || !code) {
       return res.status(400).json({ error: 'Заповніть всі поля' })
+    }
+
+    cleanupExpiredCodes()
+    const stored = resetCodes.get(email.toLowerCase())
+    if (!stored) {
+      return res.status(400).json({ error: 'Код сброса не найден или истёк' })
+    }
+
+    if (stored.code !== code.trim()) {
+      return res.status(400).json({ error: 'Невірний код' })
     }
 
     const result = await db.execute({
@@ -97,8 +159,12 @@ router.post('/reset-password', async (req, res) => {
       args: [hashed, email.toLowerCase()]
     })
 
+    // Remove used code
+    resetCodes.delete(email.toLowerCase())
+
     res.json({ success: true })
   } catch (e) {
+    console.error('Error in reset-password:', e)
     res.status(500).json({ error: 'Помилка сервера' })
   }
 })
