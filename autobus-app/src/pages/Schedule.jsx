@@ -15,14 +15,14 @@ function Schedule() {
   const today = new Date().toISOString().split('T')[0]
   const [filterFrom, setFilterFrom] = useState(searchParams.get('from') || '')
   const [filterTo, setFilterTo] = useState(searchParams.get('to') || '')
-  const [filterDate, setFilterDate] = useState(searchParams.get('date') || today)
+  const [filterDate, setFilterDate] = useState(searchParams.get('date') || '')
   const [searchQuery, setSearchQuery] = useState('')
 
   useEffect(() => {
     setFilterFrom(searchParams.get('from') || '')
     setFilterTo(searchParams.get('to') || '')
-    setFilterDate(searchParams.get('date') || today)
-  }, [searchParams, today])
+    setFilterDate(searchParams.get('date') || '')
+  }, [searchParams])
 
   const filteredTrips = useMemo(() => {
   return trips.filter(trip => {

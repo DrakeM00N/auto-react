@@ -38,20 +38,24 @@ function Admin() {
     setStatus({ type: 'success', message: 'Маршрут додано' })
   }
 
-  const handleAddTrip = (e) => {
+  const handleAddTrip = async (e) => {
     e.preventDefault()
     if (!newTrip.routeId || !newTrip.date || !newTrip.time || !newTrip.price || !newTrip.seats) {
       setStatus({ type: 'error', message: 'Заповніть всі поля для рейсу' })
       return
     }
-    addTrip({
-      ...newTrip,
-      routeId: Number(newTrip.routeId),
-      price: Number(newTrip.price),
-      seats: Number(newTrip.seats)
-    })
-    setNewTrip({ routeId: '', date: '', time: '', price: '', seats: '' })
-    setStatus({ type: 'success', message: 'Рейс додано' })
+    try {
+      await addTrip({
+        ...newTrip,
+        routeId: Number(newTrip.routeId),
+        price: Number(newTrip.price),
+        seats: Number(newTrip.seats)
+      })
+      setNewTrip({ routeId: '', date: '', time: '', price: '', seats: '' })
+      setStatus({ type: 'success', message: 'Рейс додано' })
+    } catch (err) {
+      setStatus({ type: 'error', message: 'Не вдалось добавити рейс: ' + err.message })
+    }
   }
 
   const handlePromote = (userId) => {
