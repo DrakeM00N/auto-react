@@ -169,6 +169,8 @@ const res = await fetch(`${BASE}/bookings`, {
     tripId,
     passengerName: fullName,
     passengerPhone: passengerPhone.trim(),
+    boardingPoint: boardingPoint.trim(),
+    alightingPoint: alightingPoint.trim(),
   }),
 })
 const result = await res.json()
