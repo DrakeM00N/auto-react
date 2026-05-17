@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cd /c:/Users/Viktor/Desktop/auto-react && cat -n autobus-app/src/pages/Booking.jsx | sed -n '150,180p')",
+      "Read(//c:/Users/Viktor/Desktop/**)"
+    ]
+  }
+}
