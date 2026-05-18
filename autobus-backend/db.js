@@ -42,6 +42,8 @@ async function initDB() {
       FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
     )`,
+    `CREATE INDEX IF NOT EXISTS idx_bookings_trip ON bookings(trip_id)`,
+    `CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id)`,
     `CREATE TABLE IF NOT EXISTS pending_bookings (
       order_id TEXT PRIMARY KEY,
       trip_id INTEGER NOT NULL,
@@ -52,11 +54,26 @@ async function initDB() {
       booking_id INTEGER,
       created_at TEXT DEFAULT (datetime('now'))
     )`,
+    `CREATE TABLE IF NOT EXISTS password_resets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      email TEXT NOT NULL,
+      token TEXT NOT NULL UNIQUE,
+      expires_at TEXT NOT NULL,
+      used INTEGER DEFAULT 0,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`,
   ])
 
   // Seed initial data if empty
   const routeCount = await db.execute('SELECT COUNT(*) as cnt FROM routes')
   if (routeCount.rows[0].cnt === 0) {
+    // Generate future dates for trips (7, 8, 9, 10 days from now)
+    const now = new Date()
+    const date1 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    const date2 = new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    const date3 = new Date(now.getTime() + 9 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    const date4 = new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+
     await db.batch([
       `INSERT INTO routes (from_city, to_city, distance, duration, stops) VALUES
         ('Кременчук', 'Київ', '475 км', '6 год', '["Миколаїв","Житомир"]')`,
@@ -64,10 +81,10 @@ async function initDB() {
         ('Кременчук', 'Харків', '680 км', '8 год', '["Полтава"]')`,
       `INSERT INTO routes (from_city, to_city, distance, duration, stops) VALUES
         ('Кременчук', 'Львів', '810 км', '10 год', '["Кропивницький"]')`,
-      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (1, '2026-05-05', '07:00', 350, 40)`,
-      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (1, '2026-05-05', '14:00', 320, 40)`,
-      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (2, '2026-05-06', '08:00', 480, 40)`,
-      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (3, '2026-05-07', '09:00', 550, 40)`,
+      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (1, '${date1}', '07:00', 350, 40)`,
+      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (1, '${date2}', '14:00', 320, 40)`,
+      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (2, '${date3}', '08:00', 480, 40)`,
+      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (3, '${date4}', '09:00', 550, 40)`,
     ])
   }
 

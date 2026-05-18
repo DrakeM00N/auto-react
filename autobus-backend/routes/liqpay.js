@@ -83,6 +83,17 @@ router.post('/callback', async (req, res) => {
     const { order_id, status } = decoded
 
     if (status === 'success' || status === 'sandbox') {
+      // Перевіряємо чи не було вже оброблено це сплачення (захист від replay-атак)
+      const existingBookingRes = await db.execute({
+        sql: 'SELECT booking_id FROM pending_bookings WHERE order_id = ? AND booking_id IS NOT NULL',
+        args: [order_id]
+      })
+
+      // Якщо бронювання вже створене для цього order_id, пропускаємо обробку
+      if (existingBookingRes.rows.length > 0) {
+        return res.send('OK')
+      }
+
       // Знаходимо pending бронювання
       const pendingRes = await db.execute({
         sql: 'SELECT * FROM pending_bookings WHERE order_id = ?',
@@ -98,7 +109,7 @@ router.post('/callback', async (req, res) => {
         })
         const bookingId = Number(bookingResult.lastInsertRowid)
 
-        // Оновлюємо pending бронювання ID реального бронювання (не видаляємо)
+        // Оновлюємо pending бронювання ID реального бронювання
         await db.execute({
           sql: 'UPDATE pending_bookings SET booking_id = ? WHERE order_id = ?',
           args: [bookingId, order_id]
@@ -119,61 +130,50 @@ router.get('/status/:orderId', async (req, res) => {
   try {
     const { orderId } = req.params
 
-    // Шукаємо чи є вже бронювання (значить оплата пройшла)
+    // Простий підхід: якщо booking_id EXISTS в pending_bookings для цього order_id - оплата пройшла
     const pendingRes = await db.execute({
-      sql: 'SELECT * FROM pending_bookings WHERE order_id = ?',
+      sql: 'SELECT booking_id FROM pending_bookings WHERE order_id = ?',
       args: [orderId]
     })
 
-    if (pendingRes.rows.length === 0) {
-      // pending видалено (або був обновлений з booking_id) — значить callback спрацював і бронювання створено
-      // Шукаємо реальне бронювання через booking_id в pending_bookings (якщо там збережено)
-      const pendingWithBookingIdRes = await db.execute({
-        sql: 'SELECT booking_id FROM pending_bookings WHERE order_id = ?',
-        args: [orderId]
+    if (pendingRes.rows.length > 0 && pendingRes.rows[0].booking_id !== null) {
+      const bookingId = pendingRes.rows[0].booking_id
+      // Отримуємо дані бронювання
+      const bookingRes = await db.execute({
+        sql: 'SELECT b.*, t.date as trip_date, t.time as trip_time, t.price, r.from_city, r.to_city ' +
+             'FROM bookings b ' +
+             'JOIN trips t ON b.trip_id = t.id ' +
+             'JOIN routes r ON t.route_id = r.id ' +
+             'WHERE b.id = ?',
+        args: [bookingId]
       })
 
-      if (pendingWithBookingIdRes.rows.length > 0 && pendingWithBookingIdRes.rows[0].booking_id) {
-        const bookingId = pendingWithBookingIdRes.rows[0].booking_id
-        // Отримуємо дані бронювання
-        const bookingRes = await db.execute({
-          sql: 'SELECT b.*, t.date as trip_date, t.time as trip_time, t.price, r.from_city, r.to_city ' +
-               'FROM bookings b ' +
-               'JOIN trips t ON b.trip_id = t.id ' +
-               'JOIN routes r ON t.route_id = r.id ' +
-               'WHERE b.id = ?',
-          args: [bookingId]
+      if (bookingRes.rows.length > 0) {
+        const booking = bookingRes.rows[0]
+        res.json({
+          paid: true,
+          bookingId: booking.id,
+          tripId: booking.trip_id,
+          passengerName: booking.passenger_name,
+          passengerPhone: booking.passenger_phone,
+          boardingPoint: booking.boarding_point,
+          alightingPoint: booking.alighting_point,
+          tripDate: booking.trip_date,
+          tripTime: booking.trip_time,
+          tripPrice: booking.price,
+          fromCity: booking.from_city,
+          toCity: booking.to_city
         })
-
-        if (bookingRes.rows.length > 0) {
-          const booking = bookingRes.rows[0]
-          res.json({
-            paid: true,
-            bookingId: booking.id,
-            tripId: booking.trip_id,
-            passengerName: booking.passenger_name,
-            passengerPhone: booking.passenger_phone,
-            boardingPoint: booking.boarding_point,
-            alightingPoint: booking.alighting_point,
-            tripDate: booking.trip_date,
-            tripTime: booking.trip_time,
-            tripPrice: booking.price,
-            fromCity: booking.from_city,
-            toCity: booking.to_city
-          })
-        } else {
-          res.json({ paid: true })
-        }
       } else {
-        // Якщо немає booking_id в pending, просто повертаємо paid: true
+        // Fallback if booking data not found (shouldn't happen)
         res.json({ paid: true })
       }
     } else {
-      // У pending ще є запис — оплата не завершена
+      // Оплата ще не завершена або pending запис не існує
       res.json({ paid: false })
     }
   } catch (e) {
-    res.status(500).json({ error: 'Помилка сервера' })
+    res.status(500).json({ error: 'Server error' })
   }
 })
 

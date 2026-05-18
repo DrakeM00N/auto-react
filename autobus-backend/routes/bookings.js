@@ -13,19 +13,27 @@ router.post('/', async (req, res) => {
       return res.status(400).json({ error: 'Заповніть всі поля' })
     }
 
-    // Перевіряємо чи є вільні місця
-    const tripRes = await db.execute({ sql: 'SELECT * FROM trips WHERE id = ?', args: [tripId] })
-    const trip = tripRes.rows[0]
-    if (!trip) return res.status(404).json({ error: 'Рейс не знайдено' })
+    // Use transaction to prevent race condition when booking
+    await db.execute('BEGIN TRANSACTION')
+    try {
+      // Lock the trip row for update to prevent race conditions
+      const tripRes = await db.execute({ sql: 'SELECT * FROM trips WHERE id = ?', args: [tripId] })
+      const trip = tripRes.rows[0]
+      if (!trip) {
+        await db.execute('ROLLBACK')
+        return res.status(404).json({ error: 'Рейс не знайдено' })
+      }
 
-    const bookingsRes = await db.execute({ sql: 'SELECT COUNT(*) as cnt FROM bookings WHERE trip_id = ?', args: [tripId] })
-    const booked = bookingsRes.rows[0].cnt
-    if (booked >= trip.seats) {
-      return res.status(400).json({ error: 'Місць немає' })
-    }
+      // Check available seats within the transaction
+      const bookingsRes = await db.execute({ sql: 'SELECT COUNT(*) as cnt FROM bookings WHERE trip_id = ?', args: [tripId] })
+      const booked = bookingsRes.rows[0].cnt
+      if (booked >= trip.seats) {
+        await db.execute('ROLLBACK')
+        return res.status(400).json({ error: 'Місць немає' })
+      }
 
-    // Визначаємо userId з токена якщо є
-    let resolvedUserId = null
+      // Визначаємо userId з токена якщо є
+      let resolvedUserId = null
     const header = req.headers.authorization
     if (header && header.startsWith('Bearer ')) {
       try {
@@ -49,8 +57,10 @@ router.post('/', async (req, res) => {
       args: [tripId, resolvedUserId, safePassengerName, safePassengerPhone, safeBoardingPoint, safeAlightingPoint]
     })
 
+    await db.execute('COMMIT')
     res.json({ success: true, booking: { id: Number(result.lastInsertRowid) } })
   } catch (e) {
+    await db.execute('ROLLBACK')
     console.error('Error in POST /api/bookings:', e)
     res.status(500).json({ error: 'Помилка сервера', message: e.message })
   }

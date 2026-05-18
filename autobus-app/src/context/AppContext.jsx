@@ -114,8 +114,9 @@ export function AppProvider({ children }) {
     try {
       await request('POST', `/users/${userId}/promote`)
       setUsers(prev => prev.map(u => u.id === userId ? { ...u, role: 'admin' } : u))
+      return { success: true }
     } catch (e) {
-      console.error(e.message)
+      return { success: false, message: e.message }
     }
   }
 
@@ -149,7 +150,10 @@ const addRoute = async (route) => {
     // Перезавантажуємо всі маршрути з сервера
     const updated = await request('GET', '/routes')
     setRoutes(updated)
-  } catch (e) { console.error(e.message) }
+    return { success: true }
+  } catch (e) {
+    return { success: false, message: e.message }
+  }
 }
 
   const updateRoute = async (id, data) => {
@@ -162,7 +166,10 @@ const addRoute = async (route) => {
       })
       const updated = await request('GET', '/routes')
       setRoutes(updated)
-    } catch (e) { console.error(e.message) }
+      return { success: true }
+    } catch (e) {
+      return { success: false, message: e.message }
+    }
   }
 
   const deleteRoute = async (id) => {
@@ -176,7 +183,10 @@ const addRoute = async (route) => {
         const allBookings = await request('GET', '/bookings')
         setBookings(allBookings)
       }
-    } catch (e) { console.error(e.message) }
+      return { success: true }
+    } catch (e) {
+      return { success: false, message: e.message }
+    }
   }
 
   // --- Рейси ---
@@ -192,7 +202,10 @@ const addTrip = async (trip) => {
     // Перезавантажуємо всі рейси з сервера
     const updated = await request('GET', '/trips')
     setTrips(updated)
-  } catch (e) { console.error(e.message) }
+    return { success: true }
+  } catch (e) {
+    return { success: false, message: e.message }
+  }
 }
 
   const updateTrip = async (id, data) => {
@@ -205,7 +218,10 @@ const addTrip = async (trip) => {
         seats: Number(data.seats),
       })
       setTrips(prev => prev.map(t => t.id === id ? updated : t))
-    } catch (e) { console.error(e.message) }
+      return { success: true }
+    } catch (e) {
+      return { success: false, message: e.message }
+    }
   }
 
   const deleteTrip = async (id) => {
@@ -216,13 +232,16 @@ const addTrip = async (trip) => {
         const allBookings = await request('GET', '/bookings')
         setBookings(allBookings)
       }
-    } catch (e) { console.error(e.message) }
+      return { success: true }
+    } catch (e) {
+      return { success: false, message: e.message }
+    }
   }
 
   // --- Бронювання ---
-  const bookTrip = async (tripId, passengerName, passengerPhone) => {
+  const bookTrip = async (tripId, passengerName, passengerPhone, boardingPoint, alightingPoint) => {
     try {
-      const result = await request('POST', '/bookings', { tripId, passengerName, passengerPhone })
+      const result = await request('POST', '/bookings', { tripId, passengerName, passengerPhone, boardingPoint, alightingPoint })
       // Оновлюємо рейси щоб показати нову кількість місць
       const tripsData = await request('GET', '/trips')
       setTrips(tripsData)
@@ -251,7 +270,10 @@ const addTrip = async (trip) => {
     try {
       await request('PUT', `/bookings/${bookingId}`, updates)
       setBookings(prev => prev.map(b => b.id === bookingId ? { ...b, ...updates } : b))
-    } catch (e) { console.error(e.message) }
+      return { success: true }
+    } catch (e) {
+      return { success: false, message: e.message }
+    }
   }
 
   return (
