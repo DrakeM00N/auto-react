@@ -5,4 +5,4 @@ autobus-backend/autobus.db
 
 # Frontend - Sensitive files and dependencies
 autobus-app/.env
-autobus-app/node_modules/
+autobus-app/node_modules/.env

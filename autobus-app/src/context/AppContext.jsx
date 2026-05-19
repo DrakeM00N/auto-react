@@ -129,9 +129,9 @@ export function AppProvider({ children }) {
     }
   }
 
-  const resetPassword = async (email, newPassword) => {
+  const resetPassword = async (email, newPassword, token) => {
     try {
-      await request('POST', '/auth/reset-password', { email, newPassword })
+      await request('POST', '/auth/reset-password', { email, newPassword, token })
       return { success: true }
     } catch (e) {
       return { success: false, message: e.message }

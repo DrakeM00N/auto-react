@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
 function ResetPassword() {
@@ -9,6 +9,8 @@ function ResetPassword() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [status, setStatus] = useState(null)
+  const [searchParams] = useSearchParams()
+  const token = searchParams.get('token')
 
   const handleSubmit = (event) => {
     event.preventDefault()
@@ -23,7 +25,7 @@ function ResetPassword() {
       return
     }
 
-    const result = resetPassword(normalizedEmail, newPassword)
+    const result = resetPassword(normalizedEmail, newPassword, token)
     if (!result.success) {
       setStatus({ type: 'error', message: result.message })
       return

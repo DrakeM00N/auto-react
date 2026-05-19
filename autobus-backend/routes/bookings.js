@@ -7,7 +7,7 @@ const router = express.Router()
 // POST /api/bookings  (можна без авторизації)
 router.post('/', async (req, res) => {
   try {
-    const { tripId, passengerName, passengerPhone, boardingPoint = '', alightingPoint = '' } = req.body
+    const { tripId, passengerName, passengerPhone, boardingPoint, alightingPoint } = req.body
 
     if (!tripId || !passengerName || !passengerPhone) {
       return res.status(400).json({ error: 'Заповніть всі поля' })
