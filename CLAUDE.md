@@ -26,7 +26,8 @@ This is a full-stack application with two main parts:
   - `/api/trips` - scheduled trips (includes booking/seat logic)
   - `/api/bookings` - booking system (creation, retrieval)
   - `/api/users` - user management
-  - `/api/liqpay` - payment integration (LiqPay API)
+  - `/api/payments` - payment integration (monobank acquiring / "Plata by mono")
+  - `/api/tickets` - public ticket lookup/verification by ticket code
 - Middleware: 
   - CORS (configured in server.js)
   - JSON parsing (express.json())
@@ -82,7 +83,7 @@ From inside `autobus-backend`:
 Backend requires a `.env` file in `autobus-backend/` with at least:
 - `PORT=3001` (default backend port)
 - `JWT_SECRET` (for signing/verifying authentication tokens)
-- `LIQPAY_PUBLIC_KEY` and `LIQPAY_PRIVATE_KEY` (for payment processing via LiqPay)
+- `MONOBANK_TOKEN` (monobank acquiring token for payment processing; test token from api.monobank.ua)
 - Database configuration (if using remote Turso/LibSQL - currently using local SQLite)
 
 Frontend uses Vite's environment variables prefixed with `VITE_` if needed (currently none defined).
@@ -101,11 +102,18 @@ Currently no test scripts are defined. To add testing:
 
 - The frontend proxy is not configured in vite.config.js; ensure backend is running on expected port (3001) for API calls
 - CORS is enabled for all origins (`*`) in backend - adjust for production to specific domains
-- Booking flow: 
-  1. User selects trip and fills passenger info
-  2. Form submits to `/api/bookings` endpoint
-  3. Backend creates booking record and returns payment data
-  4. Frontend handles LiqPay integration (incomplete in current implementation)
-  5. On payment success, sessionStorage stores pending booking for ticket display
+- Booking & payment flow:
+  1. User selects a trip and fills passenger info on the Booking page
+  2. Frontend POSTs to `/api/payments/checkout`; backend checks seat availability,
+     holds the seat via a `pending_bookings` row (15-min hold), creates a monobank
+     invoice, and returns its `pageUrl`
+  3. Frontend redirects the browser to the monobank `pageUrl` to pay
+  4. monobank redirects back to `/booking/success?order_id=...`; the page polls
+     `/api/payments/status/:orderId`
+  5. The status endpoint asks monobank directly; on confirmed payment it issues a
+     `bookings` row with a unique `ticket_code` (see `services/ticketing.js`)
+  6. The ticket (with QR code) is shown and is retrievable at `/ticket/:code`
+- A `bookings` row is created ONLY by a confirmed payment; there is no direct
+  booking-create endpoint.
 - Error handling: Both frontend and backend have basic error states; consider adding more robust error boundaries and validation
 - Responsive design: Uses CSS variables and flexible layouts; test on various screen sizes

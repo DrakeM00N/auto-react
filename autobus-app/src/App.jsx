@@ -9,6 +9,7 @@ import RoutesPage from './pages/Routes'
 import Schedule from './pages/Schedule'
 import Booking from './pages/Booking'
 import BookingSuccess from './pages/BookingSuccess'
+import Ticket from './pages/Ticket'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import Profile from './pages/Profile'
@@ -26,6 +27,7 @@ function App() {
           <Route path="/schedule" element={<Schedule />} />
           <Route path="/booking" element={<Booking />} />
           <Route path="/booking/success" element={<BookingSuccess />} />
+          <Route path="/ticket/:code" element={<Ticket />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />

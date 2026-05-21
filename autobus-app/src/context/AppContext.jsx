@@ -239,21 +239,7 @@ const addTrip = async (trip) => {
   }
 
   // --- Бронювання ---
-  const bookTrip = async (tripId, passengerName, passengerPhone, boardingPoint, alightingPoint) => {
-    try {
-      const result = await request('POST', '/bookings', { tripId, passengerName, passengerPhone, boardingPoint, alightingPoint })
-      // Оновлюємо рейси щоб показати нову кількість місць
-      const tripsData = await request('GET', '/trips')
-      setTrips(tripsData)
-      // Оновлюємо бронювання користувача
-      const myBookings = await request('GET', '/bookings/my')
-      setBookings(myBookings)
-      return { success: true, booking: result.booking }
-    } catch (e) {
-      return { success: false, message: e.message }
-    }
-  }
-
+  // Бронювання створюються лише через оплату monobank (див. pages/Booking.jsx).
   const cancelBooking = async (bookingId) => {
     try {
       await request('DELETE', `/bookings/${bookingId}`)
@@ -284,7 +270,7 @@ const addTrip = async (trip) => {
       trips, addTrip, deleteTrip, updateTrip,
       users,
       currentUser, register, login, logout, promoteUser,
-      bookings, bookTrip, cancelBooking, updateBooking,
+      bookings, cancelBooking, updateBooking,
       changePassword, resetPassword,
     }}>
       {children}
