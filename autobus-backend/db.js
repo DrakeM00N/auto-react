@@ -1,6 +1,18 @@
 const { createClient } = require('@libsql/client')
 
-const db = createClient({ url: 'file:autobus.db' })
+// Local dev falls back to a SQLite file; production sets DATABASE_URL to a
+// Turso (libsql) URL plus DATABASE_AUTH_TOKEN.
+const db = createClient({
+  url: process.env.DATABASE_URL || 'file:autobus.db',
+  authToken: process.env.DATABASE_AUTH_TOKEN,
+})
+
+async function addColumnIfMissing(table, column, type) {
+  const info = await db.execute(`PRAGMA table_info(${table})`)
+  if (!info.rows.some(r => r.name === column)) {
+    await db.execute(`ALTER TABLE ${table} ADD COLUMN ${column} ${type}`)
+  }
+}
 
 async function initDB() {
   await db.batch([
@@ -38,6 +50,7 @@ async function initDB() {
       passenger_phone TEXT NOT NULL,
       boarding_point TEXT,
       alighting_point TEXT,
+      ticket_code TEXT,
       created_at TEXT DEFAULT (datetime('now')),
       FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
@@ -46,7 +59,9 @@ async function initDB() {
     `CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id)`,
     `CREATE TABLE IF NOT EXISTS pending_bookings (
       order_id TEXT PRIMARY KEY,
+      invoice_id TEXT,
       trip_id INTEGER NOT NULL,
+      user_id INTEGER,
       passenger_name TEXT NOT NULL,
       passenger_phone TEXT NOT NULL,
       boarding_point TEXT,
@@ -63,6 +78,12 @@ async function initDB() {
       created_at TEXT DEFAULT (datetime('now'))
     )`,
   ])
+
+  // Migrate existing databases created before these columns existed
+  await addColumnIfMissing('bookings', 'ticket_code', 'TEXT')
+  await addColumnIfMissing('pending_bookings', 'user_id', 'INTEGER')
+  await addColumnIfMissing('pending_bookings', 'invoice_id', 'TEXT')
+  await db.execute(`CREATE UNIQUE INDEX IF NOT EXISTS idx_bookings_ticket_code ON bookings(ticket_code)`)
 
   // Seed initial data if empty
   const routeCount = await db.execute('SELECT COUNT(*) as cnt FROM routes')

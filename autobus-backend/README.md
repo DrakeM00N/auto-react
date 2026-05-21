@@ -45,10 +45,12 @@ Create a `.env` file in the `autobus-backend` directory with the following varia
 ```
 PORT=3001
 JWT_SECRET=your_jwt_secret_here_change_in_production
-LIQPAY_PUBLIC_KEY=your_liqpay_public_key_here
-LIQPAY_PRIVATE_KEY=your_liqpay_private_key_here
+MONOBANK_TOKEN=your_monobank_acquiring_token_here
 FRONTEND_URL=http://localhost:5173
 ```
+
+The `MONOBANK_TOKEN` is the monobank acquiring ("Plata by mono") token.
+Get a free test token at https://api.monobank.ua/ for development.
 
 ### Running the Server
 
@@ -94,20 +96,24 @@ All API endpoints are prefixed with `/api`.
 - `DELETE /api/trips/:id` - Delete a trip (admin only)
 
 #### Bookings
-- `POST /api/bookings` - Create a booking (guest or authenticated user)
 - `GET /api/bookings/my` - Get current user's bookings (authenticated)
 - `GET /api/bookings` - Get all bookings (admin only)
 - `PUT /api/bookings/:id` - Update a booking (owner or admin)
 - `DELETE /api/bookings/:id` - Delete a booking (owner or admin)
 
+Note: bookings are created only by a confirmed payment (see Payments), not by a direct endpoint.
+
 #### Users
 - `GET /api/users` - Get all users (admin only)
 - `POST /api/users/:id/promote` - Promote a user to admin (admin only)
 
-#### LiqPay Payment Integration
-- `POST /api/liqpay/checkout` - Generate LiqPay checkout form data
-- `POST /api/liqpay/callback` - Handle LiqPay payment callback
-- `GET /api/liqpay/status/:orderId` - Check payment status for an order
+#### Payments (monobank acquiring / "Plata by mono")
+- `POST /api/payments/checkout` - Hold a seat and create a monobank invoice; returns `pageUrl`
+- `POST /api/payments/webhook` - monobank server-to-server status notification (X-Sign verified)
+- `GET /api/payments/status/:orderId` - Check payment status; issues the ticket on success
+
+#### Tickets
+- `GET /api/tickets/:code` - Public ticket lookup/verification by ticket code
 
 #### Health Check
 - `GET /api/health` - Check if the server is running
@@ -120,8 +126,8 @@ The database schema includes tables for:
 - `users`
 - `routes`
 - `trips`
-- `bookings`
-- `pending_bookings` (for LiqPay payment processing)
+- `bookings` (includes a unique `ticket_code` per issued ticket)
+- `pending_bookings` (seat holds + monobank invoice ids, awaiting payment)
 - `password_resets` (for password reset tokens)
 
 The database is initialized and seeded with initial data when the server starts if the tables are empty.
@@ -138,13 +144,18 @@ autobus-backend/
 ├── package.json     # npm dependencies and scripts
 ├── package-lock.json
 ├── server.js        # Entry point for the Express application
-└── routes/          # API route definitions
-    ├── auth.js
-    ├── bookings.js
-    ├── liqpay.js
-    ├── routes.js
-    ├── trips.js
-    └── users.js
+├── routes/          # API route definitions
+│   ├── auth.js
+│   ├── bookings.js
+│   ├── payments.js
+│   ├── routes.js
+│   ├── tickets.js
+│   ├── trips.js
+│   └── users.js
+└── services/        # Business logic
+    ├── monobank.js  # monobank acquiring API client
+    ├── seats.js     # seat availability / hold counting
+    └── ticketing.js # ticket issuance and lookup
 ```
 
 ### Development Tips

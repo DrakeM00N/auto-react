@@ -135,7 +135,7 @@ The frontend communicates with the Autobus backend API:
 4. **Key Features**:
    - User authentication (login/register)
    - Route and trip browsing
-   - Booking system with LiqPay payment integration
+   - Booking system with monobank payment integration and QR-coded e-tickets
    - User profile management
    - Admin dashboard for managing routes, trips, bookings, and users
    - Responsive design with CSS variables
