@@ -98,23 +98,27 @@ async function issueTicket(orderId) {
   if (!PAID_STATUSES.includes(status)) return { state: 'pending' }
 
   // Payment confirmed — mint the ticket inside a transaction.
-  await db.execute('BEGIN TRANSACTION')
+  // db.transaction() works on both the local file and Turso (remote libsql);
+  // raw BEGIN/COMMIT strings do not work on remote.
+  const ticketCode = await uniqueTicketCode()
+  const tx = await db.transaction('write')
+  let bookingId
   try {
-    // Re-check under the transaction in case a concurrent call already issued it.
-    const recheck = await db.execute({
+    // Re-check inside the transaction in case a concurrent call already issued it.
+    const recheck = await tx.execute({
       sql: 'SELECT booking_id FROM pending_bookings WHERE order_id = ?',
       args: [orderId],
     })
     const existingId = recheck.rows[0] && recheck.rows[0].booking_id
     if (existingId != null) {
-      await db.execute('COMMIT')
+      await tx.rollback()
       return { state: 'paid', ticket: await loadTicketByBookingId(Number(existingId)) }
     }
 
     // Decision 5: a paid customer always gets a ticket. If the 15-min hold
     // expired and the seat was resold, we honour the payment and log the overbook.
-    const tripRes = await db.execute({ sql: 'SELECT seats FROM trips WHERE id = ?', args: [pending.trip_id] })
-    const confirmedRes = await db.execute({
+    const tripRes = await tx.execute({ sql: 'SELECT seats FROM trips WHERE id = ?', args: [pending.trip_id] })
+    const confirmedRes = await tx.execute({
       sql: 'SELECT COUNT(*) AS cnt FROM bookings WHERE trip_id = ?',
       args: [pending.trip_id],
     })
@@ -124,8 +128,7 @@ async function issueTicket(orderId) {
       console.warn(`[OVERBOOK] order ${orderId}: trip ${pending.trip_id} at ${confirmed}/${seats} — issuing anyway (payment received)`)
     }
 
-    const ticketCode = await uniqueTicketCode()
-    const inserted = await db.execute({
+    const inserted = await tx.execute({
       sql: `INSERT INTO bookings
               (trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point, ticket_code)
             VALUES (?, ?, ?, ?, ?, ?, ?)`,
@@ -139,19 +142,20 @@ async function issueTicket(orderId) {
         ticketCode,
       ],
     })
-    const bookingId = Number(inserted.lastInsertRowid)
+    bookingId = Number(inserted.lastInsertRowid)
 
-    await db.execute({
+    await tx.execute({
       sql: 'UPDATE pending_bookings SET booking_id = ? WHERE order_id = ?',
       args: [bookingId, orderId],
     })
 
-    await db.execute('COMMIT')
-    return { state: 'paid', ticket: await loadTicketByBookingId(bookingId) }
+    await tx.commit()
   } catch (e) {
-    await db.execute('ROLLBACK')
+    try { await tx.rollback() } catch { /* transaction already finalized */ }
     throw e
   }
+
+  return { state: 'paid', ticket: await loadTicketByBookingId(bookingId) }
 }
 
 module.exports = {

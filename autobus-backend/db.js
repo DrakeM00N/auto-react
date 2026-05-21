@@ -1,6 +1,11 @@
 const { createClient } = require('@libsql/client')
 
-const db = createClient({ url: 'file:autobus.db' })
+// Local dev falls back to a SQLite file; production sets DATABASE_URL to a
+// Turso (libsql) URL plus DATABASE_AUTH_TOKEN.
+const db = createClient({
+  url: process.env.DATABASE_URL || 'file:autobus.db',
+  authToken: process.env.DATABASE_AUTH_TOKEN,
+})
 
 async function addColumnIfMissing(table, column, type) {
   const info = await db.execute(`PRAGMA table_info(${table})`)
