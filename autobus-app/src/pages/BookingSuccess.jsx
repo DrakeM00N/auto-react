@@ -1,74 +1,33 @@
 import { useEffect, useState } from 'react'
+<<<<<<< HEAD
 import { useData } from '../context/DataContext'
 import { Link } from 'react-router-dom'
 import { track } from '../lib/analytics'
 import { apiRequest } from '../lib/api'
+=======
+import { Link, useSearchParams } from 'react-router-dom'
+import TicketCard from '../components/TicketCard'
+>>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
 
-function TicketDisplay({ booking, trip, route }) {
-  return (
-    <div id="ticket-print" style={{
-      background: 'var(--bg2)',
-      border: '2px solid var(--accent)',
-      borderRadius: '24px',
-      overflow: 'hidden',
-      maxWidth: '600px',
-      margin: '0 auto',
-    }}>
-      <div style={{ background: 'var(--accent)', padding: '20px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#1A1814', opacity: 0.7, marginBottom: '2px' }}>ЕЛЕКТРОННИЙ КВИТОК</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1A1814', fontFamily: 'Unbounded, sans-serif' }}>АвтоРейс</div>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <div style={{ fontSize: '0.75rem', color: '#1A1814', opacity: 0.7 }}>№ бронювання</div>
-          <div style={{ fontSize: '1.5rem', fontWeight: 800, color: '#1A1814' }}>#{String(booking.id).padStart(6, '0')}</div>
-        </div>
-      </div>
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+const MAX_ATTEMPTS = 6
+const POLL_INTERVAL = 2500
 
-      <div style={{ padding: '24px 28px', borderBottom: '1px dashed var(--border)' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '16px', justifyContent: 'space-between' }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text2)', marginBottom: '4px' }}>ПОСАДКА</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 700 }}>{booking.boardingPoint}</div>
-          </div>
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px' }}>
-            <div style={{ color: 'var(--accent)', fontSize: '1.4rem' }}>🚌</div>
-            <div style={{ height: '2px', width: '100%', background: 'var(--border)', position: 'relative' }}>
-              <div style={{ position: 'absolute', top: '-4px', left: '50%', transform: 'translateX(-50%)', width: '10px', height: '10px', background: 'var(--accent)', borderRadius: '50%' }} />
-            </div>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text2)' }}>{route.duration}</div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.75rem', color: 'var(--text2)', marginBottom: '4px' }}>ВИСАДКА</div>
-            <div style={{ fontSize: '1.4rem', fontWeight: 700 }}>{booking.alightingPoint}</div>
-          </div>
-        </div>
-        <div style={{ marginTop: '12px', textAlign: 'center', color: 'var(--text2)', fontSize: '0.85rem' }}>
-          Маршрут: {route.from} → {route.stops?.length ? route.stops.join(' → ') + ' → ' : ''}{route.to}
-        </div>
-      </div>
+const PRINT_STYLE = `@media print {
+  body * { visibility: hidden; }
+  #ticket-print, #ticket-print * { visibility: visible; }
+  #ticket-print { position: absolute; left: 50%; transform: translateX(-50%); top: 0; }
+}`
 
-      <div style={{ padding: '20px 28px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', borderBottom: '1px dashed var(--border)' }}>
-        <div><div style={{ fontSize: '0.75rem', color: 'var(--text2)', marginBottom: '4px' }}>ДАТА</div><div style={{ fontWeight: 700 }}>{trip.date}</div></div>
-        <div><div style={{ fontSize: '0.75rem', color: 'var(--text2)', marginBottom: '4px' }}>ЧАС</div><div style={{ fontWeight: 700 }}>{trip.time}</div></div>
-        <div><div style={{ fontSize: '0.75rem', color: 'var(--text2)', marginBottom: '4px' }}>ПАСАЖИР</div><div style={{ fontWeight: 700 }}>{booking.passengerName}</div></div>
-        <div><div style={{ fontSize: '0.75rem', color: 'var(--text2)', marginBottom: '4px' }}>ТЕЛЕФОН</div><div style={{ fontWeight: 700 }}>{booking.passengerPhone}</div></div>
-      </div>
+const primaryBtn = { padding: '12px 24px', borderRadius: '14px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 700, cursor: 'pointer', fontSize: '1rem' }
+const secondaryBtn = { padding: '12px 24px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontWeight: 600, textDecoration: 'none', fontSize: '1rem' }
 
-      <div style={{ padding: '20px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <div>
-          <div style={{ fontSize: '0.75rem', color: 'var(--text2)', marginBottom: '4px' }}>ВАРТІСТЬ КВИТКА</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: 'var(--accent)' }}>{trip.price} грн</div>
-        </div>
-        <div style={{ background: 'var(--accent)', color: '#1A1814', padding: '8px 16px', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem' }}>
-          ✓ ОПЛАЧЕНО
-        </div>
-      </div>
-    </div>
-  );
+function Centered({ children }) {
+  return <div style={{ padding: '60px 2rem', maxWidth: '620px', margin: '0 auto', textAlign: 'center' }}>{children}</div>
 }
 
 function BookingSuccess() {
+<<<<<<< HEAD
   const { trips, routes } = useData();
   // Read once at mount — sessionStorage doesn't change between renders.
   const [orderId] = useState(() => sessionStorage.getItem('liqpayOrderId'));
@@ -78,9 +37,30 @@ function BookingSuccess() {
 
   useEffect(() => {
     if (!orderId) return;
+=======
+  const [searchParams] = useSearchParams()
+  // order_id comes back in the monobank redirect URL; sessionStorage is a fallback.
+  const orderId = searchParams.get('order_id') || sessionStorage.getItem('paymentOrderId')
 
-    async function fetchStatus() {
+  // phase: polling | paid | pending | failed | error
+  const [phase, setPhase] = useState(orderId ? 'polling' : 'error')
+  const [ticket, setTicket] = useState(null)
+  const [message, setMessage] = useState(
+    orderId ? '' : 'Замовлення не знайдено. Поверніться до розкладу та забронюйте квиток.'
+  )
+
+  useEffect(() => {
+    if (!orderId) return
+>>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
+
+    let active = true
+    let attempts = 0
+    let timer
+
+    async function poll() {
+      attempts += 1
       try {
+<<<<<<< HEAD
         const data = await apiRequest('GET', `/liqpay/status/${orderId}`);
         if (data.paid) {
           // Funnel: the booking completed via the LiqPay payment flow
@@ -121,54 +101,97 @@ function BookingSuccess() {
           });
         } else {
           setError('Оплата ще не завершена. Будь ласка, зачекайте або спробуйте знову.');
+=======
+        const res = await fetch(`${BASE}/payments/status/${encodeURIComponent(orderId)}`)
+        const data = await res.json()
+        if (!active) return
+
+        if (data.status === 'paid' && data.ticket) {
+          sessionStorage.removeItem('paymentOrderId')
+          setTicket(data.ticket)
+          setPhase('paid')
+          return
+>>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
         }
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
+        if (data.status === 'failed') {
+          setPhase('failed')
+          setMessage('Оплата не пройшла. Спробуйте забронювати квиток ще раз.')
+          return
+        }
+        if (data.status === 'not_found') {
+          setPhase('error')
+          setMessage('Замовлення не знайдено.')
+          return
+        }
+        if (attempts >= MAX_ATTEMPTS) {
+          setPhase('pending')
+          return
+        }
+        timer = setTimeout(poll, POLL_INTERVAL)
+      } catch {
+        if (!active) return
+        if (attempts >= MAX_ATTEMPTS) {
+          setPhase('error')
+          setMessage('Не вдалося перевірити статус оплати. Спробуйте оновити сторінку.')
+          return
+        }
+        timer = setTimeout(poll, POLL_INTERVAL)
       }
     }
 
+<<<<<<< HEAD
     fetchStatus();
   }, [orderId, trips, routes]);
+=======
+    poll()
+    return () => { active = false; clearTimeout(timer) }
+  }, [orderId])
+>>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
 
-  if (loading) {
-    return <div style={{ textAlign: 'center', padding: '40px' }}>Завантаження...</div>;
+  if (phase === 'polling') {
+    return <Centered><div style={{ fontSize: '2.4rem', marginBottom: '12px' }}>⏳</div>Перевіряємо статус оплати...</Centered>
   }
 
-  if (error) {
+  if (phase === 'paid') {
     return (
-      <div style={{ textAlign: 'center', padding: '40px' }}>
-        <p style={{ color: 'red' }}>{error}</p>
-        <Link to="/" style={{ display: 'inline-block', marginTop: '20px' }}>Повернутися на головну</Link>
+      <div style={{ padding: '40px 2rem', maxWidth: '760px', margin: '0 auto' }}>
+        <style>{PRINT_STYLE}</style>
+        <div style={{ textAlign: 'center', marginBottom: '32px' }}>
+          <div style={{ fontSize: '3rem', marginBottom: '8px' }}>🎉</div>
+          <h1 style={{ fontFamily: 'Unbounded', fontSize: '1.8rem', marginBottom: '8px' }}>Оплата успішна!</h1>
+          <p style={{ color: 'var(--text2)' }}>Ваш квиток підтверджено</p>
+        </div>
+        <TicketCard ticket={ticket} />
+        <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', marginTop: '24px', flexWrap: 'wrap' }}>
+          <button onClick={() => window.print()} style={primaryBtn}>🖨️ Роздрукувати</button>
+          <Link to={`/ticket/${ticket.ticketCode}`} style={secondaryBtn}>🔗 Постійне посилання на квиток</Link>
+          <Link to="/schedule" style={secondaryBtn}>← До розкладу</Link>
+        </div>
       </div>
-    );
+    )
   }
 
-  if (!ticketData) {
-    return <div style={{ textAlign: 'center', padding: '40px' }}>Дані квитка не знайдено.</div>;
+  if (phase === 'pending') {
+    return (
+      <Centered>
+        <div style={{ fontSize: '2.4rem', marginBottom: '12px' }}>⏳</div>
+        <h1 style={{ fontFamily: 'Unbounded', fontSize: '1.5rem', marginBottom: '12px' }}>Оплата ще обробляється</h1>
+        <p style={{ color: 'var(--text2)', marginBottom: '20px' }}>
+          Платіж ще не підтверджено. Це може зайняти трохи часу — оновіть сторінку за хвилину.
+        </p>
+        <button onClick={() => window.location.reload()} style={primaryBtn}>Перевірити ще раз</button>
+      </Centered>
+    )
   }
 
-  const { booking, trip, route } = ticketData;
-
+  // failed | error
   return (
-    <div style={{ padding: '40px 2rem', maxWidth: '760px', margin: '0 auto' }}>
-      <div style={{ textAlign: 'center', marginBottom: '32px' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '8px' }}>🎉</div>
-        <h1 style={{ fontFamily: 'Unbounded', fontSize: '1.8rem', marginBottom: '8px' }}>Оплата успішна!</h1>
-        <p style={{ color: 'var(--text2)' }}>Ваш квиток підтверджено</p>
-      </div>
-      <TicketDisplay booking={booking} trip={trip} route={route} />
-      <div style={{ display: 'flex', gap: '14px', justifyContent: 'center', marginTop: '24px', flexWrap: 'wrap' }}>
-        <button onClick={() => window.print()} style={{ padding: '12px 24px', borderRadius: '14px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 700, cursor: 'pointer', fontSize: '1rem' }}>
-          🖨️ Роздрукувати
-        </button>
-        <Link to="/schedule" style={{ padding: '12px 24px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg2)', color: 'var(--text)', fontWeight: 600, textDecoration: 'none', fontSize: '1rem' }}>
-          ← Назад до розкладу
-        </Link>
-      </div>
-    </div>
-  );
+    <Centered>
+      <div style={{ fontSize: '2.4rem', marginBottom: '12px' }}>⚠️</div>
+      <p style={{ color: 'var(--text2)', marginBottom: '20px' }}>{message}</p>
+      <Link to="/schedule" style={primaryBtn}>Повернутися до розкладу</Link>
+    </Centered>
+  )
 }
 
-export default BookingSuccess;
+export default BookingSuccess

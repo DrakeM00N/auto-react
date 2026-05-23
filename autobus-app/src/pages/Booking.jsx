@@ -1,8 +1,14 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+<<<<<<< HEAD
 import { useData } from '../context/DataContext'
 import { track } from '../lib/analytics'
 import { apiRequest } from '../lib/api'
+=======
+import { useApp } from '../context/AppContext'
+
+const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+>>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
 
 function Booking() {
   const { trips, routes } = useData()
@@ -68,7 +74,9 @@ function Booking() {
 
     try {
       const fullName = `${passengerLastName.trim()} ${passengerFirstName.trim()}`
+      const token = localStorage.getItem('token')
 
+<<<<<<< HEAD
       // Ask the backend to prepare a LiqPay checkout. Booking is created
       // server-side only after LiqPay confirms payment via the callback;
       // we never create unpaid bookings from the client.
@@ -98,6 +106,28 @@ function Booking() {
       }
       document.body.appendChild(form)
       form.submit()
+=======
+      const res = await fetch(`${BASE}/payments/checkout`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        },
+        body: JSON.stringify({
+          tripId,
+          passengerName: fullName,
+          passengerPhone: passengerPhone.trim(),
+          boardingPoint,
+          alightingPoint,
+        }),
+      })
+      const result = await res.json()
+      if (!res.ok) throw new Error(result.error || 'Помилка сервера')
+
+      // Fallback for recovering the order on the success page.
+      sessionStorage.setItem('paymentOrderId', result.orderId)
+      window.location.href = result.pageUrl
+>>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
     } catch (e) {
       setStatus({ type: 'error', message: e.message })
       setLoading(false)
@@ -192,7 +222,7 @@ function Booking() {
                 gap: '8px',
               }}
             >
-              {loading ? 'Завантаження...' : freeSeats <= 0 ? 'Місць немає' : 'Підтвердити бронювання'}
+              {loading ? 'Перенаправлення на оплату...' : freeSeats <= 0 ? 'Місць немає' : 'Перейти до оплати'}
             </button>
 
             <Link to="/schedule" style={{ color: 'var(--accent)', textDecoration: 'underline', textAlign: 'center' }}>

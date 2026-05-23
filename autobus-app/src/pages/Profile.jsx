@@ -1,7 +1,12 @@
 import { useMemo, useState } from 'react'
+<<<<<<< HEAD
 import { Navigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
+=======
+import { Navigate, Link } from 'react-router-dom'
+import { useApp } from '../context/AppContext'
+>>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
 
 function Profile() {
   const { currentUser, changePassword } = useAuth()
@@ -178,6 +183,14 @@ function Profile() {
                       </div>
                     ) : (
                       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '12px' }}>
+                        {booking.ticketCode && (
+                          <Link
+                            to={`/ticket/${booking.ticketCode}`}
+                            style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--accent)', background: 'transparent', color: 'var(--accent)', fontWeight: 600, textDecoration: 'none' }}
+                          >
+                            🎫 Переглянути квиток
+                          </Link>
+                        )}
                         <button
                           type="button"
                           onClick={() => handleEditClick(booking)}

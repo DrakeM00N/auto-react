@@ -12,8 +12,12 @@ const { initDB } = require('./db')
 
 const app = express()
 
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173', credentials: true }))
-app.use(express.json())
+// FRONTEND_URL may be a comma-separated list (e.g. localhost + LAN IP for phone testing).
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
+  .split(',').map(o => o.trim()).filter(Boolean)
+app.use(cors({ origin: allowedOrigins, credentials: true }))
+// Keep the raw body around so monobank webhook signatures can be verified.
+app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf } }))
 
 // Rate limiting for auth endpoints
 const authLimiter = rateLimit({
@@ -44,8 +48,13 @@ app.use('/api/routes', require('./routes/routes'))
 app.use('/api/trips', require('./routes/trips'))
 app.use('/api/bookings', require('./routes/bookings'))
 app.use('/api/users', require('./routes/users'))
+<<<<<<< HEAD
 app.use('/api/liqpay', require('./routes/liqpay'))
 app.use('/api/analytics', require('./routes/analytics'))
+=======
+app.use('/api/payments', require('./routes/payments'))
+app.use('/api/tickets', require('./routes/tickets'))
+>>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
 
 // Перевірка що сервер живий
 app.get('/api/health', (req, res) => res.json({ ok: true }))
