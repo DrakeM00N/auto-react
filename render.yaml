@@ -3,6 +3,9 @@
 #
 # Two-pass deploy: create the Blueprint, then once Render assigns the service
 # URLs, fill the env vars marked `sync: false` and trigger a redeploy.
+#
+# IMPORTANT for the frontend: VITE_API_URL is inlined at BUILD time, not
+# read at runtime. Changing it requires a redeploy with "Clear build cache".
 services:
   # --- Backend API ---
   - type: web
@@ -17,17 +20,25 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "22"
-      # Auto-generated strong secret for signing JWTs.
+      # Auto-generated values — Render rolls these once and keeps them.
       - key: JWT_SECRET
         generateValue: true
+      - key: ANALYTICS_IP_SALT
+        generateValue: true
+      # Default-able settings.
+      - key: LOG_LEVEL
+        value: info
       # Secrets / URLs — set these in the Render dashboard.
       - key: MONOBANK_TOKEN
+        sync: false
+      - key: GOOGLE_CLIENT_ID
         sync: false
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_AUTH_TOKEN
         sync: false
       # Set to the frontend service URL once it exists (CORS allowlist).
+      # Comma-separated for multiple origins.
       - key: FRONTEND_URL
         sync: false
       # Set to this backend's own URL — makes the monobank webhook live.
@@ -44,11 +55,16 @@ services:
     envVars:
       - key: NODE_VERSION
         value: "22"
-      # Set to the backend URL + /api once the backend service exists.
+      # REQUIRED — without this, the built bundle hard-codes
+      # http://localhost:3001/api and production breaks silently.
       - key: VITE_API_URL
         sync: false
       # Set to this frontend's own URL (used for ticket QR codes).
       - key: VITE_PUBLIC_URL
+        sync: false
+      # Must match the backend's GOOGLE_CLIENT_ID. Leave blank to hide the
+      # "Continue with Google" button (the app handles the empty case).
+      - key: VITE_GOOGLE_CLIENT_ID
         sync: false
     routes:
       # SPA fallback so client routes like /ticket/:code resolve.

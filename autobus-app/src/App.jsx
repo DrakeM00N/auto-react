@@ -5,6 +5,7 @@ import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 import RouteTracker from './components/RouteTracker'
+import ServerErrorBanner from './components/ServerErrorBanner'
 
 // Eagerly loaded — these are on the landing-page path or in the nav.
 import Home from './pages/Home'
@@ -32,6 +33,7 @@ function App() {
     <BrowserRouter>
       <RouteTracker />
       <Navbar />
+      <ServerErrorBanner />
       <main>
         <Suspense fallback={<PageFallback />}>
           <Routes>

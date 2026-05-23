@@ -11,6 +11,10 @@ export function DataProvider({ children }) {
   const [users, setUsers] = useState([])
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
+  // Surfaced to the UI so a connectivity failure shows an explicit
+  // message instead of a silently-empty list. Cleared on the next
+  // successful load.
+  const [error, setError] = useState(null)
 
   const loadData = useCallback(async () => {
     try {
@@ -37,12 +41,22 @@ export function DataProvider({ children }) {
         setBookings([])
         setUsers([])
       }
+      setError(null)
     } catch (e) {
       console.error('Помилка завантаження даних:', e.message)
+      // Network errors from fetch produce "Failed to fetch" — translate
+      // to something a non-technical user understands.
+      const networkLike = /failed to fetch|networkerror|network request failed/i.test(e.message)
+      setError(networkLike ? 'Сервер недоступний. Перевірте підключення або спробуйте пізніше.' : e.message)
     } finally {
       setLoading(false)
     }
   }, [currentUser])
+
+  const reload = useCallback(() => {
+    setLoading(true)
+    return loadData()
+  }, [loadData])
 
   // Syncing external state (server data) into React state on auth change
   // is the documented valid use of useEffect — the lint rule fires a
@@ -143,7 +157,7 @@ export function DataProvider({ children }) {
 
   return (
     <DataContext.Provider value={{
-      loading,
+      loading, error, reload,
       routes, addRoute, updateRoute, deleteRoute,
       trips, addTrip, updateTrip, deleteTrip,
       users, promoteUser, demoteUser,
