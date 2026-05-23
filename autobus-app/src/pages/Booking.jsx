@@ -107,8 +107,20 @@ function Booking() {
       </section>
 
       {!selectedTrip ? (
-        <div style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
-          Невірний або відсутній tripId. Поверніться до <Link to="/schedule">розкладу</Link>.
+        <div style={{ padding: '28px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)', display: 'grid', gap: '18px', justifyItems: 'start' }}>
+          <p style={{ margin: 0, color: 'var(--text2)', lineHeight: 1.6 }}>
+            Невірний або відсутній tripId. Спочатку оберіть конкретний рейс у розкладі — натиснення «Забронювати» поряд із потрібним рейсом відкриє цю сторінку з потрібними параметрами.
+          </p>
+          <Link to="/schedule" style={{
+            background: 'var(--accent)',
+            color: '#1A1814',
+            padding: '12px 22px',
+            borderRadius: '12px',
+            fontWeight: 700,
+            textDecoration: 'none',
+          }}>
+            Перейти до розкладу
+          </Link>
         </div>
       ) : departed ? (
         <div style={{ display: 'grid', gap: '20px' }}>
