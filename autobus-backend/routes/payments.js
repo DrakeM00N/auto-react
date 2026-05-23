@@ -1,5 +1,7 @@
 const express = require('express')
+const crypto = require('crypto')
 const jwt = require('jsonwebtoken')
+const { body, validationResult } = require('express-validator')
 const { db } = require('../db')
 const { getOccupiedSeats, HOLD_MINUTES } = require('../services/seats')
 const { createInvoice, verifyWebhookSignature } = require('../services/monobank')
@@ -7,7 +9,8 @@ const { issueTicket } = require('../services/ticketing')
 
 const router = express.Router()
 
-const JWT_SECRET = process.env.JWT_SECRET || 'autobus-secret-key'
+// server.js already exits on missing JWT_SECRET, so no fallback here.
+const JWT_SECRET = process.env.JWT_SECRET
 
 if (!process.env.MONOBANK_TOKEN) {
   console.warn('⚠️  MONOBANK_TOKEN not set — payments will not work until you add it to autobus-backend/.env')
@@ -25,13 +28,27 @@ function resolveUserId(req) {
 }
 
 // POST /api/payments/checkout — reserve a seat hold and create a monobank invoice.
-router.post('/checkout', async (req, res) => {
+router.post('/checkout',
+  [
+    body('tripId').isInt({ min: 1 }).withMessage('tripId must be a positive integer'),
+    body('passengerName').isString().trim().notEmpty().withMessage('Passenger name is required'),
+    body('passengerPhone').isString().trim().notEmpty().withMessage('Passenger phone is required'),
+    body('boardingPoint').optional({ nullable: true }).isString(),
+    body('alightingPoint').optional({ nullable: true }).isString(),
+  ],
+  async (req, res) => {
   try {
-    const { tripId, passengerName, passengerPhone, boardingPoint, alightingPoint } = req.body
-
-    if (!tripId || !passengerName || !passengerPhone) {
-      return res.status(400).json({ error: 'Заповніть всі поля' })
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() })
     }
+
+    const safe = (v) => (typeof v === 'string' ? v.trim() : '')
+    const tripId = Number(req.body.tripId)
+    const passengerName = safe(req.body.passengerName)
+    const passengerPhone = safe(req.body.passengerPhone)
+    const boardingPoint = safe(req.body.boardingPoint)
+    const alightingPoint = safe(req.body.alightingPoint)
 
     const tripRes = await db.execute({ sql: 'SELECT * FROM trips WHERE id = ?', args: [tripId] })
     const trip = tripRes.rows[0]
@@ -46,7 +63,10 @@ router.post('/checkout', async (req, res) => {
     const routeRes = await db.execute({ sql: 'SELECT * FROM routes WHERE id = ?', args: [trip.route_id] })
     const route = routeRes.rows[0]
 
-    const orderId = `order_${tripId}_${Date.now()}`
+    // Random suffix — the order_id is the only thing protecting the
+    // unauthenticated /status endpoint from PII enumeration. (Same High-1
+    // fix as the retired LiqPay flow.)
+    const orderId = `order_${tripId}_${crypto.randomBytes(16).toString('hex')}`
     const destination = `Квиток АвтоРейс: ${boardingPoint || route.from_city} → ${alightingPoint || route.to_city}, ${trip.date} ${trip.time}`
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
 
@@ -71,10 +91,10 @@ router.post('/checkout', async (req, res) => {
         invoice.invoiceId,
         tripId,
         resolveUserId(req),
-        String(passengerName).trim(),
-        String(passengerPhone).trim(),
-        String(boardingPoint || '').trim(),
-        String(alightingPoint || '').trim(),
+        passengerName,
+        passengerPhone,
+        boardingPoint,
+        alightingPoint,
       ],
     })
 

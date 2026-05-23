@@ -1,14 +1,8 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-<<<<<<< HEAD
 import { useData } from '../context/DataContext'
 import { track } from '../lib/analytics'
 import { apiRequest } from '../lib/api'
-=======
-import { useApp } from '../context/AppContext'
-
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
->>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
 
 function Booking() {
   const { trips, routes } = useData()
@@ -74,60 +68,22 @@ function Booking() {
 
     try {
       const fullName = `${passengerLastName.trim()} ${passengerFirstName.trim()}`
-      const token = localStorage.getItem('token')
 
-<<<<<<< HEAD
-      // Ask the backend to prepare a LiqPay checkout. Booking is created
-      // server-side only after LiqPay confirms payment via the callback;
-      // we never create unpaid bookings from the client.
-      const result = await apiRequest('POST', '/liqpay/checkout', {
+      // Ask the backend to create a monobank invoice. The booking is
+      // created server-side only after monobank confirms payment, so we
+      // never produce unpaid bookings from the client.
+      const result = await apiRequest('POST', '/payments/checkout', {
         tripId,
         passengerName: fullName,
         passengerPhone: passengerPhone.trim(),
-        boardingPoint: boardingPoint.trim(),
-        alightingPoint: alightingPoint.trim(),
+        boardingPoint,
+        alightingPoint,
       })
 
-      // BookingSuccess will poll /api/liqpay/status/:orderId after redirect.
-      sessionStorage.setItem('liqpayOrderId', result.orderId)
-
-      // Submit a hidden form to LiqPay's checkout — this navigates the
-      // browser away from the app, so we don't reset loading on success.
-      const form = document.createElement('form')
-      form.method = 'POST'
-      form.action = 'https://www.liqpay.ua/api/3/checkout'
-      form.acceptCharset = 'utf-8'
-      for (const [k, v] of Object.entries({ data: result.data, signature: result.signature })) {
-        const input = document.createElement('input')
-        input.type = 'hidden'
-        input.name = k
-        input.value = v
-        form.appendChild(input)
-      }
-      document.body.appendChild(form)
-      form.submit()
-=======
-      const res = await fetch(`${BASE}/payments/checkout`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        },
-        body: JSON.stringify({
-          tripId,
-          passengerName: fullName,
-          passengerPhone: passengerPhone.trim(),
-          boardingPoint,
-          alightingPoint,
-        }),
-      })
-      const result = await res.json()
-      if (!res.ok) throw new Error(result.error || 'Помилка сервера')
-
-      // Fallback for recovering the order on the success page.
+      // Fallback for recovering the order on the success page if monobank
+      // doesn't preserve the order_id query param in its redirect.
       sessionStorage.setItem('paymentOrderId', result.orderId)
       window.location.href = result.pageUrl
->>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
     } catch (e) {
       setStatus({ type: 'error', message: e.message })
       setLoading(false)

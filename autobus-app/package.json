@@ -10,11 +10,8 @@
     "preview": "vite preview"
   },
   "dependencies": {
-<<<<<<< HEAD
     "@react-oauth/google": "^0.13.5",
-=======
     "qrcode.react": "^4.2.0",
->>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "react-router-dom": "^7.14.2"

@@ -1,13 +1,6 @@
 import { useEffect, useState } from 'react'
-<<<<<<< HEAD
-import { useData } from '../context/DataContext'
-import { Link } from 'react-router-dom'
-import { track } from '../lib/analytics'
-import { apiRequest } from '../lib/api'
-=======
 import { Link, useSearchParams } from 'react-router-dom'
 import TicketCard from '../components/TicketCard'
->>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 const MAX_ATTEMPTS = 6
@@ -27,17 +20,6 @@ function Centered({ children }) {
 }
 
 function BookingSuccess() {
-<<<<<<< HEAD
-  const { trips, routes } = useData();
-  // Read once at mount — sessionStorage doesn't change between renders.
-  const [orderId] = useState(() => sessionStorage.getItem('liqpayOrderId'));
-  const [ticketData, setTicketData] = useState(null);
-  const [loading, setLoading] = useState(Boolean(orderId));
-  const [error, setError] = useState(orderId ? null : 'Замовлення не знайдено. Поверніться на головну сторінку.');
-
-  useEffect(() => {
-    if (!orderId) return;
-=======
   const [searchParams] = useSearchParams()
   // order_id comes back in the monobank redirect URL; sessionStorage is a fallback.
   const orderId = searchParams.get('order_id') || sessionStorage.getItem('paymentOrderId')
@@ -51,7 +33,6 @@ function BookingSuccess() {
 
   useEffect(() => {
     if (!orderId) return
->>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
 
     let active = true
     let attempts = 0
@@ -60,48 +41,6 @@ function BookingSuccess() {
     async function poll() {
       attempts += 1
       try {
-<<<<<<< HEAD
-        const data = await apiRequest('GET', `/liqpay/status/${orderId}`);
-        if (data.paid) {
-          // Funnel: the booking completed via the LiqPay payment flow
-          track('booking_completed', { trip_id: data.tripId, price: data.tripPrice });
-
-          // Find trip and route from context. The /api/routes endpoint
-          // already returns {from, to, stops: []} — stops is parsed there,
-          // do not parse it again here.
-          const trip = trips.find(t => t.id === data.tripId);
-          if (!trip) {
-            throw new Error('Рейс не знайдено');
-          }
-          const route = routes.find(r => r.id === trip.routeId);
-          if (!route) {
-            throw new Error('Маршрут не знайдено');
-          }
-
-          setTicketData({
-            booking: {
-              id: data.bookingId,
-              passengerName: data.passengerName,
-              passengerPhone: data.passengerPhone,
-              boardingPoint: data.boardingPoint,
-              alightingPoint: data.alightingPoint
-            },
-            trip: {
-              id: data.tripId,
-              date: data.tripDate,
-              time: data.tripTime,
-              price: data.tripPrice
-            },
-            route: {
-              from: route.from,
-              to: route.to,
-              stops: route.stops || [],
-              duration: route.duration
-            }
-          });
-        } else {
-          setError('Оплата ще не завершена. Будь ласка, зачекайте або спробуйте знову.');
-=======
         const res = await fetch(`${BASE}/payments/status/${encodeURIComponent(orderId)}`)
         const data = await res.json()
         if (!active) return
@@ -111,7 +50,6 @@ function BookingSuccess() {
           setTicket(data.ticket)
           setPhase('paid')
           return
->>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
         }
         if (data.status === 'failed') {
           setPhase('failed')
@@ -139,14 +77,9 @@ function BookingSuccess() {
       }
     }
 
-<<<<<<< HEAD
-    fetchStatus();
-  }, [orderId, trips, routes]);
-=======
     poll()
     return () => { active = false; clearTimeout(timer) }
   }, [orderId])
->>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
 
   if (phase === 'polling') {
     return <Centered><div style={{ fontSize: '2.4rem', marginBottom: '12px' }}>⏳</div>Перевіряємо статус оплати...</Centered>

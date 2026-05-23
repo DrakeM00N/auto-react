@@ -48,13 +48,9 @@ app.use('/api/routes', require('./routes/routes'))
 app.use('/api/trips', require('./routes/trips'))
 app.use('/api/bookings', require('./routes/bookings'))
 app.use('/api/users', require('./routes/users'))
-<<<<<<< HEAD
-app.use('/api/liqpay', require('./routes/liqpay'))
-app.use('/api/analytics', require('./routes/analytics'))
-=======
 app.use('/api/payments', require('./routes/payments'))
 app.use('/api/tickets', require('./routes/tickets'))
->>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
+app.use('/api/analytics', require('./routes/analytics'))
 
 // Перевірка що сервер живий
 app.get('/api/health', (req, res) => res.json({ ok: true }))

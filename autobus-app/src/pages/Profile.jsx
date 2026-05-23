@@ -1,12 +1,7 @@
 import { useMemo, useState } from 'react'
-<<<<<<< HEAD
-import { Navigate } from 'react-router-dom'
+import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
-=======
-import { Navigate, Link } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
->>>>>>> 57d6e617e571c5c3a7bda50eea02ed573f8389bd
 
 function Profile() {
   const { currentUser, changePassword } = useAuth()
