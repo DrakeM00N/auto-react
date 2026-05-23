@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
+import { useAuth } from '../context/AuthContext'
+import GoogleAuthButton from '../components/GoogleAuthButton'
 
 function Register() {
-  const { register } = useApp()
+  const { register } = useAuth()
   const navigate = useNavigate()
   const [name, setName] = useState('')
   const [email, setEmail] = useState('')
@@ -40,7 +41,7 @@ function Register() {
     padding: 0,
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     if (password !== confirm) {
       setStatus({ type: 'error', message: 'Паролі не співпадають' })
@@ -48,7 +49,7 @@ function Register() {
     }
 
     const normalizedEmail = email.trim().toLowerCase()
-    const result = register(name.trim(), normalizedEmail, password)
+    const result = await register(name.trim(), normalizedEmail, password)
     if (!result.success) {
       setStatus({ type: 'error', message: result.message })
       return
@@ -163,6 +164,8 @@ function Register() {
         >
           Зареєструватися
         </button>
+
+        <GoogleAuthButton onError={(message) => setStatus({ type: 'error', message })} />
 
         <p style={{ color: 'var(--text2)', textAlign: 'center' }}>
           Вже є акаунт?{' '}

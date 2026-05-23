@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useApp } from '../context/AppContext'
+import { useData } from '../context/DataContext'
 import { Link } from 'react-router-dom'
 import { track } from '../lib/analytics'
+import { apiRequest } from '../lib/api'
 
 function TicketDisplay({ booking, trip, route }) {
   return (
@@ -68,31 +69,26 @@ function TicketDisplay({ booking, trip, route }) {
 }
 
 function BookingSuccess() {
-  const { trips, routes } = useApp();
+  const { trips, routes } = useData();
+  // Read once at mount — sessionStorage doesn't change between renders.
+  const [orderId] = useState(() => sessionStorage.getItem('liqpayOrderId'));
   const [ticketData, setTicketData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(Boolean(orderId));
+  const [error, setError] = useState(orderId ? null : 'Замовлення не знайдено. Поверніться на головну сторінку.');
 
   useEffect(() => {
-    const orderId = sessionStorage.getItem('liqpayOrderId');
-    if (!orderId) {
-      setError('Замовлення не знайдено. Поверніться на головну сторінку.');
-      setLoading(false);
-      return;
-    }
+    if (!orderId) return;
 
     async function fetchStatus() {
       try {
-        const res = await fetch(`/api/liqpay/status/${orderId}`);
-        if (!res.ok) {
-          throw new Error('Не вдалося отримати статус оплати');
-        }
-        const data = await res.json();
+        const data = await apiRequest('GET', `/liqpay/status/${orderId}`);
         if (data.paid) {
           // Funnel: the booking completed via the LiqPay payment flow
           track('booking_completed', { trip_id: data.tripId, price: data.tripPrice });
 
-          // Find trip and route from context
+          // Find trip and route from context. The /api/routes endpoint
+          // already returns {from, to, stops: []} — stops is parsed there,
+          // do not parse it again here.
           const trip = trips.find(t => t.id === data.tripId);
           if (!trip) {
             throw new Error('Рейс не знайдено');
@@ -117,9 +113,9 @@ function BookingSuccess() {
               price: data.tripPrice
             },
             route: {
-              from: route.from_city,
-              to: route.to_city,
-              stops: route.stops ? JSON.parse(route.stops) : [],
+              from: route.from,
+              to: route.to,
+              stops: route.stops || [],
               duration: route.duration
             }
           });
@@ -134,7 +130,7 @@ function BookingSuccess() {
     }
 
     fetchStatus();
-  }, [trips, routes]);
+  }, [orderId, trips, routes]);
 
   if (loading) {
     return <div style={{ textAlign: 'center', padding: '40px' }}>Завантаження...</div>;

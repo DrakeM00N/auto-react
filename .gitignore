@@ -1,8 +1,11 @@
 # Backend - Sensitive files and dependencies
-autobus-backend/.env
+autobus-backend/.env*
+!autobus-backend/.env.example
 autobus-backend/node_modules/
 autobus-backend/autobus.db
 
 # Frontend - Sensitive files and dependencies
-autobus-app/.env
-autobus-app/node_modules/.env
+autobus-app/.env*
+!autobus-app/.env.example
+autobus-app/node_modules/
+autobus-app/dist/

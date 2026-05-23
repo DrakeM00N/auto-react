@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
+import { useAuth } from '../context/AuthContext'
+import GoogleAuthButton from '../components/GoogleAuthButton'
 
 function Login() {
-  const { login } = useApp()
+  const { login } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -37,10 +38,10 @@ function Login() {
     padding: 0,
   }
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
     const normalizedEmail = email.trim().toLowerCase()
-    const result = login(normalizedEmail, password)
+    const result = await login(normalizedEmail, password)
     if (!result.success) {
       setStatus({ type: 'error', message: result.message })
       return
@@ -123,6 +124,8 @@ function Login() {
         >
           Увійти
         </button>
+
+        <GoogleAuthButton onError={(message) => setStatus({ type: 'error', message })} />
 
         <p style={{ color: 'var(--text2)', textAlign: 'center' }}>
           Немає акаунту?{' '}

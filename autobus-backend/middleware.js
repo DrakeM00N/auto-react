@@ -1,6 +1,6 @@
 const jwt = require('jsonwebtoken')
 const { db } = require('./db')
-const SECRET = process.env.JWT_SECRET || 'autobus-secret-key'
+const SECRET = process.env.JWT_SECRET
 
 async function authMiddleware(req, res, next) {
   const header = req.headers.authorization

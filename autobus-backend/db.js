@@ -8,7 +8,8 @@ async function initDB() {
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       name TEXT NOT NULL,
       email TEXT NOT NULL UNIQUE,
-      password TEXT NOT NULL,
+      password TEXT,
+      google_id TEXT,
       role TEXT NOT NULL DEFAULT 'user',
       last_login TEXT,
       created_at TEXT DEFAULT (datetime('now'))
@@ -78,16 +79,9 @@ async function initDB() {
     `CREATE INDEX IF NOT EXISTS idx_events_session ON events(session_id)`,
   ])
 
-  // Seed initial data if empty
+  // Seed routes only if the routes table is empty.
   const routeCount = await db.execute('SELECT COUNT(*) as cnt FROM routes')
   if (routeCount.rows[0].cnt === 0) {
-    // Generate future dates for trips (7, 8, 9, 10 days from now)
-    const now = new Date()
-    const date1 = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    const date2 = new Date(now.getTime() + 8 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    const date3 = new Date(now.getTime() + 9 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-    const date4 = new Date(now.getTime() + 10 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
-
     await db.batch([
       `INSERT INTO routes (from_city, to_city, distance, duration, stops) VALUES
         ('Кременчук', 'Київ', '475 км', '6 год', '["Миколаїв","Житомир"]')`,
@@ -95,12 +89,43 @@ async function initDB() {
         ('Кременчук', 'Харків', '680 км', '8 год', '["Полтава"]')`,
       `INSERT INTO routes (from_city, to_city, distance, duration, stops) VALUES
         ('Кременчук', 'Львів', '810 км', '10 год', '["Кропивницький"]')`,
-      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (1, '${date1}', '07:00', 350, 40)`,
-      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (1, '${date2}', '14:00', 320, 40)`,
-      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (2, '${date3}', '08:00', 480, 40)`,
-      `INSERT INTO trips (route_id, date, time, price, seats) VALUES (3, '${date4}', '09:00', 550, 40)`,
     ])
   }
+
+  // Seed trips independently — if routes exist but no trips do, we still
+  // need example trips for the seeded routes.
+  const tripCount = await db.execute('SELECT COUNT(*) as cnt FROM trips')
+  if (tripCount.rows[0].cnt === 0) {
+    const now = new Date()
+    const day = (n) => new Date(now.getTime() + n * 86400000).toISOString().split('T')[0]
+    const routes = await db.execute('SELECT id FROM routes ORDER BY id LIMIT 3')
+    if (routes.rows.length >= 3) {
+      const [r1, r2, r3] = routes.rows
+      await db.batch([
+        `INSERT INTO trips (route_id, date, time, price, seats) VALUES (${r1.id}, '${day(7)}', '07:00', 350, 40)`,
+        `INSERT INTO trips (route_id, date, time, price, seats) VALUES (${r1.id}, '${day(8)}', '14:00', 320, 40)`,
+        `INSERT INTO trips (route_id, date, time, price, seats) VALUES (${r2.id}, '${day(9)}', '08:00', 480, 40)`,
+        `INSERT INTO trips (route_id, date, time, price, seats) VALUES (${r3.id}, '${day(10)}', '09:00', 550, 40)`,
+      ])
+    }
+  }
+
+  // Purge expired/used rows on startup, then every hour. pending_bookings
+  // older than a day without a real booking_id are dead — the user either
+  // never paid or LiqPay never called back. password_resets that are used
+  // or expired serve no purpose.
+  async function cleanup() {
+    try {
+      await db.batch([
+        `DELETE FROM password_resets WHERE used = 1 OR expires_at < datetime('now')`,
+        `DELETE FROM pending_bookings WHERE booking_id IS NULL AND created_at < datetime('now', '-1 day')`,
+      ])
+    } catch (e) {
+      console.error('Cleanup task failed:', e.message)
+    }
+  }
+  await cleanup()
+  setInterval(cleanup, 60 * 60 * 1000).unref()
 
   console.log('✅ Database ready')
 }

@@ -1,22 +1,26 @@
 import { useMemo, useState } from 'react'
 import { Navigate } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
+import { useAuth } from '../context/AuthContext'
+import { useData } from '../context/DataContext'
 
 function Profile() {
-  const { currentUser, bookings, trips, routes, cancelBooking, updateBooking, changePassword } = useApp()
+  const { currentUser, changePassword } = useAuth()
+  const { bookings, trips, routes, cancelBooking, updateBooking } = useData()
   const [editBookingId, setEditBookingId] = useState(null)
   const [editData, setEditData] = useState({ passengerName: '', passengerPhone: '' })
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' })
   const [status, setStatus] = useState(null)
 
+  // Hooks must run on every render in the same order, so this useMemo
+  // sits above the early-return for the unauthenticated case.
+  const userBookings = useMemo(
+    () => (currentUser ? bookings.filter(b => b.userId === currentUser.id) : []),
+    [bookings, currentUser]
+  )
+
   if (!currentUser) {
     return <Navigate to="/login" replace />
   }
-
-  const userBookings = useMemo(
-    () => bookings.filter(booking => booking.userId === currentUser.id),
-    [bookings, currentUser]
-  )
 
   const totalSpent = userBookings.reduce((sum, booking) => {
     const trip = trips.find(t => t.id === booking.tripId)
@@ -48,7 +52,7 @@ function Profile() {
     setStatus({ type: 'success', message: 'Бронювання скасовано.' })
   }
 
-  const handleChangePassword = (event) => {
+  const handleChangePassword = async (event) => {
     event.preventDefault()
 
     if (!passwords.current || !passwords.new || !passwords.confirm) {
@@ -61,7 +65,7 @@ function Profile() {
       return
     }
 
-    const result = changePassword(passwords.current, passwords.new)
+    const result = await changePassword(passwords.current, passwords.new)
     if (!result.success) {
       setStatus({ type: 'error', message: result.message })
       return
@@ -98,7 +102,7 @@ function Profile() {
             <div><strong>Ім’я:</strong> {currentUser.name}</div>
             <div><strong>Email:</strong> {currentUser.email}</div>
             {currentUser.role === 'admin' && <div><strong>Роль:</strong> {currentUser.role}</div>}
-            {currentUser.lastLogin && <div><strong>Останній вхід:</strong> {currentUser.lastLogin}</div>}
+            {currentUser.lastLogin && <div><strong>Останній вхід:</strong> {new Date(currentUser.lastLogin).toLocaleString('uk-UA')}</div>}
           </div>
         </div>
 
@@ -198,6 +202,7 @@ function Profile() {
         )}
       </section>
 
+      {currentUser.hasPassword !== false && (
       <section style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
         <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Змінити пароль</h2>
         <form onSubmit={handleChangePassword} style={{ display: 'grid', gap: '14px', maxWidth: '520px' }}>
@@ -239,6 +244,7 @@ function Profile() {
           </button>
         </form>
       </section>
+      )}
     </div>
   )
 }

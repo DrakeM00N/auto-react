@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
+import { useTheme } from '../context/ThemeContext'
+import { useAuth } from '../context/AuthContext'
 
 function Navbar() {
-  const { theme, toggleTheme, currentUser, logout } = useApp()
+  const { theme, toggleTheme } = useTheme()
+  const { currentUser, logout } = useAuth()
 
   return (
     <nav style={{

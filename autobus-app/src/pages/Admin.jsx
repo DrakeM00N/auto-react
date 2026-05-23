@@ -1,9 +1,11 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
+import { useAuth } from '../context/AuthContext'
+import { useData } from '../context/DataContext'
 
 function Admin() {
-  const { currentUser, routes, addRoute, deleteRoute, updateRoute, trips, addTrip, deleteTrip, updateTrip, users, bookings, promoteUser, cancelBooking } = useApp()
+  const { currentUser } = useAuth()
+  const { routes, addRoute, deleteRoute, updateRoute, trips, addTrip, deleteTrip, updateTrip, users, bookings, promoteUser, cancelBooking } = useData()
 
   // Состояния для форм
   const [newRoute, setNewRoute] = useState({ from: '', to: '', distance: '', duration: '', stops: '' })
@@ -143,8 +145,6 @@ function Admin() {
     return sum + (trip?.price || 0)
   }, 0)
   const totalUsers = users.length
-  const totalSeats = trips.reduce((sum, trip) => sum + trip.seats, 0)
-  const bookedSeats = trips.reduce((sum, trip) => sum + trip.bookedSeats.length, 0)
 
   const routeBookingCount = routes.map(route => {
     const count = bookings.reduce((sum, booking) => {
@@ -515,7 +515,7 @@ function Admin() {
                       </div>
                       <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
                         <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>Ціна: {trip.price} грн • Місць: {trip.seats}</div>
-                        <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>Заброньовано: {trip.bookedSeats.length}</div>
+                        <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>Заброньовано: {trip.bookedCount || 0}</div>
                       </div>
                     </div>
                   )}
@@ -550,7 +550,7 @@ function Admin() {
                   <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{user.email}</div>
                   <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
                     Роль: {user.role}
-                    {user.lastLogin ? ` • востаний вхід: ${user.lastLogin}` : ''}
+                    {user.lastLogin ? ` • востаний вхід: ${new Date(user.lastLogin).toLocaleString('uk-UA')}` : ''}
                   </div>
                 </div>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>

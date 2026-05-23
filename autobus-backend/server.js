@@ -1,4 +1,10 @@
 require('dotenv').config()
+
+if (!process.env.JWT_SECRET) {
+  console.error('❌ JWT_SECRET is not set. Refusing to start with an unsigned/weak token secret.')
+  process.exit(1)
+}
+
 const express = require('express')
 const cors = require('cors')
 const rateLimit = require('express-rate-limit')

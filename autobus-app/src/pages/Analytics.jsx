@@ -1,8 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
-
-const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
+import { useAuth } from '../context/AuthContext'
+import { apiRequest } from '../lib/api'
 
 const STEP_LABELS = {
   page_view: 'Перегляди сторінок',
@@ -20,7 +19,7 @@ const cardStyle = {
 }
 
 function Analytics() {
-  const { currentUser } = useApp()
+  const { currentUser } = useAuth()
   const [range, setRange] = useState('30')
   const [funnel, setFunnel] = useState([])
   const [demand, setDemand] = useState([])
@@ -31,17 +30,10 @@ function Analytics() {
     setLoading(true)
     setError(null)
     try {
-      const token = localStorage.getItem('token')
-      const headers = token ? { Authorization: `Bearer ${token}` } : {}
-      const [funnelRes, demandRes] = await Promise.all([
-        fetch(`${BASE}/analytics/funnel?range=${range}`, { headers }),
-        fetch(`${BASE}/analytics/search-demand?range=${range}`, { headers }),
+      const [funnelData, demandData] = await Promise.all([
+        apiRequest('GET', `/analytics/funnel?range=${range}`),
+        apiRequest('GET', `/analytics/search-demand?range=${range}`),
       ])
-      if (!funnelRes.ok || !demandRes.ok) {
-        throw new Error('Не вдалося завантажити аналітику')
-      }
-      const funnelData = await funnelRes.json()
-      const demandData = await demandRes.json()
       setFunnel(funnelData.steps || [])
       setDemand(demandData.rows || [])
     } catch (e) {

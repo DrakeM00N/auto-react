@@ -8,7 +8,11 @@
       "Bash(node -e \"require\\('./routes/analytics'\\); console.log\\('analytics.js OK'\\)\")",
       "Bash(npx eslint *)",
       "Bash(node *)",
-      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")"
+      "Bash(powershell -Command \"Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force\")",
+      "Bash(npm install *)",
+      "Bash(ls autobus.db*)",
+      "Bash(rm -f autobus.db autobus.db-journal autobus.db-wal autobus.db-shm)",
+      "Bash(JWT_SECRET=test_syntax_check node -e \"require\\('./middleware'\\); require\\('./routes/auth'\\); require\\('./routes/bookings'\\); require\\('./routes/liqpay'\\); console.log\\('all backend modules parse OK'\\)\")"
     ]
   }
 }

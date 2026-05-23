@@ -6,6 +6,8 @@ const router = express.Router()
 
 const LIQPAY_PUBLIC_KEY = process.env.LIQPAY_PUBLIC_KEY
 const LIQPAY_PRIVATE_KEY = process.env.LIQPAY_PRIVATE_KEY
+const LIQPAY_SANDBOX = process.env.LIQPAY_SANDBOX === '1'
+const PUBLIC_BACKEND_URL = process.env.PUBLIC_BACKEND_URL
 
 function liqpaySign(data) {
   return crypto
@@ -24,7 +26,13 @@ router.post('/checkout', async (req, res) => {
   try {
     const { tripId, passengerName, passengerPhone, boardingPoint, alightingPoint } = req.body
 
-    if (!tripId || !passengerName || !passengerPhone) {
+    const safe = (v) => (typeof v === 'string' ? v.trim() : '')
+    const safeName = safe(passengerName)
+    const safePhone = safe(passengerPhone)
+    const safeBoarding = safe(boardingPoint)
+    const safeAlighting = safe(alightingPoint)
+
+    if (!Number.isInteger(tripId) || !safeName || !safePhone) {
       return res.status(400).json({ error: 'Заповніть всі поля' })
     }
 
@@ -35,8 +43,10 @@ router.post('/checkout', async (req, res) => {
     const routeRes = await db.execute({ sql: 'SELECT * FROM routes WHERE id = ?', args: [trip.route_id] })
     const route = routeRes.rows[0]
 
-    const orderId = `trip_${tripId}_${Date.now()}`
-    const description = `Квиток: ${boardingPoint || route.from_city} → ${alightingPoint || route.to_city} • ${trip.date} ${trip.time} • ${passengerName}`
+    // Random suffix — order_id is the only thing protecting PII on the
+    // unauthenticated /status endpoint, so it must not be guessable.
+    const orderId = `trip_${tripId}_${crypto.randomBytes(16).toString('hex')}`
+    const description = `Квиток: ${safeBoarding || route.from_city} → ${safeAlighting || route.to_city} • ${trip.date} ${trip.time} • ${safeName}`
 
     const params = {
       public_key: LIQPAY_PUBLIC_KEY,
@@ -47,18 +57,19 @@ router.post('/checkout', async (req, res) => {
       description,
       order_id: orderId,
       language: 'uk',
-      sandbox: '1',
+      sandbox: LIQPAY_SANDBOX ? '1' : '0',
       result_url: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/booking/success`,
-      //server_url: 'https://www.liqpay.ua',
+      // Server-to-server webhook. Without this, LiqPay never calls our
+      // callback and bookings are never created. Must be publicly reachable.
+      ...(PUBLIC_BACKEND_URL ? { server_url: `${PUBLIC_BACKEND_URL}/api/liqpay/callback` } : {}),
     }
 
     const data = liqpayData(params)
     const signature = liqpaySign(data)
 
-    // Зберігаємо pending бронювання (без booking_id наразі)
     await db.execute({
       sql: 'INSERT OR REPLACE INTO pending_bookings (order_id, trip_id, passenger_name, passenger_phone, boarding_point, alighting_point) VALUES (?, ?, ?, ?, ?, ?)',
-      args: [orderId, tripId, passengerName, passengerPhone, boardingPoint || '', alightingPoint || '']
+      args: [orderId, tripId, safeName, safePhone, safeBoarding, safeAlighting]
     })
 
     res.json({ data, signature, orderId })
@@ -80,40 +91,72 @@ router.post('/callback', async (req, res) => {
     }
 
     const decoded = JSON.parse(Buffer.from(data, 'base64').toString('utf8'))
-    const { order_id, status } = decoded
+    const { order_id, status, amount, currency } = decoded
 
     if (status === 'success' || status === 'sandbox') {
-      // Перевіряємо чи не було вже оброблено це сплачення (захист від replay-атак)
+      // Idempotency: if we already created a booking for this order, stop.
       const existingBookingRes = await db.execute({
         sql: 'SELECT booking_id FROM pending_bookings WHERE order_id = ? AND booking_id IS NOT NULL',
         args: [order_id]
       })
-
-      // Якщо бронювання вже створене для цього order_id, пропускаємо обробку
       if (existingBookingRes.rows.length > 0) {
         return res.send('OK')
       }
 
-      // Знаходимо pending бронювання
       const pendingRes = await db.execute({
         sql: 'SELECT * FROM pending_bookings WHERE order_id = ?',
         args: [order_id]
       })
       const pending = pendingRes.rows[0]
+      if (!pending) {
+        // Signature was valid but we have no record of this order — refuse.
+        console.error('LiqPay callback for unknown order:', order_id)
+        return res.status(400).send('Unknown order')
+      }
 
-      if (pending) {
-        // Створюємо реальне бронювання
-        const bookingResult = await db.execute({
+      // Re-fetch the trip and assert that the paid amount + currency match
+      // what we intended to charge. Without this, a valid-signature callback
+      // with an attacker-chosen amount would still produce a booking.
+      const tripRes = await db.execute({
+        sql: 'SELECT price, seats FROM trips WHERE id = ?',
+        args: [pending.trip_id]
+      })
+      const trip = tripRes.rows[0]
+      if (!trip) {
+        console.error('LiqPay callback for missing trip:', pending.trip_id)
+        return res.status(400).send('Trip not found')
+      }
+      if (Number(amount) !== Number(trip.price) || currency !== 'UAH') {
+        console.error('LiqPay amount/currency mismatch', { order_id, paid: amount, currency, expected: trip.price })
+        return res.status(400).send('Amount mismatch')
+      }
+
+      // INSERT booking and link it from pending_bookings in one batch.
+      // libsql runs batch statements in a single transaction, so either
+      // both writes land or neither does — no ghost bookings on crash.
+      const batchResult = await db.batch([
+        {
           sql: 'INSERT INTO bookings (trip_id, passenger_name, passenger_phone, boarding_point, alighting_point) VALUES (?, ?, ?, ?, ?)',
-          args: [pending.trip_id, pending.passenger_name, pending.passenger_phone, pending.boarding_point, pending.alighting_point]
-        })
-        const bookingId = Number(bookingResult.lastInsertRowid)
+          args: [pending.trip_id, pending.passenger_name, pending.passenger_phone, pending.boarding_point, pending.alighting_point],
+        },
+        {
+          sql: 'UPDATE pending_bookings SET booking_id = last_insert_rowid() WHERE order_id = ?',
+          args: [order_id],
+        },
+      ])
+      const bookingId = Number(batchResult[0].lastInsertRowid)
 
-        // Оновлюємо pending бронювання ID реального бронювання
-        await db.execute({
-          sql: 'UPDATE pending_bookings SET booking_id = ? WHERE order_id = ?',
-          args: [bookingId, order_id]
-        })
+      // Defensive overbooking check — see bookings.js POST for context.
+      // If two payments completed concurrently for the last seat, the
+      // second one gets refunded out-of-band (booking + link both undone).
+      const recheck = await db.execute({ sql: 'SELECT COUNT(*) as cnt FROM bookings WHERE trip_id = ?', args: [pending.trip_id] })
+      if (recheck.rows[0].cnt > trip.seats) {
+        await db.batch([
+          { sql: 'DELETE FROM bookings WHERE id = ?', args: [bookingId] },
+          { sql: 'UPDATE pending_bookings SET booking_id = NULL WHERE order_id = ?', args: [order_id] },
+        ])
+        console.error('Overbooking detected after LiqPay callback; booking rolled back', { order_id, trip_id: pending.trip_id })
+        return res.status(409).send('Overbooked')
       }
     }
 

@@ -1,6 +1,6 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
-import { useApp } from '../context/AppContext'
+import { useData } from '../context/DataContext'
 import { track } from '../lib/analytics'
 
 const UKRAINE_CITIES = [
@@ -11,19 +11,28 @@ const UKRAINE_CITIES = [
 ].sort((a, b) => a.localeCompare(b, 'uk'))
 
 function Schedule() {
-  const { trips, routes } = useApp()
-  const [searchParams] = useSearchParams()
-  const today = new Date().toISOString().split('T')[0]
-  const [filterFrom, setFilterFrom] = useState(searchParams.get('from') || '')
-  const [filterTo, setFilterTo] = useState(searchParams.get('to') || '')
-  const [filterDate, setFilterDate] = useState(searchParams.get('date') || '')
+  const { trips, routes } = useData()
+  const [searchParams, setSearchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
 
-  useEffect(() => {
-    setFilterFrom(searchParams.get('from') || '')
-    setFilterTo(searchParams.get('to') || '')
-    setFilterDate(searchParams.get('date') || '')
-  }, [searchParams])
+  // Filters live in the URL so they survive refresh and can be linked to.
+  // Reading them straight from searchParams (no local mirror) is what
+  // removes the set-state-in-effect anti-pattern.
+  const filterFrom = searchParams.get('from') || ''
+  const filterTo = searchParams.get('to') || ''
+  const filterDate = searchParams.get('date') || ''
+
+  const updateFilter = (key, value) => {
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev)
+      if (value) next.set(key, value)
+      else next.delete(key)
+      return next
+    })
+  }
+  const setFilterFrom = (v) => updateFilter('from', v)
+  const setFilterTo = (v) => updateFilter('to', v)
+  const setFilterDate = (v) => updateFilter('date', v)
 
   const filteredTrips = useMemo(() => {
   return trips.filter(trip => {
@@ -147,7 +156,7 @@ function Schedule() {
           </div>
         ) : filteredTrips.map(trip => {
           const route = routes.find(r => r.id === trip.routeId)
-          const freeSeats = trip.seats - (trip.bookedSeats?.length || 0)
+          const freeSeats = trip.seats - (trip.bookedCount || 0)
 
           return (
             <article key={trip.id} style={{

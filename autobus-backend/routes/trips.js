@@ -1,8 +1,26 @@
 const express = require('express')
+const { body, validationResult } = require('express-validator')
 const { db } = require('../db')
 const { adminMiddleware } = require('../middleware')
 
 const router = express.Router()
+
+const tripValidators = [
+  body('routeId').isInt({ min: 1 }).withMessage('routeId must be a positive integer'),
+  body('date').isISO8601({ strict: true }).withMessage('date must be ISO 8601 (YYYY-MM-DD)'),
+  body('time').matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage('time must be HH:MM'),
+  body('price').isFloat({ gt: 0 }).withMessage('price must be a positive number'),
+  body('seats').isInt({ min: 1, max: 100 }).withMessage('seats must be between 1 and 100'),
+]
+
+function rejectInvalid(req, res) {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() })
+    return true
+  }
+  return false
+}
 
 // GET /api/trips
 router.get('/', async (req, res) => {
@@ -25,7 +43,7 @@ router.get('/', async (req, res) => {
       time: trip.time,
       price: trip.price,
       seats: trip.seats,
-      bookedSeats: Array(trip.booked_count).fill(0).map((_, i) => i + 1), // Create array of booked seat IDs for compatibility
+      bookedCount: Number(trip.booked_count),
     }))
 
     res.json(trips)
@@ -35,12 +53,10 @@ router.get('/', async (req, res) => {
 })
 
 // POST /api/trips  (тільки адмін)
-router.post('/', adminMiddleware, async (req, res) => {
+router.post('/', adminMiddleware, tripValidators, async (req, res) => {
+  if (rejectInvalid(req, res)) return
   try {
     const { routeId, date, time, price, seats } = req.body
-    if (!routeId || !date || !time || !price || !seats) {
-      return res.status(400).json({ error: 'Заповніть всі поля' })
-    }
     const result = await db.execute({
       sql: 'INSERT INTO trips (route_id, date, time, price, seats) VALUES (?, ?, ?, ?, ?)',
       args: [routeId, date, time, price, seats]
@@ -66,7 +82,7 @@ router.post('/', adminMiddleware, async (req, res) => {
       time: trip.time,
       price: trip.price,
       seats: trip.seats,
-      bookedSeats: Array(trip.booked_count).fill(0).map((_, i) => i + 1),
+      bookedCount: Number(trip.booked_count),
     })
   } catch (e) {
     res.status(500).json({ error: 'Помилка сервера' })
@@ -74,7 +90,8 @@ router.post('/', adminMiddleware, async (req, res) => {
 })
 
 // PUT /api/trips/:id  (тільки адмін)
-router.put('/:id', adminMiddleware, async (req, res) => {
+router.put('/:id', adminMiddleware, tripValidators, async (req, res) => {
+  if (rejectInvalid(req, res)) return
   try {
     const { routeId, date, time, price, seats } = req.body
     await db.execute({
@@ -102,7 +119,7 @@ router.put('/:id', adminMiddleware, async (req, res) => {
       time: trip.time,
       price: trip.price,
       seats: trip.seats,
-      bookedSeats: Array(trip.booked_count).fill(0).map((_, i) => i + 1),
+      bookedCount: Number(trip.booked_count),
     })
   } catch (e) {
     res.status(500).json({ error: 'Помилка сервера' })

@@ -1,8 +1,27 @@
 const express = require('express')
+const { body, validationResult } = require('express-validator')
 const { db } = require('../db')
 const { adminMiddleware } = require('../middleware')
 
 const router = express.Router()
+
+const routeValidators = [
+  body('from').isString().trim().notEmpty().withMessage('from is required'),
+  body('to').isString().trim().notEmpty().withMessage('to is required'),
+  body('distance').isString().trim().notEmpty().withMessage('distance is required'),
+  body('duration').isString().trim().notEmpty().withMessage('duration is required'),
+  body('stops').optional().isArray().withMessage('stops must be an array'),
+  body('stops.*').optional().isString().withMessage('each stop must be a string'),
+]
+
+function rejectInvalid(req, res) {
+  const errors = validationResult(req)
+  if (!errors.isEmpty()) {
+    res.status(400).json({ errors: errors.array() })
+    return true
+  }
+  return false
+}
 
 function parseRoute(row) {
   return {
@@ -26,12 +45,10 @@ router.get('/', async (req, res) => {
 })
 
 // POST /api/routes  (тільки адмін)
-router.post('/', adminMiddleware, async (req, res) => {
+router.post('/', adminMiddleware, routeValidators, async (req, res) => {
+  if (rejectInvalid(req, res)) return
   try {
     const { from, to, distance, duration, stops = [] } = req.body
-    if (!from || !to || !distance || !duration) {
-      return res.status(400).json({ error: 'Заповніть всі обов\'язкові поля' })
-    }
     const result = await db.execute({
       sql: 'INSERT INTO routes (from_city, to_city, distance, duration, stops) VALUES (?, ?, ?, ?, ?)',
       args: [from, to, distance, duration, JSON.stringify(stops)]
@@ -43,7 +60,8 @@ router.post('/', adminMiddleware, async (req, res) => {
 })
 
 // PUT /api/routes/:id  (тільки адмін)
-router.put('/:id', adminMiddleware, async (req, res) => {
+router.put('/:id', adminMiddleware, routeValidators, async (req, res) => {
+  if (rejectInvalid(req, res)) return
   try {
     const { from, to, distance, duration, stops = [] } = req.body
     await db.execute({

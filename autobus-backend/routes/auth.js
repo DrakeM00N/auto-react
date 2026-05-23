@@ -5,6 +5,7 @@ const crypto = require('crypto')
 const { db } = require('../db')
 const { authMiddleware } = require('../middleware')
 const { body, validationResult } = require('express-validator')
+const { OAuth2Client } = require('google-auth-library')
 
 // Generate a reset token
 function generateResetToken() {
@@ -12,14 +13,18 @@ function generateResetToken() {
 }
 
 const router = express.Router()
-const SECRET = process.env.JWT_SECRET || 'autobus-secret-key'
+const SECRET = process.env.JWT_SECRET
+const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
+const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID)
 
 // POST /api/auth/register
 router.post('/register',
   [
     body('name').trim().notEmpty().withMessage('Name is required'),
     body('email').isEmail().normalizeEmail().withMessage('Valid email is required'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long')
+    body('password')
+      .isLength({ min: 8 }).withMessage('Password must be at least 8 characters long')
+      .matches(/\d/).withMessage('Password must contain at least one digit')
   ],
   async (req, res) => {
     try {
@@ -47,7 +52,7 @@ router.post('/register',
     const user = { id: Number(result.lastInsertRowid), name: name.trim(), email: email.toLowerCase() }
     const token = jwt.sign(user, SECRET, { expiresIn: '7d' })
 
-    res.json({ token, user })
+    res.json({ token, user: { ...user, hasPassword: true } })
   } catch (e) {
     res.status(500).json({ error: 'Помилка сервера' })
   }
@@ -82,7 +87,7 @@ router.post('/login',
       return res.status(401).json({ error: 'Невірний email або пароль' })
     }
 
-    const now = new Date().toLocaleString('uk-UA')
+    const now = new Date().toISOString()
     await db.execute({
       sql: 'UPDATE users SET last_login = ? WHERE id = ?',
       args: [now, user.id]
@@ -91,8 +96,82 @@ router.post('/login',
     const userData = { id: user.id, name: user.name, email: user.email, lastLogin: now }
     const token = jwt.sign(userData, SECRET, { expiresIn: '7d' })
 
-    res.json({ token, user: userData })
+    res.json({ token, user: { ...userData, hasPassword: true } })
   } catch (e) {
+    res.status(500).json({ error: 'Помилка сервера' })
+  }
+})
+
+// POST /api/auth/google
+router.post('/google', async (req, res) => {
+  try {
+    const { credential } = req.body
+    if (!credential) {
+      return res.status(400).json({ error: 'Відсутній токен Google' })
+    }
+    if (!GOOGLE_CLIENT_ID) {
+      return res.status(500).json({ error: 'Вхід через Google не налаштовано на сервері' })
+    }
+
+    // Verify the Google ID token (checks signature, audience, issuer, expiry)
+    let payload
+    try {
+      const ticket = await googleClient.verifyIdToken({
+        idToken: credential,
+        audience: GOOGLE_CLIENT_ID,
+      })
+      payload = ticket.getPayload()
+    } catch (e) {
+      return res.status(401).json({ error: 'Недійсний токен Google' })
+    }
+
+    if (!payload.email || payload.email_verified !== true) {
+      return res.status(401).json({ error: 'Google не підтвердив цю електронну адресу' })
+    }
+
+    const email = payload.email.toLowerCase()
+    const googleId = payload.sub
+    const name = (payload.name || '').trim() || email
+
+    let userResult = await db.execute({
+      sql: 'SELECT * FROM users WHERE email = ?',
+      args: [email]
+    })
+    let user = userResult.rows[0]
+
+    if (user) {
+      // Existing account with this email — link the Google identity if not linked yet
+      if (!user.google_id) {
+        await db.execute({
+          sql: 'UPDATE users SET google_id = ? WHERE id = ?',
+          args: [googleId, user.id]
+        })
+      }
+    } else {
+      // First contact via Google — create a Google-only account (no password)
+      const result = await db.execute({
+        sql: 'INSERT INTO users (name, email, google_id) VALUES (?, ?, ?)',
+        args: [name, email, googleId]
+      })
+      userResult = await db.execute({
+        sql: 'SELECT * FROM users WHERE id = ?',
+        args: [Number(result.lastInsertRowid)]
+      })
+      user = userResult.rows[0]
+    }
+
+    const now = new Date().toISOString()
+    await db.execute({
+      sql: 'UPDATE users SET last_login = ? WHERE id = ?',
+      args: [now, user.id]
+    })
+
+    const userData = { id: user.id, name: user.name, email: user.email, lastLogin: now }
+    const token = jwt.sign(userData, SECRET, { expiresIn: '7d' })
+
+    res.json({ token, user: { ...userData, hasPassword: !!user.password } })
+  } catch (e) {
+    console.error('Error in google auth:', e)
     res.status(500).json({ error: 'Помилка сервера' })
   }
 })
@@ -118,7 +197,6 @@ router.post('/request-reset',
     })
     if (userResult.rows.length === 0) {
       // Don't reveal that email doesn't exist - for security
-      console.log(`Password reset requested for non-existent email: ${email}`)
       return res.json({ success: true, message: 'If email exists, reset instructions have been sent' })
     }
 
@@ -126,15 +204,19 @@ router.post('/request-reset',
     const token = generateResetToken()
     const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes
 
-    // Store reset token in database
     await db.execute({
       sql: 'INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)',
       args: [email.toLowerCase(), token, expiresAt]
     })
 
-    // In production, send email with reset link
-    // For now, log the token (would be sent via email)
-    console.log(`Password reset token for ${email}: ${token}`)
+    // No email transport is wired up. In production, refuse to operate
+    // rather than silently dropping the token (would leak via dev logs
+    // and let any log-reader take over accounts).
+    if (process.env.NODE_ENV === 'production') {
+      console.error('Password reset requested but no email transport configured')
+      return res.status(503).json({ error: 'Password reset is not available right now' })
+    }
+    console.log(`[dev] Password reset token for ${email}: ${token}`)
 
     res.json({ success: true, message: 'If email exists, reset instructions have been sent' })
   } catch (e) {
@@ -185,7 +267,9 @@ router.post('/reset-password', async (req, res) => {
 router.post('/change-password',
   [
     body('currentPassword').notEmpty().withMessage('Current password is required'),
-    body('newPassword').isLength({ min: 6 }).withMessage('New password must be at least 6 characters long')
+    body('newPassword')
+      .isLength({ min: 8 }).withMessage('New password must be at least 8 characters long')
+      .matches(/\d/).withMessage('New password must contain at least one digit')
   ],
   authMiddleware, async (req, res) => {
     try {
@@ -201,6 +285,10 @@ router.post('/change-password',
     })
     const user = userResult.rows[0]
     if (!user) return res.status(404).json({ error: 'Користувача не знайдено' })
+
+    if (!user.password) {
+      return res.status(400).json({ error: 'Цей акаунт використовує вхід через Google і не має пароля' })
+    }
 
     const valid = await bcrypt.compare(currentPassword, user.password)
     if (!valid) return res.status(400).json({ error: 'Невірний поточний пароль' })

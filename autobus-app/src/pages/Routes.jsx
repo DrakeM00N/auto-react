@@ -1,6 +1,6 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useApp } from '../context/AppContext'
+import { useData } from '../context/DataContext'
 
 const UKRAINE_CITIES = [
   'Київ', 'Харків', 'Дніпро', 'Одеса', 'Запоріжжя', 'Львів', 'Кривий Ріг',
@@ -11,7 +11,7 @@ const UKRAINE_CITIES = [
 ].sort()
 
 function RoutesPage() {
-  const { routes } = useApp()
+  const { routes } = useData()
   const navigate = useNavigate()
   const [fromFilter, setFromFilter] = useState('')
   const [toFilter, setToFilter] = useState('')

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
-import { useApp } from '../context/AppContext'
+import { useData } from '../context/DataContext'
 
 const FAQ_ITEMS = [
   {
@@ -86,7 +86,7 @@ function FaqItem({ item }) {
 }
 
 function Home() {
-  const { routes, trips } = useApp()
+  const { routes, trips } = useData()
   const upcomingTrips = trips.slice(0, 3)
 
   return (
@@ -187,7 +187,7 @@ function Home() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {upcomingTrips.map(trip => {
             const route = routes.find(r => r.id === trip.routeId)
-            const freeSeats = trip.seats - (trip.bookedSeats?.length || 0)
+            const freeSeats = trip.seats - (trip.bookedCount || 0)
             return (
               <div key={trip.id} style={{
                 display: 'flex',
