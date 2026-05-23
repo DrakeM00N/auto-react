@@ -1,8 +1,16 @@
 import { Link, useSearchParams } from 'react-router-dom'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useData } from '../context/DataContext'
 import { track } from '../lib/analytics'
-import { formatDate, isDeparted } from '../lib/format'
+import { formatDate, isDeparted, todayLocalISO } from '../lib/format'
+
+// CSS-only hover effect on the "Забронювати" icon. Inline styles can't
+// express :hover; mounting a once-per-page <style> tag is the lightest
+// solution that doesn't pull in a CSS framework.
+const HOVER_CSS = `
+.icon-cta svg { transition: transform 0.2s ease; }
+.icon-cta:hover svg { transform: translateX(4px); }
+`
 
 // One toggleable "Детальніше" panel per trip card. Renders only fields that
 // were actually filled in, so old trips with no extended data don't show
@@ -134,13 +142,19 @@ function Schedule() {
   const { trips, routes } = useData()
   const [searchParams, setSearchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
+  const resultsRef = useRef(null)
 
   // Filters live in the URL so they survive refresh and can be linked to.
   // Reading them straight from searchParams (no local mirror) is what
   // removes the set-state-in-effect anti-pattern.
   const filterFrom = searchParams.get('from') || ''
   const filterTo = searchParams.get('to') || ''
-  const filterDate = searchParams.get('date') || ''
+  // No `date` param? Default to today (computed at read time, no effect,
+  // no URL write). An explicit value in the URL — even if empty after the
+  // user clears the picker — still wins on the next render because we
+  // remove the param from the URL when value is '' (see updateFilter).
+  const today = todayLocalISO()
+  const filterDate = searchParams.get('date') ?? today
 
   const updateFilter = (key, value) => {
     setSearchParams(prev => {
@@ -212,6 +226,26 @@ function Schedule() {
     return () => clearTimeout(timer)
   }, [filterFrom, filterTo, filterDate, filteredTrips.length])
 
+  // Explicit search action — fired by the "Знайти" button and by Enter
+  // in any of the filter inputs. Filtering is already reactive, so this
+  // mainly forces an immediate funnel event and scrolls to results.
+  const handleSearch = () => {
+    track('search_performed', {
+      from: filterFrom || '',
+      to: filterTo || '',
+      date: filterDate || '',
+      results_count: filteredTrips.length,
+    })
+    resultsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  const onFiltersKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSearch()
+    }
+  }
+
   const selectStyle = {
     padding: '14px 16px',
     borderRadius: '14px',
@@ -222,6 +256,7 @@ function Schedule() {
 
   return (
     <div style={{ padding: '40px 2rem', maxWidth: '1000px', margin: '0 auto' }}>
+      <style>{HOVER_CSS}</style>
       <section style={{ marginBottom: '32px' }}>
         <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem', marginBottom: '12px' }}>
           Розклад рейсів
@@ -232,7 +267,7 @@ function Schedule() {
       </section>
 
       <section style={{ marginBottom: '28px', display: 'grid', gap: '14px' }}>
-        <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
+        <div onKeyDown={onFiltersKeyDown} style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', alignItems: 'end' }}>
 
           <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
             Пошук маршруту
@@ -269,17 +304,35 @@ function Schedule() {
             <input
               type="date"
               value={filterDate}
+              min={today}
               onChange={e => setFilterDate(e.target.value)}
               style={selectStyle}
             />
           </label>
+
+          <button
+            type="button"
+            onClick={handleSearch}
+            style={{
+              padding: '14px 18px',
+              borderRadius: '14px',
+              border: 'none',
+              background: 'var(--accent)',
+              color: '#1A1814',
+              fontWeight: 700,
+              cursor: 'pointer',
+              minHeight: '50px',
+            }}
+          >
+            Знайти
+          </button>
         </div>
         <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>
           Показано {filteredTrips.length} з {trips.length} рейсів.
         </div>
       </section>
 
-      <div style={{ display: 'grid', gap: '18px' }}>
+      <div ref={resultsRef} style={{ display: 'grid', gap: '18px' }}>
         {orderedTrips.length === 0 ? (
           <div style={{ padding: '24px', background: 'var(--bg2)', borderRadius: '16px', border: '1px solid var(--border)' }}>
             Немає доступних рейсів за обраними параметрами.
@@ -357,6 +410,7 @@ function Schedule() {
                   ) : (
                     <Link
                       to={`/booking?tripId=${trip.id}`}
+                      className="icon-cta"
                       style={{
                         background: 'var(--accent)',
                         color: '#1A1814',
@@ -364,9 +418,16 @@ function Schedule() {
                         borderRadius: '10px',
                         fontWeight: 600,
                         textDecoration: 'none',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '8px',
                       }}
                     >
                       Забронювати
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                        <line x1="5" y1="12" x2="19" y2="12" />
+                        <polyline points="12 5 19 12 12 19" />
+                      </svg>
                     </Link>
                   )}
                 </div>

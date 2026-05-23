@@ -8,6 +8,14 @@
 
 const KYIV_TZ = 'Europe/Kyiv'
 
+// Today in the user's local TZ, formatted as 'YYYY-MM-DD'. Used for date-
+// input defaults and the `min` attribute that greys out past days in the
+// native calendar.
+export function todayLocalISO() {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 // 'YYYY-MM-DD' → 'DD-MM-YYYY'. Returns the input untouched on a malformed value,
 // so a stray null/empty string never throws in the UI.
 export function formatDate(iso) {

@@ -1,6 +1,13 @@
 import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext'
+import { todayLocalISO } from '../lib/format'
+
+// Shared CSS for the icon hover effect — see Schedule.jsx for the same rule.
+const HOVER_CSS = `
+.icon-cta svg { transition: transform 0.2s ease; }
+.icon-cta:hover svg { transform: translateX(4px); }
+`
 
 const UKRAINE_CITIES = [
   'Київ', 'Харків', 'Дніпро', 'Одеса', 'Запоріжжя', 'Львів', 'Кривий Ріг',
@@ -15,7 +22,9 @@ function RoutesPage() {
   const navigate = useNavigate()
   const [fromFilter, setFromFilter] = useState('')
   const [toFilter, setToFilter] = useState('')
-  const today = new Date().toISOString().split('T')[0]
+  // todayLocalISO uses local time, not UTC — important near UTC midnight in
+  // Kyiv. Same helper as Schedule.jsx so the two pages can't drift.
+  const today = todayLocalISO()
   const [travelDate, setTravelDate] = useState(today)
   const [passengers, setPassengers] = useState('1')
 
@@ -45,6 +54,13 @@ function RoutesPage() {
     )
   }
 
+  const onFiltersKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      handleSearch()
+    }
+  }
+
   const selectStyle = {
     padding: '14px 16px',
     borderRadius: '16px',
@@ -55,6 +71,7 @@ function RoutesPage() {
 
   return (
     <div style={{ padding: '40px 2rem', maxWidth: '980px', margin: '0 auto' }}>
+      <style>{HOVER_CSS}</style>
       <section style={{ marginBottom: '28px' }}>
         <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem', marginBottom: '12px' }}>
           Каталог маршрутів
@@ -65,7 +82,7 @@ function RoutesPage() {
       </section>
 
       <section style={{ marginBottom: '28px' }}>
-        <div style={{ display: 'grid', gap: '16px', padding: '22px', borderRadius: '24px', background: 'var(--bg2)', border: '1px solid var(--border)', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', alignItems: 'end' }}>
+        <div onKeyDown={onFiltersKeyDown} style={{ display: 'grid', gap: '16px', padding: '22px', borderRadius: '24px', background: 'var(--bg2)', border: '1px solid var(--border)', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', alignItems: 'end' }}>
 
           <label style={{ display: 'flex', flexDirection: 'column', gap: '8px', color: 'var(--text2)' }}>
             Звідки
@@ -92,6 +109,7 @@ function RoutesPage() {
             <input
               type="date"
               value={travelDate}
+              min={today}
               onChange={e => setTravelDate(e.target.value)}
               style={selectStyle}
             />
@@ -111,7 +129,7 @@ function RoutesPage() {
           <button
             type="button"
             onClick={handleSearch}
-            style={{ padding: '16px 18px', borderRadius: '18px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 700, cursor: 'pointer', minHeight: '58px' }}
+            style={{ padding: '14px 18px', borderRadius: '14px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 700, cursor: 'pointer', minHeight: '50px' }}
           >
             Знайти квиток
           </button>
@@ -147,10 +165,12 @@ function RoutesPage() {
                 <span style={{ color: 'var(--text2)' }}>Маршрут №{route.id}</span>
                 <Link
                   to="/schedule"
+                  className="icon-cta"
                   style={{
                     display: 'inline-flex',
                     alignItems: 'center',
                     justifyContent: 'center',
+                    gap: '8px',
                     padding: '12px 20px',
                     background: 'var(--accent)',
                     color: '#1A1814',
@@ -160,6 +180,10 @@ function RoutesPage() {
                   }}
                 >
                   Переглянути рейси
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <line x1="5" y1="12" x2="19" y2="12" />
+                    <polyline points="12 5 19 12 12 19" />
+                  </svg>
                 </Link>
               </div>
             </article>
