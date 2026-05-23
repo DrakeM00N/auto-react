@@ -1,8 +1,10 @@
 const express = require('express')
 const { db } = require('../db')
 const { adminMiddleware } = require('../middleware')
+const { logger } = require('../logger')
 
 const router = express.Router()
+const log = logger('users')
 
 // GET /api/users  (тільки адмін)
 router.get('/', adminMiddleware, async (req, res) => {
@@ -37,7 +39,7 @@ async function setRole(req, res, role) {
     await db.execute({ sql: 'UPDATE users SET role = ? WHERE id = ?', args: [role, id] })
     res.json({ success: true })
   } catch (e) {
-    console.error('Error setting user role:', e)
+    log.error('setRole:', e)
     res.status(500).json({ error: 'Помилка сервера' })
   }
 }

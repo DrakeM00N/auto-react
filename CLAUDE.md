@@ -9,31 +9,29 @@ This is a full-stack application with two main parts:
 - `autobus-backend`: Backend API server built with Node.js and Express
 
 ### Frontend (autobus-app)
-- Technology stack: React 19, React Router DOM, Vite
-- Entry point: `index.html` -> `src/main.jsx` (implied by Vite setup)
-- State management: Uses React Context (`src/context/AppContext.js`) for global state
-- API communication: Uses `fetch` with base URL defined in constants (see Booking.jsx line 5)
-- Components organized in `src/pages/` and `src/components/`
-- Styles use CSS variables defined in `index.css`
+- Technology stack: React 19, React Router DOM v7, Vite 8, `@react-oauth/google`, `qrcode.react`.
+- Entry point: `index.html` → `src/main.jsx` → `src/App.jsx` (BrowserRouter, lazy-loaded routes wrapped in Suspense).
+- State management: three React Contexts in `src/context/` — `AuthContext` (currentUser + auth mutators), `DataContext` (routes/trips/bookings/users + their mutators), `ThemeContext` (theme + toggle). Consumers subscribe to only what they need to keep re-renders scoped.
+- API communication: `src/lib/api.js` exports `apiRequest(method, path, body?)` and `BASE`. Reads the JWT from localStorage on every call; throws an Error whose `message` carries the backend's error message so UI code can render `e.message`.
+- Analytics tracking: `src/lib/analytics.js` + the `<RouteTracker />` component fire whitelisted events via `navigator.sendBeacon` to `/api/analytics/track`.
+- Components in `src/components/`, pages in `src/pages/`. Styles use CSS variables defined in `index.css`.
 
 ### Backend (autobus-backend)
-- Technology stack: Node.js, Express, SQLite (via @libsql/client)
-- Entry point: `server.js`
-- Database: SQLite file `autobus.db` initialized via `db.js`
-- Route organization:
-  - `/api/auth` - authentication (login/register)
-  - `/api/routes` - bus routes management (CRUD operations)
-  - `/api/trips` - scheduled trips (includes booking/seat logic)
-  - `/api/bookings` - booking system (creation, retrieval)
-  - `/api/users` - user management
-  - `/api/payments` - payment integration (monobank acquiring / "Plata by mono")
-  - `/api/tickets` - public ticket lookup/verification by ticket code
-- Middleware: 
-  - CORS (configured in server.js)
-  - JSON parsing (express.json())
-  - Custom auth middleware (`middleware.js` - validates JWT tokens)
-  - Error handling middleware
-- Services: Business logic separated in `services/` directory (e.g., authService.js)
+- Technology stack: Node.js ≥20, Express 5, libsql (via `@libsql/client`) — local SQLite file by default; remote Turso when `DATABASE_URL` + `DATABASE_AUTH_TOKEN` are set.
+- Entry point: `server.js`. Refuses to start if `JWT_SECRET` is unset.
+- Database: `autobus-backend/autobus.db` initialized via `db.js`. Schema migrations use `addColumnIfMissing` for evolution (new columns added without dropping the file).
+- Route organization (all under `/api`):
+  - `/auth` — register / login / Google OAuth / password reset / change-password
+  - `/routes` — bus routes CRUD (admin)
+  - `/trips` — scheduled trips CRUD (admin)
+  - `/bookings` — admin-only booking creation; per-user `/my`; PUT/DELETE for own booking
+  - `/users` — admin list + promote/demote
+  - `/payments` — monobank invoice creation, webhook, status polling
+  - `/tickets/:code` — public ticket lookup (ticket code is the bearer credential)
+  - `/analytics` — public `/track` (rate-limited beacon), admin `/funnel` and `/search-demand`
+- Middleware: CORS allowing one or more origins from `FRONTEND_URL` (comma-separated), raw-body capture for monobank webhook signature verification, `express.json()`, custom `authMiddleware` / `adminMiddleware` in `middleware.js`.
+- Services in `services/`: `monobank.js` (acquiring API + webhook signature verification), `seats.js` (seat-hold count), `ticketing.js` (issue-ticket transaction, ticket code generation).
+- Logger: `logger.js` exports `logger(scope)` — all backend logging should go through it; respects `LOG_LEVEL` env var.
 
 ## Development Commands
 
@@ -58,7 +56,7 @@ From inside `autobus-backend`:
 2. **Make frontend changes**:
    - Edit files in `autobus-app/src/`
    - Vite provides hot module replacement during `npm run dev`
-   - Context updates in `src/context/AppContext.js` affect all consuming components
+   - Each of the three contexts (`Auth`, `Data`, `Theme`) only re-renders consumers that subscribe to it via the matching hook (`useAuth`/`useData`/`useTheme`)
 
 3. **Make backend changes**:
    - Edit routes in `autobus-backend/routes/` for endpoint logic
@@ -80,13 +78,20 @@ From inside `autobus-backend`:
 
 ## Environment Variables
 
-Backend requires a `.env` file in `autobus-backend/` with at least:
-- `PORT=3001` (default backend port)
-- `JWT_SECRET` (for signing/verifying authentication tokens)
-- `MONOBANK_TOKEN` (monobank acquiring token for payment processing; test token from api.monobank.ua)
-- Database configuration (if using remote Turso/LibSQL - currently using local SQLite)
+Backend `.env` (see `autobus-backend/.env.example`):
+- `JWT_SECRET` — **required**. Server exits on startup if unset.
+- `PORT` — defaults to `3001`.
+- `MONOBANK_TOKEN` — acquiring token from `api.monobank.ua`. Payments are inert without it (a warning logs at startup).
+- `BACKEND_PUBLIC_URL` — publicly reachable URL of this backend, used for the monobank webhook. Empty in local dev (the polling fallback still works).
+- `FRONTEND_URL` — comma-separated list of origins allowed by CORS. Defaults to `http://localhost:5173`.
+- `ANALYTICS_IP_SALT` — salt for hashing visitor IPs in the `events` table.
+- `GOOGLE_CLIENT_ID` — OAuth web client ID. Empty disables the "Continue with Google" button gracefully.
+- `LOG_LEVEL` — `debug`/`info`/`warn`/`error`. Defaults to `info`.
+- `DATABASE_URL` + `DATABASE_AUTH_TOKEN` — set both to switch from the local SQLite file to a remote Turso/libsql database.
 
-Frontend uses Vite's environment variables prefixed with `VITE_` if needed (currently none defined).
+Frontend `.env.local` (see `autobus-app/.env.example`):
+- `VITE_API_URL` — backend API base, defaults to `http://localhost:3001/api`.
+- `VITE_GOOGLE_CLIENT_ID` — must match the backend's `GOOGLE_CLIENT_ID` for Google sign-in to work.
 
 ## Testing
 
@@ -100,8 +105,8 @@ Currently no test scripts are defined. To add testing:
 
 ## Important Notes
 
-- The frontend proxy is not configured in vite.config.js; ensure backend is running on expected port (3001) for API calls
-- CORS is enabled for all origins (`*`) in backend - adjust for production to specific domains
+- The frontend proxy is not configured in `vite.config.js`; ensure backend is running on the port the frontend's `VITE_API_URL` points to (default `3001`).
+- CORS is restricted to the origins listed in `FRONTEND_URL` (comma-separated).
 - Booking & payment flow:
   1. User selects a trip and fills passenger info on the Booking page
   2. Frontend POSTs to `/api/payments/checkout`; backend checks seat availability,

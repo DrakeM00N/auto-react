@@ -2,7 +2,11 @@
   "name": "autobus-app",
   "private": true,
   "version": "0.0.0",
+  "description": "React + Vite frontend for the AutoRace bus-ticket booking app.",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

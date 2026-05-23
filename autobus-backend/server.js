@@ -1,6 +1,8 @@
 require('dotenv').config()
 
 if (!process.env.JWT_SECRET) {
+  // Pre-logger startup check — logger.js is fine to load this early, but
+  // stderr direct is fine too and avoids any future logger config concerns.
   console.error('❌ JWT_SECRET is not set. Refusing to start with an unsigned/weak token secret.')
   process.exit(1)
 }
@@ -9,6 +11,9 @@ const express = require('express')
 const cors = require('cors')
 const rateLimit = require('express-rate-limit')
 const { initDB } = require('./db')
+const { logger } = require('./logger')
+
+const log = logger('server')
 
 const app = express()
 
@@ -59,10 +64,10 @@ const PORT = process.env.PORT || 3001
 
 initDB().then(() => {
   app.listen(PORT, () => {
-    console.log(`🚀 Сервер запущено: http://localhost:${PORT}`)
-    console.log(`📋 API доступне на: http://localhost:${PORT}/api`)
+    log.info(`Server listening on http://localhost:${PORT}`)
+    log.info(`API base: http://localhost:${PORT}/api`)
   })
 }).catch(err => {
-  console.error('❌ Помилка запуску:', err)
+  log.error('Startup failed:', err)
   process.exit(1)
 })

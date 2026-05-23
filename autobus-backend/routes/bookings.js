@@ -2,81 +2,52 @@ const express = require('express')
 const { body, validationResult } = require('express-validator')
 const { db } = require('../db')
 const { authMiddleware, adminMiddleware } = require('../middleware')
+const { logger } = require('../logger')
 
 const router = express.Router()
+const log = logger('bookings')
 
-// POST /api/bookings  (можна без авторизації)
-router.post('/', async (req, res) => {
+// POST /api/bookings  (admin only — public bookings go through /api/payments/checkout)
+router.post('/', adminMiddleware, async (req, res) => {
   try {
-    const { tripId, passengerName, passengerPhone, boardingPoint, alightingPoint } = req.body
+    const { tripId, userId, passengerName, passengerPhone, boardingPoint, alightingPoint } = req.body
 
     if (!tripId || !passengerName || !passengerPhone) {
       return res.status(400).json({ error: 'Заповніть всі поля' })
     }
 
-    // Use transaction to prevent race condition when booking
-    await db.execute('BEGIN TRANSACTION')
+    const tripRes = await db.execute({ sql: 'SELECT seats FROM trips WHERE id = ?', args: [tripId] })
+    const trip = tripRes.rows[0]
+    if (!trip) return res.status(404).json({ error: 'Рейс не знайдено' })
 
-    try {
-      // Lock the trip row for update to prevent race conditions
-      const tripRes = await db.execute({ sql: 'SELECT * FROM trips WHERE id = ?', args: [tripId] })
-      const trip = tripRes.rows[0]
-      if (!trip) {
-        await db.execute('ROLLBACK')
-        return res.status(404).json({ error: 'Рейс не знайдено' })
-      }
-
-      // Check available seats within the transaction
-      const bookingsRes = await db.execute({ sql: 'SELECT COUNT(*) as cnt FROM bookings WHERE trip_id = ?', args: [tripId] })
-      const booked = bookingsRes.rows[0].cnt
-      if (booked >= trip.seats) {
-        await db.execute('ROLLBACK')
-        return res.status(400).json({ error: 'Місць немає' })
-      }
-
-      // Визначаємо userId з токена якщо є
-      let resolvedUserId = null
-      const header = req.headers.authorization
-      if (header && header.startsWith('Bearer ')) {
-        try {
-          const jwt = require('jsonwebtoken')
-          const user = jwt.verify(header.slice(7), process.env.JWT_SECRET || 'autobus-secret-key')
-          resolvedUserId = user.id
-        } catch (err) {
-          console.warn('JWT verification failed:', err.message)
-          // Continue with resolvedUserId = null (guest booking)
-        }
-      }
-
-      // Ensure string values for text fields to avoid .trim() errors
-      const safePassengerName = String(passengerName).trim()
-      const safePassengerPhone = String(passengerPhone).trim()
-      const safeBoardingPoint = String(boardingPoint).trim()
-      const safeAlightingPoint = String(alightingPoint).trim()
-
-      const result = await db.execute({
-        sql: 'INSERT INTO bookings (trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point) VALUES (?, ?, ?, ?, ?, ?)',
-        args: [tripId, resolvedUserId, safePassengerName, safePassengerPhone, safeBoardingPoint, safeAlightingPoint]
-      })
-
-      await db.execute('COMMIT')
-      res.json({ success: true, booking: { id: Number(result.lastInsertRowid) } })
-
-    } catch (e) {
-      // catch внутреннего try — откатываем транзакцию
-      await db.execute('ROLLBACK')
-      console.error('Error in POST /api/bookings:', e)
-      res.status(500).json({ error: 'Помилка сервера', message: e.message })
+    const bookingsRes = await db.execute({ sql: 'SELECT COUNT(*) as cnt FROM bookings WHERE trip_id = ?', args: [tripId] })
+    if (bookingsRes.rows[0].cnt >= trip.seats) {
+      return res.status(400).json({ error: 'Місць немає' })
     }
 
+    const safe = (v) => (typeof v === 'string' ? v.trim() : '')
+    const result = await db.execute({
+      sql: 'INSERT INTO bookings (trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point) VALUES (?, ?, ?, ?, ?, ?)',
+      args: [tripId, Number.isInteger(userId) ? userId : null, safe(passengerName), safe(passengerPhone), safe(boardingPoint), safe(alightingPoint)]
+    })
+    const bookingId = Number(result.lastInsertRowid)
+
+    // Defensive seat re-count: shrinks the race window when two admins
+    // create the last booking concurrently. Not race-free.
+    const recheck = await db.execute({ sql: 'SELECT COUNT(*) as cnt FROM bookings WHERE trip_id = ?', args: [tripId] })
+    if (recheck.rows[0].cnt > trip.seats) {
+      await db.execute({ sql: 'DELETE FROM bookings WHERE id = ?', args: [bookingId] })
+      return res.status(400).json({ error: 'Місць немає' })
+    }
+
+    res.json({ success: true, booking: { id: bookingId } })
   } catch (e) {
-    // catch внешнего try — ошибки валидации и прочее
-    console.error('Error in POST /api/bookings (outer):', e)
-    res.status(500).json({ error: 'Помилка сервера', message: e.message })
+    log.error('POST /api/bookings:', e)
+    res.status(500).json({ error: 'Помилка сервера' })
   }
 })
 
-// GET /api/bookings/my  (тільки авторизований)
+// GET /api/bookings/my  (auth required)
 router.get('/my', authMiddleware, async (req, res) => {
   try {
     const result = await db.execute({
@@ -95,12 +66,12 @@ router.get('/my', authMiddleware, async (req, res) => {
       createdAt: b.created_at,
     })))
   } catch (e) {
-    console.error(e)
-    res.status(500).json({ error: e.message })
+    log.error('GET /api/bookings/my:', e)
+    res.status(500).json({ error: 'Помилка сервера' })
   }
 })
 
-// GET /api/bookings  (тільки адмін — всі бронювання)
+// GET /api/bookings  (admin — all bookings)
 router.get('/', adminMiddleware, async (req, res) => {
   try {
     const result = await db.execute('SELECT * FROM bookings ORDER BY created_at DESC')
@@ -116,11 +87,12 @@ router.get('/', adminMiddleware, async (req, res) => {
       createdAt: b.created_at,
     })))
   } catch (e) {
+    log.error('GET /api/bookings:', e)
     res.status(500).json({ error: 'Помилка сервера' })
   }
 })
 
-// PUT /api/bookings/:id  (редагування власного бронювання)
+// PUT /api/bookings/:id  (edit own booking)
 router.put('/:id',
   authMiddleware,
   [
@@ -148,12 +120,12 @@ router.put('/:id',
       })
       res.json({ success: true })
     } catch (e) {
-      console.error('Error in PUT /api/bookings/:id:', e)
+      log.error('PUT /api/bookings/:id:', e)
       res.status(500).json({ error: 'Помилка сервера' })
     }
   })
 
-// DELETE /api/bookings/:id  (скасування)
+// DELETE /api/bookings/:id  (cancellation)
 router.delete('/:id', authMiddleware, async (req, res) => {
   try {
     const bookingRes = await db.execute({ sql: 'SELECT * FROM bookings WHERE id = ?', args: [req.params.id] })
@@ -167,6 +139,7 @@ router.delete('/:id', authMiddleware, async (req, res) => {
     await db.execute({ sql: 'DELETE FROM bookings WHERE id = ?', args: [req.params.id] })
     res.json({ success: true })
   } catch (e) {
+    log.error('DELETE /api/bookings/:id:', e)
     res.status(500).json({ error: 'Помилка сервера' })
   }
 })

@@ -1,6 +1,9 @@
 const crypto = require('crypto')
 const { db } = require('../db')
 const { requestInvoiceStatus } = require('./monobank')
+const { logger } = require('../logger')
+
+const log = logger('ticketing')
 
 // monobank invoice statuses that mean the money is secured / not secured.
 const PAID_STATUSES = ['success', 'hold']
@@ -125,7 +128,7 @@ async function issueTicket(orderId) {
     const seats = tripRes.rows[0] ? tripRes.rows[0].seats : 0
     const confirmed = confirmedRes.rows[0].cnt
     if (confirmed >= seats) {
-      console.warn(`[OVERBOOK] order ${orderId}: trip ${pending.trip_id} at ${confirmed}/${seats} — issuing anyway (payment received)`)
+      log.warn(`[OVERBOOK] order ${orderId}: trip ${pending.trip_id} at ${confirmed}/${seats} — issuing anyway (payment received)`)
     }
 
     const inserted = await tx.execute({

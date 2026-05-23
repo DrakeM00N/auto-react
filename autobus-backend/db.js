@@ -1,4 +1,7 @@
 const { createClient } = require('@libsql/client')
+const { logger } = require('./logger')
+
+const log = logger('db')
 
 // Local dev falls back to a SQLite file; production sets DATABASE_URL to a
 // Turso (libsql) URL plus DATABASE_AUTH_TOKEN.
@@ -144,13 +147,13 @@ async function initDB() {
         `DELETE FROM pending_bookings WHERE booking_id IS NULL AND created_at < datetime('now', '-1 day')`,
       ])
     } catch (e) {
-      console.error('Cleanup task failed:', e.message)
+      log.error('Cleanup task failed:', e.message)
     }
   }
   await cleanup()
   setInterval(cleanup, 60 * 60 * 1000).unref()
 
-  console.log('✅ Database ready')
+  log.info('Database ready')
 }
 
 module.exports = { db, initDB }

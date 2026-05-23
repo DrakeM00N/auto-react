@@ -1,4 +1,7 @@
 const crypto = require('crypto')
+const { logger } = require('../logger')
+
+const log = logger('monobank')
 
 // monobank acquiring API ("Plata by mono") — https://api.monobank.ua/docs/acquiring.html
 const API_BASE = 'https://api.monobank.ua'
@@ -43,7 +46,7 @@ async function requestInvoiceStatus(invoiceId) {
     const data = await res.json()
     return data.status || null
   } catch (e) {
-    console.error('monobank status request failed:', e.message)
+    log.error('status request failed:', e.message)
     return null
   }
 }
@@ -78,7 +81,7 @@ async function verifyWebhookSignature(rawBody, xSignBase64) {
     // The signing key may have rotated — refetch once and retry.
     return check(await getPublicKey(true))
   } catch (e) {
-    console.error('monobank webhook verification error:', e.message)
+    log.error('webhook verification error:', e.message)
     return false
   }
 }

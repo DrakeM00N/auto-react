@@ -2,8 +2,10 @@ const express = require('express')
 const crypto = require('crypto')
 const { db } = require('../db')
 const { adminMiddleware } = require('../middleware')
+const { logger } = require('../logger')
 
 const router = express.Router()
+const log = logger('analytics')
 
 // Whitelisted event names — also the funnel step order
 const EVENT_NAMES = [
@@ -74,7 +76,7 @@ router.post('/track', express.text({ type: '*/*', limit: '8kb' }), async (req, r
     res.status(204).end()
   } catch (err) {
     // Analytics must never surface an error to the client
-    console.error('analytics track error:', err.message)
+    log.error('track:', err.message)
     res.status(204).end()
   }
 })
@@ -112,7 +114,7 @@ router.get('/funnel', adminMiddleware, async (req, res) => {
 
     res.json({ rangeDays: offset === '-7 days' ? 7 : 30, steps })
   } catch (err) {
-    console.error('analytics funnel error:', err.message)
+    log.error('funnel:', err.message)
     res.status(500).json({ error: 'Помилка завантаження аналітики' })
   }
 })
@@ -154,7 +156,7 @@ router.get('/search-demand', adminMiddleware, async (req, res) => {
 
     res.json({ rows })
   } catch (err) {
-    console.error('analytics search-demand error:', err.message)
+    log.error('search-demand:', err.message)
     res.status(500).json({ error: 'Помилка завантаження аналітики' })
   }
 })

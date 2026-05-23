@@ -1,7 +1,9 @@
 const express = require('express')
 const { loadTicketByCode } = require('../services/ticketing')
+const { logger } = require('../logger')
 
 const router = express.Router()
+const log = logger('tickets')
 
 // GET /api/tickets/:code — public ticket lookup / verification.
 // The opaque ticket code is the bearer credential: whoever holds it can view
@@ -13,7 +15,7 @@ router.get('/:code', async (req, res) => {
     if (!ticket) return res.status(404).json({ error: 'Квиток не знайдено' })
     res.json(ticket)
   } catch (e) {
-    console.error('Error in GET /api/tickets/:code:', e)
+    log.error('GET /api/tickets/:code:', e)
     res.status(500).json({ error: 'Помилка сервера' })
   }
 })

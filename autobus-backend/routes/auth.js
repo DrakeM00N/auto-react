@@ -6,6 +6,9 @@ const { db } = require('../db')
 const { authMiddleware } = require('../middleware')
 const { body, validationResult } = require('express-validator')
 const { OAuth2Client } = require('google-auth-library')
+const { logger } = require('../logger')
+
+const log = logger('auth')
 
 // Generate a reset token
 function generateResetToken() {
@@ -171,7 +174,7 @@ router.post('/google', async (req, res) => {
 
     res.json({ token, user: { ...userData, hasPassword: !!user.password } })
   } catch (e) {
-    console.error('Error in google auth:', e)
+    log.error('google auth:', e)
     res.status(500).json({ error: 'Помилка сервера' })
   }
 })
@@ -213,14 +216,14 @@ router.post('/request-reset',
     // rather than silently dropping the token (would leak via dev logs
     // and let any log-reader take over accounts).
     if (process.env.NODE_ENV === 'production') {
-      console.error('Password reset requested but no email transport configured')
+      log.error('Password reset requested but no email transport configured')
       return res.status(503).json({ error: 'Password reset is not available right now' })
     }
-    console.log(`[dev] Password reset token for ${email}: ${token}`)
+    log.info(`[dev] Password reset token for ${email}: ${token}`)
 
     res.json({ success: true, message: 'If email exists, reset instructions have been sent' })
   } catch (e) {
-    console.error('Error in request-reset:', e)
+    log.error('request-reset:', e)
     res.status(500).json({ error: 'Server error' })
   }
 })
@@ -258,7 +261,7 @@ router.post('/reset-password', async (req, res) => {
 
     res.json({ success: true })
   } catch (e) {
-    console.error('Error in reset-password:', e)
+    log.error('reset-password:', e)
     res.status(500).json({ error: 'Server error' })
   }
 })
