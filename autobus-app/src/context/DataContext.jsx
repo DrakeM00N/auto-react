@@ -4,6 +4,43 @@ import { useAuth } from './AuthContext'
 
 const DataContext = createContext(null)
 
+// Normalize a trip coming back from the backend — defensively fill in the
+// extended fields with empty values so consumers can always rely on the
+// shape even on rows added before the busfor-style migration.
+function mapTrip(raw) {
+  return {
+    id: raw.id,
+    routeId: raw.routeId,
+    date: raw.date,
+    time: raw.time,
+    price: raw.price,
+    seats: raw.seats,
+    bookedCount: raw.bookedCount || 0,
+    departurePoint: raw.departurePoint || '',
+    arrivalPoint: raw.arrivalPoint || '',
+    busModel: raw.busModel || '',
+    carrier: raw.carrier || '',
+    amenities: Array.isArray(raw.amenities) ? raw.amenities : [],
+    intermediateStops: Array.isArray(raw.intermediateStops) ? raw.intermediateStops : [],
+  }
+}
+
+function tripPayload(trip) {
+  return {
+    routeId: Number(trip.routeId),
+    date: trip.date,
+    time: trip.time,
+    price: Number(trip.price),
+    seats: Number(trip.seats),
+    departurePoint: trip.departurePoint || '',
+    arrivalPoint: trip.arrivalPoint || '',
+    busModel: trip.busModel || '',
+    carrier: trip.carrier || '',
+    amenities: Array.isArray(trip.amenities) ? trip.amenities : [],
+    intermediateStops: Array.isArray(trip.intermediateStops) ? trip.intermediateStops : [],
+  }
+}
+
 export function DataProvider({ children }) {
   const { currentUser } = useAuth()
   const [routes, setRoutes] = useState([])
@@ -23,7 +60,7 @@ export function DataProvider({ children }) {
         request('GET', '/trips'),
       ])
       setRoutes(routesData)
-      setTrips(tripsData)
+      setTrips(tripsData.map(mapTrip))
 
       if (currentUser) {
         const bookingsData = await request('GET', '/bookings/my')
@@ -92,7 +129,7 @@ export function DataProvider({ children }) {
   const deleteRoute = (id) => wrap(async () => {
     await request('DELETE', `/routes/${id}`)
     setRoutes(prev => prev.filter(r => r.id !== id))
-    setTrips(await request('GET', '/trips'))
+    setTrips((await request('GET', '/trips')).map(mapTrip))
     if (currentUser?.role === 'admin') {
       setBookings(await request('GET', '/bookings'))
     }
@@ -100,23 +137,16 @@ export function DataProvider({ children }) {
   })
 
   // --- Trips ---
-  const tripPayload = (trip) => ({
-    routeId: Number(trip.routeId),
-    date: trip.date,
-    time: trip.time,
-    price: Number(trip.price),
-    seats: Number(trip.seats),
-  })
-
   const addTrip = (trip) => wrap(async () => {
     await request('POST', '/trips', tripPayload(trip))
-    setTrips(await request('GET', '/trips'))
+    const tripsData = await request('GET', '/trips')
+    setTrips(tripsData.map(mapTrip))
     return { success: true }
   })
 
   const updateTrip = (id, data) => wrap(async () => {
     const updated = await request('PUT', `/trips/${id}`, tripPayload(data))
-    setTrips(prev => prev.map(t => t.id === id ? updated : t))
+    setTrips(prev => prev.map(t => t.id === id ? mapTrip(updated) : t))
     return { success: true }
   })
 
@@ -133,7 +163,7 @@ export function DataProvider({ children }) {
   const cancelBooking = (bookingId) => wrap(async () => {
     await request('DELETE', `/bookings/${bookingId}`)
     setBookings(prev => prev.filter(b => b.id !== bookingId))
-    setTrips(await request('GET', '/trips'))
+    setTrips((await request('GET', '/trips')).map(mapTrip))
     return { success: true }
   })
 

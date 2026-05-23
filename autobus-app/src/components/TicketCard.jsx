@@ -1,4 +1,5 @@
 import { QRCodeSVG } from 'qrcode.react'
+import { formatDate } from '../lib/format'
 
 // Renders one electronic ticket from the payload returned by
 // /api/tickets/:code or /api/payments/status/:orderId.
@@ -54,7 +55,7 @@ function TicketCard({ ticket }) {
       </div>
 
       <div style={{ padding: '20px 28px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', borderBottom: '1px dashed var(--border)' }}>
-        <div><div style={labelStyle}>ДАТА</div><div style={{ fontWeight: 700 }}>{ticket.tripDate}</div></div>
+        <div><div style={labelStyle}>ДАТА</div><div style={{ fontWeight: 700 }}>{formatDate(ticket.tripDate)}</div></div>
         <div><div style={labelStyle}>ЧАС</div><div style={{ fontWeight: 700 }}>{ticket.tripTime}</div></div>
         <div><div style={labelStyle}>ПАСАЖИР</div><div style={{ fontWeight: 700 }}>{ticket.passengerName}</div></div>
         <div><div style={labelStyle}>ТЕЛЕФОН</div><div style={{ fontWeight: 700 }}>{ticket.passengerPhone}</div></div>

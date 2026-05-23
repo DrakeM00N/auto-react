@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
+import { formatDate } from '../lib/format'
 
 function Profile() {
   const { currentUser, changePassword } = useAuth()
@@ -130,7 +131,7 @@ function Profile() {
                     <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                       <div>
                         <div style={{ fontWeight: 700 }}>{route?.from} → {route?.to}</div>
-                        <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>{trip?.date} • {trip?.time}</div>
+                        <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>{formatDate(trip?.date)} • {trip?.time}</div>
                       </div>
                       <div style={{ fontWeight: 700, color: 'var(--accent)' }}>{trip?.price} грн</div>
                     </div>

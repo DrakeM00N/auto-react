@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useData } from '../context/DataContext'
+import { formatDate, isDeparted } from '../lib/format'
 
 const FAQ_ITEMS = [
   {
@@ -87,7 +88,8 @@ function FaqItem({ item }) {
 
 function Home() {
   const { routes, trips } = useData()
-  const upcomingTrips = trips.slice(0, 3)
+  // Главная — только актуальные рейсы. Прошедшие отрезаются по Києву.
+  const upcomingTrips = trips.filter(t => !isDeparted(t)).slice(0, 3)
 
   return (
     <div>
@@ -205,7 +207,7 @@ function Home() {
                     {route?.from} → {route?.to}
                   </div>
                   <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
-                    {trip.date} • відправлення о {trip.time}
+                    {formatDate(trip.date)} • відправлення о {trip.time}
                   </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '24px' }}>

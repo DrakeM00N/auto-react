@@ -2,6 +2,162 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
+import { formatDate, isDeparted } from '../lib/format'
+
+// Fixed amenity catalogue. Used by the admin checkboxes — Schedule.jsx
+// just renders whatever amenities the backend returns, so it doesn't
+// need this list at module-load time.
+const AMENITY_CATALOGUE = [
+  'Кондиціонер',
+  'Wi-Fi',
+  'Туалет',
+  'Розетки USB',
+  'Клімат-контроль',
+  'Місце для багажу',
+]
+
+const EMPTY_TRIP_FORM = {
+  routeId: '', date: '', time: '', price: '', seats: '',
+  departurePoint: '', arrivalPoint: '', busModel: '', carrier: '',
+  amenities: [], intermediateStops: [],
+}
+
+// Shared "extended trip details" block used by both the create and edit
+// forms in Admin.jsx. Keeps the markup in one place so adding a field
+// later doesn't drift between the two forms.
+function TripDetailsFields({ value, onChange, inputStyle }) {
+  const set = (patch) => onChange({ ...value, ...patch })
+
+  const toggleAmenity = (a) => {
+    const has = value.amenities.includes(a)
+    set({ amenities: has ? value.amenities.filter(x => x !== a) : [...value.amenities, a] })
+  }
+
+  const updateStop = (i, patch) => {
+    const next = value.intermediateStops.map((s, idx) => idx === i ? { ...s, ...patch } : s)
+    set({ intermediateStops: next })
+  }
+  const addStop = () => set({ intermediateStops: [...value.intermediateStops, { name: '', address: '', time: '' }] })
+  const removeStop = (i) => set({ intermediateStops: value.intermediateStops.filter((_, idx) => idx !== i) })
+
+  const sectionTitle = { fontSize: '0.9rem', color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '8px' }
+
+  return (
+    <>
+      <div style={sectionTitle}>Деталі рейсу</div>
+
+      <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr' }}>
+        <label style={{ display: 'grid', gap: '6px' }}>
+          Точка відправлення
+          <input
+            value={value.departurePoint}
+            onChange={e => set({ departurePoint: e.target.value })}
+            placeholder="вул. Шевченка, 1, автостанція"
+            style={inputStyle}
+          />
+        </label>
+        <label style={{ display: 'grid', gap: '6px' }}>
+          Точка прибуття
+          <input
+            value={value.arrivalPoint}
+            onChange={e => set({ arrivalPoint: e.target.value })}
+            placeholder="Центральна автостанція"
+            style={inputStyle}
+          />
+        </label>
+      </div>
+
+      <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr' }}>
+        <label style={{ display: 'grid', gap: '6px' }}>
+          Модель автобуса
+          <input
+            value={value.busModel}
+            onChange={e => set({ busModel: e.target.value })}
+            placeholder="Setra S 415 GT-HD"
+            style={inputStyle}
+          />
+        </label>
+        <label style={{ display: 'grid', gap: '6px' }}>
+          Перевізник
+          <input
+            value={value.carrier}
+            onChange={e => set({ carrier: e.target.value })}
+            placeholder="Prestige-bus"
+            style={inputStyle}
+          />
+        </label>
+      </div>
+
+      <div style={sectionTitle}>Зручності</div>
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+        {AMENITY_CATALOGUE.map(a => {
+          const checked = value.amenities.includes(a)
+          return (
+            <label key={a} style={{
+              display: 'flex', alignItems: 'center', gap: '8px',
+              padding: '8px 14px',
+              borderRadius: '999px',
+              border: `1px solid ${checked ? 'var(--accent)' : 'var(--border)'}`,
+              background: checked ? 'rgba(0,0,0,0)' : 'var(--bg)',
+              color: checked ? 'var(--accent)' : 'var(--text)',
+              cursor: 'pointer',
+              fontWeight: 600,
+              fontSize: '0.9rem',
+            }}>
+              <input
+                type="checkbox"
+                checked={checked}
+                onChange={() => toggleAmenity(a)}
+                style={{ accentColor: 'var(--accent)' }}
+              />
+              {a}
+            </label>
+          )
+        })}
+      </div>
+
+      <div style={sectionTitle}>Проміжні зупинки</div>
+      <div style={{ display: 'grid', gap: '10px' }}>
+        {value.intermediateStops.length === 0 && (
+          <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>Немає проміжних зупинок.</div>
+        )}
+        {value.intermediateStops.map((stop, i) => (
+          <div key={i} style={{
+            display: 'grid',
+            gap: '8px',
+            gridTemplateColumns: '1fr 1fr 100px auto',
+            alignItems: 'end',
+            padding: '12px',
+            background: 'var(--bg)',
+            border: '1px solid var(--border)',
+            borderRadius: '12px',
+          }}>
+            <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)' }}>
+              Назва
+              <input value={stop.name} onChange={e => updateStop(i, { name: e.target.value })} style={inputStyle} placeholder="Полтава" />
+            </label>
+            <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)' }}>
+              Адреса
+              <input value={stop.address} onChange={e => updateStop(i, { address: e.target.value })} style={inputStyle} placeholder="АС Полтава-1" />
+            </label>
+            <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)' }}>
+              Час
+              <input value={stop.time} onChange={e => updateStop(i, { time: e.target.value })} style={inputStyle} placeholder="11:30" />
+            </label>
+            <button type="button" onClick={() => removeStop(i)} style={{
+              padding: '10px 14px', borderRadius: '10px', border: 'none',
+              background: '#e74c3c', color: '#fff', cursor: 'pointer', fontWeight: 600,
+            }}>×</button>
+          </div>
+        ))}
+        <button type="button" onClick={addStop} style={{
+          padding: '10px 14px', borderRadius: '10px', border: '1px dashed var(--border)',
+          background: 'transparent', color: 'var(--text)', cursor: 'pointer', width: 'max-content',
+        }}>+ Додати зупинку</button>
+      </div>
+    </>
+  )
+}
 
 function Admin() {
   const { currentUser } = useAuth()
@@ -9,11 +165,11 @@ function Admin() {
 
   // Состояния для форм
   const [newRoute, setNewRoute] = useState({ from: '', to: '', distance: '', duration: '', stops: '' })
-  const [newTrip, setNewTrip] = useState({ routeId: '', date: '', time: '', price: '', seats: '' })
+  const [newTrip, setNewTrip] = useState(EMPTY_TRIP_FORM)
   const [editingRouteId, setEditingRouteId] = useState(null)
   const [editingRoute, setEditingRoute] = useState({ from: '', to: '', distance: '', duration: '', stops: '' })
   const [editingTripId, setEditingTripId] = useState(null)
-  const [editingTrip, setEditingTrip] = useState({ routeId: '', date: '', time: '', price: '', seats: '' })
+  const [editingTrip, setEditingTrip] = useState(EMPTY_TRIP_FORM)
   const [status, setStatus] = useState(null)
   const inputStyle = { padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }
 
@@ -52,9 +208,9 @@ function Admin() {
         ...newTrip,
         routeId: Number(newTrip.routeId),
         price: Number(newTrip.price),
-        seats: Number(newTrip.seats)
+        seats: Number(newTrip.seats),
       })
-      setNewTrip({ routeId: '', date: '', time: '', price: '', seats: '' })
+      setNewTrip(EMPTY_TRIP_FORM)
       setStatus({ type: 'success', message: 'Рейс додано' })
     } catch (err) {
       setStatus({ type: 'error', message: 'Не вдалось добавити рейс: ' + err.message })
@@ -97,6 +253,12 @@ function Admin() {
       time: trip.time,
       price: String(trip.price),
       seats: String(trip.seats),
+      departurePoint: trip.departurePoint || '',
+      arrivalPoint: trip.arrivalPoint || '',
+      busModel: trip.busModel || '',
+      carrier: trip.carrier || '',
+      amenities: Array.isArray(trip.amenities) ? trip.amenities : [],
+      intermediateStops: Array.isArray(trip.intermediateStops) ? trip.intermediateStops : [],
     })
     setStatus(null)
   }
@@ -108,20 +270,19 @@ function Admin() {
       return
     }
     updateTrip(editingTripId, {
+      ...editingTrip,
       routeId: Number(editingTrip.routeId),
-      date: editingTrip.date,
-      time: editingTrip.time,
       price: Number(editingTrip.price),
       seats: Number(editingTrip.seats),
     })
     setEditingTripId(null)
-    setEditingTrip({ routeId: '', date: '', time: '', price: '', seats: '' })
+    setEditingTrip(EMPTY_TRIP_FORM)
     setStatus({ type: 'success', message: 'Рейс оновлено' })
   }
 
   const handleCancelEditTrip = () => {
     setEditingTripId(null)
-    setEditingTrip({ routeId: '', date: '', time: '', price: '', seats: '' })
+    setEditingTrip(EMPTY_TRIP_FORM)
   }
 
   const handleDeleteRoute = (routeId) => {
@@ -328,6 +489,9 @@ function Admin() {
                 style={inputStyle}
               />
             </label>
+
+            <TripDetailsFields value={newTrip} onChange={setNewTrip} inputStyle={inputStyle} />
+
             <button type="submit" style={{
               padding: '12px',
               borderRadius: '8px',
@@ -488,6 +652,9 @@ function Admin() {
                           style={inputStyle}
                         />
                       </label>
+
+                      <TripDetailsFields value={editingTrip} onChange={setEditingTrip} inputStyle={inputStyle} />
+
                       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                         <button type="submit" style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600, cursor: 'pointer' }}>
                           Зберегти рейс
@@ -498,11 +665,27 @@ function Admin() {
                       </div>
                     </form>
                   ) : (
-                    <div style={{ display: 'grid', gap: '12px' }}>
+                    <div style={{ display: 'grid', gap: '12px', opacity: isDeparted(trip) ? 0.65 : 1 }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
                         <div>
-                          <div style={{ fontWeight: 700 }}>{route?.from} → {route?.to}</div>
-                          <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>{trip.date} • {trip.time}</div>
+                          <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                            <span>{route?.from} → {route?.to}</span>
+                            {isDeparted(trip) && (
+                              <span style={{
+                                fontSize: '0.7rem',
+                                letterSpacing: '0.08em',
+                                textTransform: 'uppercase',
+                                padding: '3px 8px',
+                                borderRadius: '999px',
+                                background: 'var(--border)',
+                                color: 'var(--text2)',
+                                fontWeight: 700,
+                              }}>
+                                Відправлено
+                              </span>
+                            )}
+                          </div>
+                          <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>{formatDate(trip.date)} • {trip.time}</div>
                         </div>
                         <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                           <button type="button" onClick={() => handleStartEditTrip(trip)} style={{ padding: '10px 14px', borderRadius: '10px', border: 'none', background: 'var(--bg3)', color: 'var(--text)', cursor: 'pointer' }}>
@@ -601,7 +784,7 @@ function Admin() {
                   <div style={{ display: 'grid', gap: '10px' }}>
                     <div style={{ fontWeight: 600 }}>{booking.passengerName}</div>
                     <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
-                      {route?.from} → {route?.to} • {trip?.date} {trip?.time}
+                      {route?.from} → {route?.to} • {formatDate(trip?.date)} {trip?.time}
                     </div>
                     <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
                       Телефон: {booking.passengerPhone} • Дата броні: {booking.createdAt}

@@ -2,6 +2,126 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useData } from '../context/DataContext'
 import { track } from '../lib/analytics'
+import { formatDate, isDeparted } from '../lib/format'
+
+// One toggleable "Детальніше" panel per trip card. Renders only fields that
+// were actually filled in, so old trips with no extended data don't show
+// empty sections.
+function TripDetails({ trip, route }) {
+  const [open, setOpen] = useState(false)
+
+  const hasDeparture = Boolean(trip.departurePoint || trip.arrivalPoint)
+  const hasStops = Array.isArray(trip.intermediateStops) && trip.intermediateStops.length > 0
+  const hasBusInfo = Boolean(trip.busModel || trip.carrier)
+  const hasAmenities = Array.isArray(trip.amenities) && trip.amenities.length > 0
+
+  // If nothing was filled in, the toggle has nothing to show — hide it.
+  if (!hasDeparture && !hasStops && !hasBusInfo && !hasAmenities) return null
+
+  const labelStyle = { fontSize: '0.75rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--text2)', marginBottom: '4px' }
+  const sectionStyle = { padding: '14px 16px', borderRadius: '12px', background: 'var(--bg)', border: '1px solid var(--border)' }
+
+  return (
+    <div style={{ flexBasis: '100%', marginTop: '4px' }}>
+      <button
+        type="button"
+        onClick={() => setOpen(o => !o)}
+        aria-expanded={open}
+        style={{
+          background: 'transparent',
+          border: 'none',
+          color: 'var(--accent)',
+          fontWeight: 600,
+          cursor: 'pointer',
+          padding: 0,
+          fontSize: '0.95rem',
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '6px',
+        }}
+      >
+        {open ? '▾' : '▸'} Детальніше про рейс
+      </button>
+
+      {open && (
+        <div style={{ display: 'grid', gap: '12px', marginTop: '12px' }}>
+          {hasDeparture && (
+            <div style={{ ...sectionStyle, display: 'grid', gap: '10px', gridTemplateColumns: '1fr 1fr' }}>
+              {trip.departurePoint && (
+                <div>
+                  <div style={labelStyle}>Точка відправлення</div>
+                  <div style={{ color: 'var(--text)' }}>{route?.from}</div>
+                  <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{trip.departurePoint}</div>
+                </div>
+              )}
+              {trip.arrivalPoint && (
+                <div>
+                  <div style={labelStyle}>Точка прибуття</div>
+                  <div style={{ color: 'var(--text)' }}>{route?.to}</div>
+                  <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{trip.arrivalPoint}</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {hasStops && (
+            <div style={sectionStyle}>
+              <div style={labelStyle}>Проміжні зупинки</div>
+              <div style={{ display: 'grid', gap: '8px' }}>
+                {trip.intermediateStops.map((s, i) => (
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                    <div>
+                      <div style={{ fontWeight: 600 }}>{s.name}</div>
+                      {s.address && <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{s.address}</div>}
+                    </div>
+                    {s.time && <div style={{ color: 'var(--accent)', fontWeight: 600 }}>{s.time}</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {hasBusInfo && (
+            <div style={{ ...sectionStyle, display: 'grid', gap: '10px', gridTemplateColumns: '1fr 1fr' }}>
+              {trip.busModel && (
+                <div>
+                  <div style={labelStyle}>Автобус</div>
+                  <div style={{ color: 'var(--text)' }}>{trip.busModel}</div>
+                </div>
+              )}
+              {trip.carrier && (
+                <div>
+                  <div style={labelStyle}>Перевізник</div>
+                  <div style={{ color: 'var(--text)' }}>{trip.carrier}</div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {hasAmenities && (
+            <div style={sectionStyle}>
+              <div style={labelStyle}>Зручності</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                {trip.amenities.map(a => (
+                  <span key={a} style={{
+                    padding: '6px 12px',
+                    borderRadius: '999px',
+                    border: '1px solid var(--accent)',
+                    color: 'var(--accent)',
+                    fontWeight: 600,
+                    fontSize: '0.85rem',
+                  }}>
+                    {a}
+                  </span>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
 
 const UKRAINE_CITIES = [
   'Київ', 'Харків', 'Дніпро', 'Одеса', 'Запоріжжя', 'Львів', 'Кривий Ріг',
@@ -66,6 +186,16 @@ function Schedule() {
     return routeMatch && dateMatch && searchMatch
   })
 }, [trips, routes, filterFrom, filterTo, filterDate, searchQuery])
+
+  // Прошедшие рейсы НЕ скрываем — выводим в конце списка, приглушённо.
+  // Сортировка стабильная: внутри каждой группы порядок берётся из data layer
+  // (бэкенд уже сортирует по date, time).
+  const orderedTrips = useMemo(() => {
+    const active = []
+    const past = []
+    for (const t of filteredTrips) (isDeparted(t) ? past : active).push(t)
+    return [...active, ...past]
+  }, [filteredTrips])
 
   // Track search demand: debounced so we record a settled search, not every
   // keystroke. Only fires when at least one structured filter is set.
@@ -150,13 +280,14 @@ function Schedule() {
       </section>
 
       <div style={{ display: 'grid', gap: '18px' }}>
-        {filteredTrips.length === 0 ? (
+        {orderedTrips.length === 0 ? (
           <div style={{ padding: '24px', background: 'var(--bg2)', borderRadius: '16px', border: '1px solid var(--border)' }}>
             Немає доступних рейсів за обраними параметрами.
           </div>
-        ) : filteredTrips.map(trip => {
+        ) : orderedTrips.map(trip => {
           const route = routes.find(r => r.id === trip.routeId)
           const freeSeats = trip.seats - (trip.bookedCount || 0)
+          const departed = isDeparted(trip)
 
           return (
             <article key={trip.id} style={{
@@ -168,13 +299,28 @@ function Schedule() {
               background: 'var(--bg2)',
               borderRadius: '18px',
               border: '1px solid var(--border)',
+              opacity: departed ? 0.55 : 1,
             }}>
               <div style={{ minWidth: '220px', flex: '1 1 280px' }}>
                 <div style={{ fontSize: '0.9rem', color: 'var(--accent)', marginBottom: '8px', fontWeight: 700 }}>
                   {route?.from} {route?.stops?.length ? `→ ${route.stops.join(' → ')} →` : '→'} {route?.to}
                 </div>
-                <h2 style={{ fontSize: '1.3rem', margin: 0, lineHeight: 1.2 }}>
-                  {trip.date} • {trip.time}
+                <h2 style={{ fontSize: '1.3rem', margin: 0, lineHeight: 1.2, display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <span>{formatDate(trip.date)} • {trip.time}</span>
+                  {departed && (
+                    <span style={{
+                      fontSize: '0.7rem',
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      padding: '4px 10px',
+                      borderRadius: '999px',
+                      background: 'var(--border)',
+                      color: 'var(--text2)',
+                      fontWeight: 700,
+                    }}>
+                      Відправлено
+                    </span>
+                  )}
                 </h2>
                 <p style={{ margin: '12px 0 0', color: 'var(--text2)' }}>
                   Відстань: {route?.distance} • Тривалість: {route?.duration}
@@ -197,21 +343,36 @@ function Schedule() {
 
                 <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
                   <span style={{ color: 'var(--text2)' }}>Автобус містить {trip.seats} місць</span>
-                  <Link
-                    to={`/booking?tripId=${trip.id}`}
-                    style={{
-                      background: 'var(--accent)',
-                      color: '#1A1814',
+                  {departed ? (
+                    <span style={{
+                      background: 'var(--border)',
+                      color: 'var(--text2)',
                       padding: '10px 18px',
                       borderRadius: '10px',
                       fontWeight: 600,
-                      textDecoration: 'none',
-                    }}
-                  >
-                    Забронювати
-                  </Link>
+                      cursor: 'not-allowed',
+                    }}>
+                      Бронювання закрите
+                    </span>
+                  ) : (
+                    <Link
+                      to={`/booking?tripId=${trip.id}`}
+                      style={{
+                        background: 'var(--accent)',
+                        color: '#1A1814',
+                        padding: '10px 18px',
+                        borderRadius: '10px',
+                        fontWeight: 600,
+                        textDecoration: 'none',
+                      }}
+                    >
+                      Забронювати
+                    </Link>
+                  )}
                 </div>
               </div>
+
+              <TripDetails trip={trip} route={route} />
             </article>
           )
         })}

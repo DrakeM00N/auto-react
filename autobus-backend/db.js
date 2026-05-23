@@ -105,6 +105,17 @@ async function initDB() {
   await addColumnIfMissing('pending_bookings', 'invoice_id', 'TEXT')
   await addColumnIfMissing('pending_bookings', 'user_id', 'INTEGER')
 
+  // Extended trip metadata (busfor-style detail block). Old rows get '[]'
+  // for the JSON columns via the ADD COLUMN default; the plain TEXT
+  // columns stay NULL on old rows and are normalized to '' on the way
+  // out in routes/trips.js.
+  await addColumnIfMissing('trips', 'departure_point', 'TEXT')
+  await addColumnIfMissing('trips', 'arrival_point', 'TEXT')
+  await addColumnIfMissing('trips', 'bus_model', 'TEXT')
+  await addColumnIfMissing('trips', 'carrier', 'TEXT')
+  await addColumnIfMissing('trips', 'amenities', "TEXT DEFAULT '[]'")
+  await addColumnIfMissing('trips', 'intermediate_stops', "TEXT DEFAULT '[]'")
+
   // Seed initial data if empty
   const routeCount = await db.execute('SELECT COUNT(*) as cnt FROM routes')
   if (routeCount.rows[0].cnt === 0) {
