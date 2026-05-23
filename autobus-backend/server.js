@@ -22,6 +22,16 @@ const authLimiter = rateLimit({
 
 app.use('/api/auth', authLimiter)
 
+// Rate limiting for the public analytics tracking endpoint
+const analyticsLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 120, // limit each IP to 120 events per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+app.use('/api/analytics/track', analyticsLimiter)
+
 // Маршрути API
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/routes', require('./routes/routes'))
@@ -29,6 +39,7 @@ app.use('/api/trips', require('./routes/trips'))
 app.use('/api/bookings', require('./routes/bookings'))
 app.use('/api/users', require('./routes/users'))
 app.use('/api/liqpay', require('./routes/liqpay'))
+app.use('/api/analytics', require('./routes/analytics'))
 
 // Перевірка що сервер живий
 app.get('/api/health', (req, res) => res.json({ ok: true }))

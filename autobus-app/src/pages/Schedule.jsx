@@ -1,6 +1,7 @@
 import { Link, useSearchParams } from 'react-router-dom'
 import { useEffect, useMemo, useState } from 'react'
 import { useApp } from '../context/AppContext'
+import { track } from '../lib/analytics'
 
 const UKRAINE_CITIES = [
   'Київ', 'Харків', 'Дніпро', 'Одеса', 'Запоріжжя', 'Львів', 'Кривий Ріг',
@@ -56,6 +57,21 @@ function Schedule() {
     return routeMatch && dateMatch && searchMatch
   })
 }, [trips, routes, filterFrom, filterTo, filterDate, searchQuery])
+
+  // Track search demand: debounced so we record a settled search, not every
+  // keystroke. Only fires when at least one structured filter is set.
+  useEffect(() => {
+    if (!filterFrom && !filterTo && !filterDate) return
+    const timer = setTimeout(() => {
+      track('search_performed', {
+        from: filterFrom || '',
+        to: filterTo || '',
+        date: filterDate || '',
+        results_count: filteredTrips.length,
+      })
+    }, 800)
+    return () => clearTimeout(timer)
+  }, [filterFrom, filterTo, filterDate, filteredTrips.length])
 
   const selectStyle = {
     padding: '14px 16px',

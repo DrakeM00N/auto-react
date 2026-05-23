@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { Link } from 'react-router-dom'
+import { track } from '../lib/analytics'
 
 function TicketDisplay({ booking, trip, route }) {
   return (
@@ -88,6 +89,9 @@ function BookingSuccess() {
         }
         const data = await res.json();
         if (data.paid) {
+          // Funnel: the booking completed via the LiqPay payment flow
+          track('booking_completed', { trip_id: data.tripId, price: data.tripPrice });
+
           // Find trip and route from context
           const trip = trips.find(t => t.id === data.tripId);
           if (!trip) {

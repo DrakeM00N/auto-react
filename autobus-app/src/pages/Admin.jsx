@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
 
 function Admin() {
@@ -156,9 +157,21 @@ function Admin() {
 
   return (
     <div style={{ padding: '40px 2rem', maxWidth: '1200px', margin: '0 auto' }}>
-      <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem', marginBottom: '24px' }}>
-        Адмін-панель
-      </h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px', marginBottom: '24px' }}>
+        <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem' }}>
+          Адмін-панель
+        </h1>
+        <Link to="/admin/analytics" style={{
+          padding: '12px 20px',
+          borderRadius: '12px',
+          background: 'var(--accent)',
+          color: '#1A1814',
+          fontWeight: 600,
+          textDecoration: 'none',
+        }}>
+          📊 Аналітика
+        </Link>
+      </div>
 
       <section style={{ display: 'grid', gap: '18px', marginBottom: '32px', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
         <div style={{ padding: '20px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>

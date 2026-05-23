@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import Navbar from './components/Navbar'
 import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
+import RouteTracker from './components/RouteTracker'
 
 import Home from './pages/Home'
 import RoutesPage from './pages/Routes'
@@ -14,10 +15,12 @@ import Register from './pages/Register'
 import Profile from './pages/Profile'
 import ResetPassword from './pages/ResetPassword'
 import Admin from './pages/Admin'
+import Analytics from './pages/Analytics'
 
 function App() {
   return (
     <BrowserRouter>
+      <RouteTracker />
       <Navbar />
       <main>
         <Routes>
@@ -31,6 +34,7 @@ function App() {
           <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
+          <Route path="/admin/analytics" element={<ProtectedRoute requireAdmin><Analytics /></ProtectedRoute>} />
         </Routes>
       </main>
       <Footer />

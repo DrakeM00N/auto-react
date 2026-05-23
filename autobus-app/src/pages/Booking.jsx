@@ -1,6 +1,7 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useApp } from '../context/AppContext'
+import { track } from '../lib/analytics'
 
 const BASE = import.meta.env.VITE_API_URL || 'http://localhost:3001/api'
 
@@ -123,6 +124,17 @@ function Booking() {
   const selectedRoute = useMemo(() => routes.find(route => route.id === selectedTrip?.routeId), [routes, selectedTrip])
   const freeSeats = selectedTrip ? selectedTrip.seats - (selectedTrip.bookedSeats?.length || 0) : 0
 
+  // Funnel: the visitor reached the booking page with a valid trip
+  useEffect(() => {
+    if (selectedTrip) {
+      track('booking_started', {
+        trip_id: selectedTrip.id,
+        route: selectedRoute ? `${selectedRoute.from} → ${selectedRoute.to}` : '',
+      })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedTrip?.id])
+
   const allPoints = useMemo(() => {
     if (!selectedRoute) return []
     return [selectedRoute.from, ...(selectedRoute.stops || []), selectedRoute.to]
@@ -154,6 +166,9 @@ function Booking() {
     setLoading(true)
     setStatus(null)
 
+    // Funnel: the visitor submitted the booking form
+    track('booking_submitted', { trip_id: tripId })
+
     try {
       const fullName = `${passengerLastName.trim()} ${passengerFirstName.trim()}`
 
@@ -183,6 +198,9 @@ setCompletedBooking({
   boardingPoint,
   alightingPoint,
 })
+
+// Funnel: the booking completed successfully
+track('booking_completed', { trip_id: tripId, price: selectedTrip?.price })
     } catch (e) {
       setStatus({ type: 'error', message: e.message })
       setLoading(false)
