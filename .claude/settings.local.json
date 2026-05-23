@@ -12,7 +12,19 @@
       "Bash(npm install *)",
       "Bash(ls autobus.db*)",
       "Bash(rm -f autobus.db autobus.db-journal autobus.db-wal autobus.db-shm)",
-      "Bash(JWT_SECRET=test_syntax_check node -e \"require\\('./middleware'\\); require\\('./routes/auth'\\); require\\('./routes/bookings'\\); require\\('./routes/liqpay'\\); console.log\\('all backend modules parse OK'\\)\")"
+      "Bash(JWT_SECRET=test_syntax_check node -e \"require\\('./middleware'\\); require\\('./routes/auth'\\); require\\('./routes/bookings'\\); require\\('./routes/liqpay'\\); console.log\\('all backend modules parse OK'\\)\")",
+      "Read(//c/Users/Victor/Desktop/**)",
+      "Bash(curl -s -m 3 http://localhost:3001/api/health)",
+      "Bash(echo \" [exit $?]\")",
+      "Bash(JWT_SECRET=tmp node -e ' *)",
+      "Bash(curl -s -m 2 http://localhost:3001/api/health)",
+      "Bash(curl -s http://localhost:3001/api/health)",
+      "Bash(curl -s http://localhost:3001/api/routes)",
+      "Bash(curl -s http://localhost:3001/api/trips)",
+      "Bash(taskkill //F //IM node.exe)",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)"
     ]
   }
 }
