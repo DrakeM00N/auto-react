@@ -78,7 +78,29 @@ async function initDB() {
       used INTEGER DEFAULT 0,
       created_at TEXT DEFAULT (datetime('now'))
     )`,
+    `CREATE TABLE IF NOT EXISTS events (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      visitor_id TEXT,
+      session_id TEXT,
+      user_id INTEGER,
+      path TEXT,
+      props TEXT DEFAULT '{}',
+      ip_hash TEXT,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_events_name_time ON events(name, created_at)`,
+    `CREATE INDEX IF NOT EXISTS idx_events_session ON events(session_id)`,
   ])
+
+  // Migrations for databases created before the monobank ticketing system.
+  // CREATE TABLE IF NOT EXISTS does not add new columns to existing tables,
+  // so we patch them in explicitly. Safe to run on a fresh DB too — the
+  // helper is a no-op when the column is already present.
+  await addColumnIfMissing('bookings', 'ticket_code', 'TEXT')
+  await addColumnIfMissing('pending_bookings', 'invoice_id', 'TEXT')
+  await addColumnIfMissing('pending_bookings', 'user_id', 'INTEGER')
 
   // Seed initial data if empty
   const routeCount = await db.execute('SELECT COUNT(*) as cnt FROM routes')

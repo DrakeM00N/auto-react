@@ -44,7 +44,7 @@ router.get('/', async (req, res) => {
       time: trip.time,
       price: trip.price,
       seats: trip.seats,
-      bookedSeats: Array(trip.booked_count).fill(0).map((_, i) => i + 1), // Create array of booked seat IDs for compatibility
+      bookedCount: Number(trip.booked_count),
     }))
 
     res.json(trips)
@@ -83,7 +83,7 @@ router.post('/', adminMiddleware, tripValidators, async (req, res) => {
       time: trip.time,
       price: trip.price,
       seats: trip.seats,
-      bookedSeats: Array(trip.booked_count).fill(0).map((_, i) => i + 1),
+      bookedCount: Number(trip.booked_count),
     })
   } catch (e) {
     res.status(500).json({ error: 'Помилка сервера' })
@@ -120,7 +120,7 @@ router.put('/:id', adminMiddleware, tripValidators, async (req, res) => {
       time: trip.time,
       price: trip.price,
       seats: trip.seats,
-      bookedSeats: Array(trip.booked_count).fill(0).map((_, i) => i + 1),
+      bookedCount: Number(trip.booked_count),
     })
   } catch (e) {
     res.status(500).json({ error: 'Помилка сервера' })
