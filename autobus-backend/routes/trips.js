@@ -15,6 +15,7 @@ const tripValidators = [
   body('departurePoint').optional({ nullable: true }).isString(),
   body('arrivalPoint').optional({ nullable: true }).isString(),
   body('busModel').optional({ nullable: true }).isString(),
+  body('busPlate').optional({ nullable: true }).isString(),
   body('carrier').optional({ nullable: true }).isString(),
   body('amenities').optional({ nullable: true }).isArray().withMessage('amenities must be an array of strings'),
   body('amenities.*').optional().isString(),
@@ -78,6 +79,7 @@ function mapTripRow(row) {
     departurePoint: row.departure_point || '',
     arrivalPoint: row.arrival_point || '',
     busModel: row.bus_model || '',
+    busPlate: row.bus_plate || '',
     carrier: row.carrier || '',
     amenities: safeParseJson(row.amenities, []),
     intermediateStops: safeParseJson(row.intermediate_stops, []),
@@ -116,21 +118,22 @@ router.post('/', adminMiddleware, tripValidators, async (req, res) => {
   try {
     const {
       routeId, date, time, price, seats,
-      departurePoint, arrivalPoint, busModel, carrier,
+      departurePoint, arrivalPoint, busModel, busPlate, carrier,
       amenities, intermediateStops,
     } = req.body
 
     const result = await db.execute({
       sql: `INSERT INTO trips
               (route_id, date, time, price, seats,
-               departure_point, arrival_point, bus_model, carrier,
+               departure_point, arrival_point, bus_model, bus_plate, carrier,
                amenities, intermediate_stops)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         routeId, date, time, price, seats,
         safeString(departurePoint),
         safeString(arrivalPoint),
         safeString(busModel),
+        safeString(busPlate),
         safeString(carrier),
         JSON.stringify(normalizeAmenities(amenities)),
         JSON.stringify(normalizeIntermediateStops(intermediateStops)),
@@ -149,14 +152,14 @@ router.put('/:id', adminMiddleware, tripValidators, async (req, res) => {
   try {
     const {
       routeId, date, time, price, seats,
-      departurePoint, arrivalPoint, busModel, carrier,
+      departurePoint, arrivalPoint, busModel, busPlate, carrier,
       amenities, intermediateStops,
     } = req.body
 
     await db.execute({
       sql: `UPDATE trips SET
               route_id=?, date=?, time=?, price=?, seats=?,
-              departure_point=?, arrival_point=?, bus_model=?, carrier=?,
+              departure_point=?, arrival_point=?, bus_model=?, bus_plate=?, carrier=?,
               amenities=?, intermediate_stops=?
             WHERE id=?`,
       args: [
@@ -164,6 +167,7 @@ router.put('/:id', adminMiddleware, tripValidators, async (req, res) => {
         safeString(departurePoint),
         safeString(arrivalPoint),
         safeString(busModel),
+        safeString(busPlate),
         safeString(carrier),
         JSON.stringify(normalizeAmenities(amenities)),
         JSON.stringify(normalizeIntermediateStops(intermediateStops)),

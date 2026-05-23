@@ -20,7 +20,7 @@ function TripDetails({ trip, route }) {
 
   const hasDeparture = Boolean(trip.departurePoint || trip.arrivalPoint)
   const hasStops = Array.isArray(trip.intermediateStops) && trip.intermediateStops.length > 0
-  const hasBusInfo = Boolean(trip.busModel || trip.carrier)
+  const hasBusInfo = Boolean(trip.busModel || trip.carrier || trip.busPlate)
   const hasAmenities = Array.isArray(trip.amenities) && trip.amenities.length > 0
 
   // If nothing was filled in, the toggle has nothing to show — hide it.
@@ -90,11 +90,17 @@ function TripDetails({ trip, route }) {
           )}
 
           {hasBusInfo && (
-            <div style={{ ...sectionStyle, display: 'grid', gap: '10px', gridTemplateColumns: '1fr 1fr' }}>
+            <div style={{ ...sectionStyle, display: 'grid', gap: '10px', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
               {trip.busModel && (
                 <div>
                   <div style={labelStyle}>Автобус</div>
                   <div style={{ color: 'var(--text)' }}>{trip.busModel}</div>
+                </div>
+              )}
+              {trip.busPlate && (
+                <div>
+                  <div style={labelStyle}>Держ. номер</div>
+                  <div style={{ color: 'var(--text)' }}>{trip.busPlate}</div>
                 </div>
               )}
               {trip.carrier && (

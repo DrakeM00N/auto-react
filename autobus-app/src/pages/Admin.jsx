@@ -18,7 +18,7 @@ const AMENITY_CATALOGUE = [
 
 const EMPTY_TRIP_FORM = {
   routeId: '', date: '', time: '', price: '', seats: '',
-  departurePoint: '', arrivalPoint: '', busModel: '', carrier: '',
+  departurePoint: '', arrivalPoint: '', busModel: '', busPlate: '', carrier: '',
   amenities: [], intermediateStops: [],
 }
 
@@ -67,13 +67,22 @@ function TripDetailsFields({ value, onChange, inputStyle }) {
         </label>
       </div>
 
-      <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr' }}>
+      <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr 1fr' }}>
         <label style={{ display: 'grid', gap: '6px' }}>
           Модель автобуса
           <input
             value={value.busModel}
             onChange={e => set({ busModel: e.target.value })}
             placeholder="Setra S 415 GT-HD"
+            style={inputStyle}
+          />
+        </label>
+        <label style={{ display: 'grid', gap: '6px' }}>
+          Держ. номер
+          <input
+            value={value.busPlate}
+            onChange={e => set({ busPlate: e.target.value })}
+            placeholder="AA 1234 BB"
             style={inputStyle}
           />
         </label>
@@ -256,6 +265,7 @@ function Admin() {
       departurePoint: trip.departurePoint || '',
       arrivalPoint: trip.arrivalPoint || '',
       busModel: trip.busModel || '',
+      busPlate: trip.busPlate || '',
       carrier: trip.carrier || '',
       amenities: Array.isArray(trip.amenities) ? trip.amenities : [],
       intermediateStops: Array.isArray(trip.intermediateStops) ? trip.intermediateStops : [],

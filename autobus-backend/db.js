@@ -112,6 +112,7 @@ async function initDB() {
   await addColumnIfMissing('trips', 'departure_point', 'TEXT')
   await addColumnIfMissing('trips', 'arrival_point', 'TEXT')
   await addColumnIfMissing('trips', 'bus_model', 'TEXT')
+  await addColumnIfMissing('trips', 'bus_plate', 'TEXT')
   await addColumnIfMissing('trips', 'carrier', 'TEXT')
   await addColumnIfMissing('trips', 'amenities', "TEXT DEFAULT '[]'")
   await addColumnIfMissing('trips', 'intermediate_stops', "TEXT DEFAULT '[]'")
