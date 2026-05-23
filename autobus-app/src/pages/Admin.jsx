@@ -461,44 +461,48 @@ function Admin() {
                 ))}
               </select>
             </label>
-            <label style={{ display: 'grid', gap: '6px' }}>
-              Дата
-              <input
-                type="date"
-                value={newTrip.date}
-                onChange={e => setNewTrip({ ...newTrip, date: e.target.value })}
-                style={inputStyle}
-              />
-            </label>
-            <label style={{ display: 'grid', gap: '6px' }}>
-              Час
-              <input
-                type="time"
-                value={newTrip.time}
-                onChange={e => setNewTrip({ ...newTrip, time: e.target.value })}
-                style={inputStyle}
-              />
-            </label>
-            <label style={{ display: 'grid', gap: '6px' }}>
-              Ціна (грн)
-              <input
-                type="number"
-                value={newTrip.price}
-                onChange={e => setNewTrip({ ...newTrip, price: e.target.value })}
-                placeholder="350"
-                style={inputStyle}
-              />
-            </label>
-            <label style={{ display: 'grid', gap: '6px' }}>
-              Кількість місць
-              <input
-                type="number"
-                value={newTrip.seats}
-                onChange={e => setNewTrip({ ...newTrip, seats: e.target.value })}
-                placeholder="40"
-                style={inputStyle}
-              />
-            </label>
+            <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
+              <label style={{ display: 'grid', gap: '6px' }}>
+                Дата
+                <input
+                  type="date"
+                  value={newTrip.date}
+                  onChange={e => setNewTrip({ ...newTrip, date: e.target.value })}
+                  style={inputStyle}
+                />
+              </label>
+              <label style={{ display: 'grid', gap: '6px' }}>
+                Час
+                <input
+                  type="time"
+                  value={newTrip.time}
+                  onChange={e => setNewTrip({ ...newTrip, time: e.target.value })}
+                  style={inputStyle}
+                />
+              </label>
+            </div>
+            <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
+              <label style={{ display: 'grid', gap: '6px' }}>
+                Ціна (грн)
+                <input
+                  type="number"
+                  value={newTrip.price}
+                  onChange={e => setNewTrip({ ...newTrip, price: e.target.value })}
+                  placeholder="350"
+                  style={inputStyle}
+                />
+              </label>
+              <label style={{ display: 'grid', gap: '6px' }}>
+                Кількість місць
+                <input
+                  type="number"
+                  value={newTrip.seats}
+                  onChange={e => setNewTrip({ ...newTrip, seats: e.target.value })}
+                  placeholder="40"
+                  style={inputStyle}
+                />
+              </label>
+            </div>
 
             <TripDetailsFields value={newTrip} onChange={setNewTrip} inputStyle={inputStyle} />
 
@@ -626,42 +630,46 @@ function Admin() {
                           ))}
                         </select>
                       </label>
-                      <label style={{ display: 'grid', gap: '6px' }}>
-                        Дата
-                        <input
-                          type="date"
-                          value={editingTrip.date}
-                          onChange={e => setEditingTrip({ ...editingTrip, date: e.target.value })}
-                          style={inputStyle}
-                        />
-                      </label>
-                      <label style={{ display: 'grid', gap: '6px' }}>
-                        Час
-                        <input
-                          type="time"
-                          value={editingTrip.time}
-                          onChange={e => setEditingTrip({ ...editingTrip, time: e.target.value })}
-                          style={inputStyle}
-                        />
-                      </label>
-                      <label style={{ display: 'grid', gap: '6px' }}>
-                        Ціна (грн)
-                        <input
-                          type="number"
-                          value={editingTrip.price}
-                          onChange={e => setEditingTrip({ ...editingTrip, price: e.target.value })}
-                          style={inputStyle}
-                        />
-                      </label>
-                      <label style={{ display: 'grid', gap: '6px' }}>
-                        Кількість місць
-                        <input
-                          type="number"
-                          value={editingTrip.seats}
-                          onChange={e => setEditingTrip({ ...editingTrip, seats: e.target.value })}
-                          style={inputStyle}
-                        />
-                      </label>
+                      <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
+                        <label style={{ display: 'grid', gap: '6px' }}>
+                          Дата
+                          <input
+                            type="date"
+                            value={editingTrip.date}
+                            onChange={e => setEditingTrip({ ...editingTrip, date: e.target.value })}
+                            style={inputStyle}
+                          />
+                        </label>
+                        <label style={{ display: 'grid', gap: '6px' }}>
+                          Час
+                          <input
+                            type="time"
+                            value={editingTrip.time}
+                            onChange={e => setEditingTrip({ ...editingTrip, time: e.target.value })}
+                            style={inputStyle}
+                          />
+                        </label>
+                      </div>
+                      <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
+                        <label style={{ display: 'grid', gap: '6px' }}>
+                          Ціна (грн)
+                          <input
+                            type="number"
+                            value={editingTrip.price}
+                            onChange={e => setEditingTrip({ ...editingTrip, price: e.target.value })}
+                            style={inputStyle}
+                          />
+                        </label>
+                        <label style={{ display: 'grid', gap: '6px' }}>
+                          Кількість місць
+                          <input
+                            type="number"
+                            value={editingTrip.seats}
+                            onChange={e => setEditingTrip({ ...editingTrip, seats: e.target.value })}
+                            style={inputStyle}
+                          />
+                        </label>
+                      </div>
 
                       <TripDetailsFields value={editingTrip} onChange={setEditingTrip} inputStyle={inputStyle} />
 
