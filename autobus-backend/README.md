@@ -40,17 +40,42 @@ These instructions will help you set up and run the backend on your local machin
 
 ### Environment Variables
 
-Create a `.env` file in the `autobus-backend` directory with the following variables:
+Copy `.env.example` to `.env` and fill in the values you need. The server
+will refuse to start if `JWT_SECRET` is unset.
 
 ```
+JWT_SECRET=your_jwt_secret_here_change_in_production   # required
 PORT=3001
-JWT_SECRET=your_jwt_secret_here_change_in_production
 MONOBANK_TOKEN=your_monobank_acquiring_token_here
 FRONTEND_URL=http://localhost:5173
+ADMIN_EMAILS=                                          # see below
 ```
 
 The `MONOBANK_TOKEN` is the monobank acquiring ("Plata by mono") token.
 Get a free test token at https://api.monobank.ua/ for development.
+
+### Bootstrapping the admin role
+
+There's no API endpoint that creates an admin from scratch — `/api/users/:id/promote`
+requires an existing admin. To break the cycle, `routes/auth.js` assigns
+`role='admin'` on registration when **either** condition holds:
+
+1. The `users` table is empty (the very first signup gets admin
+   automatically — useful right after a fresh `autobus.db`).
+2. The new user's email is listed in the comma-separated `ADMIN_EMAILS`
+   environment variable. This is the recovery path: set `ADMIN_EMAILS`
+   in `.env`, restart the server, then register that email — they come
+   out as admin even if other users already exist.
+
+The decision is made inside a single `INSERT ... CASE WHEN` statement,
+so two concurrent first-user registrations can't both win.
+
+The JWT does **not** contain `role`. `authMiddleware` re-reads `role`
+from the DB on every request, so a promote/demote takes effect on the
+backend immediately. However, the frontend caches `currentUser` in
+`localStorage` (including `role`) from the login response, so a user
+whose role just changed has to **log out and log back in** before the
+admin nav shows up in their browser.
 
 ### Running the Server
 

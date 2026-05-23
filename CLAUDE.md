@@ -76,6 +76,12 @@ From inside `autobus-backend`:
    - Backend validates token via `middleware.js` (checks Authorization header)
    - Protected routes should include the auth middleware
 
+6. **Bootstrapping the admin role**:
+   - Roles live in `users.role`. The only API path to mint an admin is `/api/users/:id/promote`, which itself requires admin — chicken-and-egg if the DB has no admins.
+   - On registration (`/api/auth/register`) and on first-Google-signup, `routes/auth.js` assigns `role='admin'` if either (a) the email is listed in `ADMIN_EMAILS`, or (b) the `users` table is currently empty. Otherwise `role='user'`.
+   - The role decision lives in a single `INSERT ... CASE WHEN` statement so concurrent registrations can't race past each other on a fresh DB.
+   - The JWT itself does **not** carry the role — `authMiddleware` re-fetches `role` from `users` on every request, so role changes take effect immediately on the backend. But the frontend caches `currentUser` (including `role`) in `localStorage` from the login response. After a role change (promote/demote, or moving an email into/out of `ADMIN_EMAILS`), **the affected user must log out and log back in** to see the admin UI update — there's no live channel for role-change push.
+
 ## Environment Variables
 
 Backend `.env` (see `autobus-backend/.env.example`):
@@ -86,6 +92,7 @@ Backend `.env` (see `autobus-backend/.env.example`):
 - `FRONTEND_URL` — comma-separated list of origins allowed by CORS. Defaults to `http://localhost:5173`.
 - `ANALYTICS_IP_SALT` — salt for hashing visitor IPs in the `events` table.
 - `GOOGLE_CLIENT_ID` — OAuth web client ID. Empty disables the "Continue with Google" button gracefully.
+- `ADMIN_EMAILS` — comma-separated emails that get `role='admin'` on first registration. Combined with the implicit "first ever user is admin" bootstrap, this is the recovery path after a DB reset — see *Bootstrapping the admin role* below.
 - `LOG_LEVEL` — `debug`/`info`/`warn`/`error`. Defaults to `info`.
 - `DATABASE_URL` + `DATABASE_AUTH_TOKEN` — set both to switch from the local SQLite file to a remote Turso/libsql database.
 

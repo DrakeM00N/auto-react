@@ -33,6 +33,11 @@ services:
         sync: false
       - key: GOOGLE_CLIENT_ID
         sync: false
+      # Comma-separated emails promoted to admin on first registration.
+      # Set this BEFORE the first user signs up if you want a specific
+      # account to own the admin role from day one.
+      - key: ADMIN_EMAILS
+        sync: false
       - key: DATABASE_URL
         sync: false
       - key: DATABASE_AUTH_TOKEN

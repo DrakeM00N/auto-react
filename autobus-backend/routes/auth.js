@@ -20,6 +20,35 @@ const SECRET = process.env.JWT_SECRET
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID)
 
+// Emails listed in ADMIN_EMAILS get role='admin' on registration. This is the
+// recovery path after a DB reset — without it, the first user has to be
+// promoted by hand (chicken-and-egg with adminMiddleware). Lower-cased on
+// load so the lookup matches email.toLowerCase() at signup time.
+const ADMIN_EMAILS = new Set(
+  (process.env.ADMIN_EMAILS || '')
+    .split(',')
+    .map(s => s.trim().toLowerCase())
+    .filter(Boolean)
+)
+
+// Build an INSERT statement that picks role='admin' atomically when (a) the
+// caller-supplied flag says so (ADMIN_EMAILS hit) or (b) the users table is
+// still empty (first-user-admin bootstrap). The COUNT subquery is evaluated
+// against the table state before this insert, so two concurrent registrations
+// can both see COUNT=0 only if SQLite ever runs writes in parallel — it
+// doesn't, single writer at a time. Race window is effectively zero.
+function insertUserSql(columns, placeholders, forceAdmin) {
+  // role column is appended after the caller's columns.
+  return {
+    sql: `INSERT INTO users (${columns.join(', ')}, role)
+          VALUES (${placeholders.join(', ')},
+                  CASE WHEN ? = 1 THEN 'admin'
+                       WHEN (SELECT COUNT(*) FROM users) = 0 THEN 'admin'
+                       ELSE 'user' END)`,
+    forceAdminArg: forceAdmin ? 1 : 0,
+  }
+}
+
 // POST /api/auth/register
 router.post('/register',
   [
@@ -47,16 +76,30 @@ router.post('/register',
     }
 
     const hashed = await bcrypt.hash(password, 10)
+    const normalizedEmail = email.toLowerCase()
+    const trimmedName = name.trim()
+    const stmt = insertUserSql(
+      ['name', 'email', 'password'],
+      ['?', '?', '?'],
+      ADMIN_EMAILS.has(normalizedEmail),
+    )
     const result = await db.execute({
-      sql: 'INSERT INTO users (name, email, password) VALUES (?, ?, ?)',
-      args: [name.trim(), email.toLowerCase(), hashed]
+      sql: stmt.sql,
+      args: [trimmedName, normalizedEmail, hashed, stmt.forceAdminArg],
     })
 
-    const user = { id: Number(result.lastInsertRowid), name: name.trim(), email: email.toLowerCase() }
+    // Read back the role since the INSERT decided it via a CASE expression.
+    const userRow = (await db.execute({
+      sql: 'SELECT id, name, email, role FROM users WHERE id = ?',
+      args: [Number(result.lastInsertRowid)],
+    })).rows[0]
+
+    const user = { id: userRow.id, name: userRow.name, email: userRow.email, role: userRow.role }
     const token = jwt.sign(user, SECRET, { expiresIn: '7d' })
 
     res.json({ token, user: { ...user, hasPassword: true } })
   } catch (e) {
+    log.error('register:', e)
     res.status(500).json({ error: 'Помилка сервера' })
   }
 })
@@ -96,11 +139,12 @@ router.post('/login',
       args: [now, user.id]
     })
 
-    const userData = { id: user.id, name: user.name, email: user.email, lastLogin: now }
+    const userData = { id: user.id, name: user.name, email: user.email, role: user.role, lastLogin: now }
     const token = jwt.sign(userData, SECRET, { expiresIn: '7d' })
 
     res.json({ token, user: { ...userData, hasPassword: true } })
   } catch (e) {
+    log.error('login:', e)
     res.status(500).json({ error: 'Помилка сервера' })
   }
 })
@@ -151,10 +195,16 @@ router.post('/google', async (req, res) => {
         })
       }
     } else {
-      // First contact via Google — create a Google-only account (no password)
+      // First contact via Google — create a Google-only account (no password).
+      // Same atomic role-bootstrap as /register.
+      const stmt = insertUserSql(
+        ['name', 'email', 'google_id'],
+        ['?', '?', '?'],
+        ADMIN_EMAILS.has(email),
+      )
       const result = await db.execute({
-        sql: 'INSERT INTO users (name, email, google_id) VALUES (?, ?, ?)',
-        args: [name, email, googleId]
+        sql: stmt.sql,
+        args: [name, email, googleId, stmt.forceAdminArg],
       })
       userResult = await db.execute({
         sql: 'SELECT * FROM users WHERE id = ?',
@@ -169,7 +219,7 @@ router.post('/google', async (req, res) => {
       args: [now, user.id]
     })
 
-    const userData = { id: user.id, name: user.name, email: user.email, lastLogin: now }
+    const userData = { id: user.id, name: user.name, email: user.email, role: user.role, lastLogin: now }
     const token = jwt.sign(userData, SECRET, { expiresIn: '7d' })
 
     res.json({ token, user: { ...userData, hasPassword: !!user.password } })
