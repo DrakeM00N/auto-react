@@ -77,7 +77,7 @@ function Profile() {
   }
 
   return (
-    <div style={{ padding: '40px 2rem', maxWidth: '1120px', margin: '0 auto' }}>
+    <div className="page-glow" style={{ padding: '40px 2rem', maxWidth: '1120px', margin: '0 auto' }}>
       <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem', marginBottom: '18px' }}>Мій профіль</h1>
       <p style={{ color: 'var(--text2)', lineHeight: 1.7, marginBottom: '28px' }}>
         Твоя особиста панель: історія бронювань, зміна пароля та управління своїми поїздками.
