@@ -1,74 +1,68 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '../context/AuthContext'
 import GoogleAuthButton from '../components/GoogleAuthButton'
 import Button from '../components/Button'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
+import { registerSchema } from '../lib/schemas'
+
+const fieldStyle = {
+  width: '100%',
+  padding: '14px 16px',
+  borderRadius: '14px',
+  border: '1px solid var(--border)',
+  background: 'var(--bg)',
+  color: 'var(--text)',
+}
+
+const fieldErrorStyle = { color: '#842029', fontSize: '0.85rem', marginTop: '-4px' }
+
+const passwordWrapperStyle = { position: 'relative', display: 'grid' }
+
+const eyeButtonStyle = {
+  position: 'absolute',
+  top: '50%',
+  right: '14px',
+  transform: 'translateY(-50%)',
+  border: 'none',
+  background: 'transparent',
+  color: 'var(--text2)',
+  cursor: 'pointer',
+  fontSize: '1.1rem',
+  padding: 0,
+}
 
 function Register() {
   useDocumentMeta({
     title: 'Реєстрація',
     description: 'Створіть акаунт, щоб зберігати бронювання, отримувати електронні квитки та швидко повторно оформляти поїздки.',
   })
-  const { register } = useAuth()
+  const { register: registerUser } = useAuth()
   const navigate = useNavigate()
-  const [name, setName] = useState('')
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
-  const [confirm, setConfirm] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
-  const [status, setStatus] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [serverStatus, setServerStatus] = useState(null)
 
-  const fieldStyle = {
-    width: '100%',
-    padding: '14px 16px',
-    borderRadius: '14px',
-    border: '1px solid var(--border)',
-    background: 'var(--bg)',
-    color: 'var(--text)',
-  }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(registerSchema),
+    defaultValues: { name: '', email: '', password: '', confirm: '' },
+  })
 
-  const passwordWrapperStyle = {
-    position: 'relative',
-    display: 'grid',
-  }
-
-  const eyeButtonStyle = {
-    position: 'absolute',
-    top: '50%',
-    right: '14px',
-    transform: 'translateY(-50%)',
-    border: 'none',
-    background: 'transparent',
-    color: 'var(--text2)',
-    cursor: 'pointer',
-    fontSize: '1.1rem',
-    padding: 0,
-  }
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    if (loading) return
-    if (password !== confirm) {
-      setStatus({ type: 'error', message: 'Паролі не співпадають' })
+  const onSubmit = async (values) => {
+    setServerStatus(null)
+    const result = await registerUser(values.name, values.email, values.password)
+    if (!result.success) {
+      setServerStatus({ type: 'error', message: result.message })
       return
     }
-
-    setLoading(true)
-    try {
-      const normalizedEmail = email.trim().toLowerCase()
-      const result = await register(name.trim(), normalizedEmail, password)
-      if (!result.success) {
-        setStatus({ type: 'error', message: result.message })
-        return
-      }
-      setStatus({ type: 'success', message: 'Реєстрація пройшла успішно!' })
-      navigate('/')
-    } finally {
-      setLoading(false)
-    }
+    setServerStatus({ type: 'success', message: 'Реєстрація пройшла успішно!' })
+    navigate('/')
   }
 
   return (
@@ -82,38 +76,30 @@ function Register() {
         </p>
       </section>
 
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '18px' }}>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: 'grid', gap: '18px' }}>
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
-          Ім’я
-          <input
-            value={name}
-            onChange={e => setName(e.target.value)}
-            required
-            placeholder="Ім’я"
-            style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
-          />
+          Імʼя
+          <input {...register('name')} placeholder="Імʼя" style={fieldStyle} />
+          {errors.name && <span style={fieldErrorStyle}>{errors.name.message}</span>}
         </label>
 
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
           Email
           <input
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            {...register('email')}
             type="email"
-            required
             placeholder="example@mail.com"
-            style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+            style={fieldStyle}
           />
+          {errors.email && <span style={fieldErrorStyle}>{errors.email.message}</span>}
         </label>
 
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
           Пароль
           <div style={passwordWrapperStyle}>
             <input
-              value={password}
-              onChange={e => setPassword(e.target.value)}
+              {...register('password')}
               type={showPassword ? 'text' : 'password'}
-              required
               placeholder="••••••••"
               style={fieldStyle}
             />
@@ -126,16 +112,15 @@ function Register() {
               {showPassword ? '👁' : '👁️'}
             </button>
           </div>
+          {errors.password && <span style={fieldErrorStyle}>{errors.password.message}</span>}
         </label>
 
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
           Підтвердження пароля
           <div style={passwordWrapperStyle}>
             <input
-              value={confirm}
-              onChange={e => setConfirm(e.target.value)}
+              {...register('confirm')}
               type={showConfirm ? 'text' : 'password'}
-              required
               placeholder="••••••••"
               style={fieldStyle}
             />
@@ -148,23 +133,24 @@ function Register() {
               {showConfirm ? '👁' : '👁️'}
             </button>
           </div>
+          {errors.confirm && <span style={fieldErrorStyle}>{errors.confirm.message}</span>}
         </label>
 
-        {status && (
+        {serverStatus && (
           <div style={{
             padding: '14px 16px',
             borderRadius: '14px',
-            background: status.type === 'success' ? '#E8F6EE' : '#FDECEA',
-            border: `1px solid ${status.type === 'success' ? '#A3D9A5' : '#F5C6CB'}`,
-            color: status.type === 'success' ? '#1B6B31' : '#842029',
+            background: serverStatus.type === 'success' ? '#E8F6EE' : '#FDECEA',
+            border: `1px solid ${serverStatus.type === 'success' ? '#A3D9A5' : '#F5C6CB'}`,
+            color: serverStatus.type === 'success' ? '#1B6B31' : '#842029',
           }}>
-            {status.message}
+            {serverStatus.message}
           </div>
         )}
 
         <Button
           type="submit"
-          loading={loading}
+          loading={isSubmitting}
           style={{
             padding: '14px 18px',
             borderRadius: '14px',
@@ -177,7 +163,7 @@ function Register() {
           Зареєструватися
         </Button>
 
-        <GoogleAuthButton onError={(message) => setStatus({ type: 'error', message })} />
+        <GoogleAuthButton onError={(message) => setServerStatus({ type: 'error', message })} />
 
         <p style={{ color: 'var(--text2)', textAlign: 'center' }}>
           Вже є акаунт?{' '}

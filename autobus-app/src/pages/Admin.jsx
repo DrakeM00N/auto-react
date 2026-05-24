@@ -1,9 +1,12 @@
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
+import { useForm, useFieldArray } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { formatDate, isDeparted } from '../lib/format'
 import Button from '../components/Button'
+import { routeSchema, tripSchema } from '../lib/schemas'
 
 // Fixed amenity catalogue. Used by the admin checkboxes — Schedule.jsx
 // just renders whatever amenities the backend returns, so it doesn't
@@ -17,29 +20,30 @@ const AMENITY_CATALOGUE = [
   'Місце для багажу',
 ]
 
+const EMPTY_ROUTE_FORM = { from: '', to: '', distance: '', duration: '', stops: '' }
 const EMPTY_TRIP_FORM = {
   routeId: '', date: '', time: '', price: '', seats: '',
   departurePoint: '', arrivalPoint: '', busModel: '', busPlate: '', carrier: '',
   amenities: [], intermediateStops: [],
 }
 
+const fieldErrorStyle = { color: '#842029', fontSize: '0.85rem', marginTop: '4px' }
+
 // Shared "extended trip details" block used by both the create and edit
-// forms in Admin.jsx. Keeps the markup in one place so adding a field
-// later doesn't drift between the two forms.
-function TripDetailsFields({ value, onChange, inputStyle }) {
-  const set = (patch) => onChange({ ...value, ...patch })
+// trip forms. Reads from / writes to the given react-hook-form instance
+// (passed via `form`) so the field paths line up with the parent's schema.
+function TripDetailsFields({ form, inputStyle }) {
+  const { register, watch, setValue, control } = form
+  const amenities = watch('amenities') || []
+  const { fields, append, remove } = useFieldArray({ control, name: 'intermediateStops' })
 
   const toggleAmenity = (a) => {
-    const has = value.amenities.includes(a)
-    set({ amenities: has ? value.amenities.filter(x => x !== a) : [...value.amenities, a] })
+    setValue(
+      'amenities',
+      amenities.includes(a) ? amenities.filter(x => x !== a) : [...amenities, a],
+      { shouldDirty: true },
+    )
   }
-
-  const updateStop = (i, patch) => {
-    const next = value.intermediateStops.map((s, idx) => idx === i ? { ...s, ...patch } : s)
-    set({ intermediateStops: next })
-  }
-  const addStop = () => set({ intermediateStops: [...value.intermediateStops, { name: '', address: '', time: '' }] })
-  const removeStop = (i) => set({ intermediateStops: value.intermediateStops.filter((_, idx) => idx !== i) })
 
   const sectionTitle = { fontSize: '0.9rem', color: 'var(--text2)', textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: '8px' }
 
@@ -50,58 +54,33 @@ function TripDetailsFields({ value, onChange, inputStyle }) {
       <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr' }}>
         <label style={{ display: 'grid', gap: '6px' }}>
           Точка відправлення
-          <input
-            value={value.departurePoint}
-            onChange={e => set({ departurePoint: e.target.value })}
-            placeholder="вул. Шевченка, 1, автостанція"
-            style={inputStyle}
-          />
+          <input {...register('departurePoint')} placeholder="вул. Шевченка, 1, автостанція" style={inputStyle} />
         </label>
         <label style={{ display: 'grid', gap: '6px' }}>
           Точка прибуття
-          <input
-            value={value.arrivalPoint}
-            onChange={e => set({ arrivalPoint: e.target.value })}
-            placeholder="Центральна автостанція"
-            style={inputStyle}
-          />
+          <input {...register('arrivalPoint')} placeholder="Центральна автостанція" style={inputStyle} />
         </label>
       </div>
 
       <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr 1fr' }}>
         <label style={{ display: 'grid', gap: '6px' }}>
           Модель автобуса
-          <input
-            value={value.busModel}
-            onChange={e => set({ busModel: e.target.value })}
-            placeholder="Setra S 415 GT-HD"
-            style={inputStyle}
-          />
+          <input {...register('busModel')} placeholder="Setra S 415 GT-HD" style={inputStyle} />
         </label>
         <label style={{ display: 'grid', gap: '6px' }}>
           Держ. номер
-          <input
-            value={value.busPlate}
-            onChange={e => set({ busPlate: e.target.value })}
-            placeholder="AA 1234 BB"
-            style={inputStyle}
-          />
+          <input {...register('busPlate')} placeholder="AA 1234 BB" style={inputStyle} />
         </label>
         <label style={{ display: 'grid', gap: '6px' }}>
           Перевізник
-          <input
-            value={value.carrier}
-            onChange={e => set({ carrier: e.target.value })}
-            placeholder="Prestige-bus"
-            style={inputStyle}
-          />
+          <input {...register('carrier')} placeholder="Prestige-bus" style={inputStyle} />
         </label>
       </div>
 
       <div style={sectionTitle}>Зручності</div>
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
         {AMENITY_CATALOGUE.map(a => {
-          const checked = value.amenities.includes(a)
+          const checked = amenities.includes(a)
           return (
             <label key={a} style={{
               display: 'flex', alignItems: 'center', gap: '8px',
@@ -128,11 +107,11 @@ function TripDetailsFields({ value, onChange, inputStyle }) {
 
       <div style={sectionTitle}>Проміжні зупинки</div>
       <div style={{ display: 'grid', gap: '10px' }}>
-        {value.intermediateStops.length === 0 && (
+        {fields.length === 0 && (
           <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>Немає проміжних зупинок.</div>
         )}
-        {value.intermediateStops.map((stop, i) => (
-          <div key={i} style={{
+        {fields.map((field, i) => (
+          <div key={field.id} style={{
             display: 'grid',
             gap: '8px',
             gridTemplateColumns: '1fr 1fr 100px auto',
@@ -144,26 +123,32 @@ function TripDetailsFields({ value, onChange, inputStyle }) {
           }}>
             <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)' }}>
               Назва
-              <input value={stop.name} onChange={e => updateStop(i, { name: e.target.value })} style={inputStyle} placeholder="Полтава" />
+              <input {...register(`intermediateStops.${i}.name`)} style={inputStyle} placeholder="Полтава" />
             </label>
             <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)' }}>
               Адреса
-              <input value={stop.address} onChange={e => updateStop(i, { address: e.target.value })} style={inputStyle} placeholder="АС Полтава-1" />
+              <input {...register(`intermediateStops.${i}.address`)} style={inputStyle} placeholder="АС Полтава-1" />
             </label>
             <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)' }}>
               Час
-              <input value={stop.time} onChange={e => updateStop(i, { time: e.target.value })} style={inputStyle} placeholder="11:30" />
+              <input {...register(`intermediateStops.${i}.time`)} style={inputStyle} placeholder="11:30" />
             </label>
-            <button type="button" onClick={() => removeStop(i)} style={{
+            <button type="button" onClick={() => remove(i)} style={{
               padding: '10px 14px', borderRadius: '10px', border: 'none',
               background: '#e74c3c', color: '#fff', cursor: 'pointer', fontWeight: 600,
             }}>×</button>
           </div>
         ))}
-        <button type="button" onClick={addStop} style={{
-          padding: '10px 14px', borderRadius: '10px', border: '1px dashed var(--border)',
-          background: 'transparent', color: 'var(--text)', cursor: 'pointer', width: 'max-content',
-        }}>+ Додати зупинку</button>
+        <button
+          type="button"
+          onClick={() => append({ name: '', address: '', time: '' })}
+          style={{
+            padding: '10px 14px', borderRadius: '10px', border: '1px dashed var(--border)',
+            background: 'transparent', color: 'var(--text)', cursor: 'pointer', width: 'max-content',
+          }}
+        >
+          + Додати зупинку
+        </button>
       </div>
     </>
   )
@@ -173,18 +158,30 @@ function Admin() {
   const { currentUser } = useAuth()
   const { routes, addRoute, deleteRoute, updateRoute, trips, addTrip, deleteTrip, updateTrip, users, bookings, promoteUser, cancelBooking } = useData()
 
-  // Состояния для форм
-  const [newRoute, setNewRoute] = useState({ from: '', to: '', distance: '', duration: '', stops: '' })
-  const [newTrip, setNewTrip] = useState(EMPTY_TRIP_FORM)
   const [editingRouteId, setEditingRouteId] = useState(null)
-  const [editingRoute, setEditingRoute] = useState({ from: '', to: '', distance: '', duration: '', stops: '' })
   const [editingTripId, setEditingTripId] = useState(null)
-  const [editingTrip, setEditingTrip] = useState(EMPTY_TRIP_FORM)
   const [status, setStatus] = useState(null)
-  // Один флаг для всех submit-кнопок админки. В этом интерфейсе одновременно
-  // открыта максимум одна форма, поэтому отдельные state'ы избыточны.
-  const [submitting, setSubmitting] = useState(false)
   const inputStyle = { padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }
+
+  // 4 separate form instances. Each has its own schema + isSubmitting flag,
+  // so two admins editing different rows in the same browser tab still
+  // wouldn't be possible UX-wise but the form state stays clean.
+  const addRouteForm = useForm({
+    resolver: zodResolver(routeSchema),
+    defaultValues: EMPTY_ROUTE_FORM,
+  })
+  const editRouteForm = useForm({
+    resolver: zodResolver(routeSchema),
+    defaultValues: EMPTY_ROUTE_FORM,
+  })
+  const addTripForm = useForm({
+    resolver: zodResolver(tripSchema),
+    defaultValues: EMPTY_TRIP_FORM,
+  })
+  const editTripForm = useForm({
+    resolver: zodResolver(tripSchema),
+    defaultValues: EMPTY_TRIP_FORM,
+  })
 
   // Проверка роли
   if (!currentUser || currentUser.role !== 'admin') {
@@ -196,87 +193,50 @@ function Admin() {
     )
   }
 
-  const handleAddRoute = async (e) => {
-    e.preventDefault()
-    if (submitting) return
-    if (!newRoute.from || !newRoute.to || !newRoute.distance || !newRoute.duration) {
-      setStatus({ type: 'error', message: 'Заповніть всі поля для маршруту' })
-      return
-    }
-    setSubmitting(true)
-    try {
-      await addRoute({
-        ...newRoute,
-        stops: newRoute.stops.split(',').map(item => item.trim()).filter(Boolean),
-      })
-      setNewRoute({ from: '', to: '', distance: '', duration: '', stops: '' })
-      setStatus({ type: 'success', message: 'Маршрут додано' })
-    } finally {
-      setSubmitting(false)
-    }
+  const onAddRoute = async (values) => {
+    await addRoute(values)
+    addRouteForm.reset(EMPTY_ROUTE_FORM)
+    setStatus({ type: 'success', message: 'Маршрут додано' })
   }
 
-  const handleAddTrip = async (e) => {
-    e.preventDefault()
-    if (submitting) return
-    if (!newTrip.routeId || !newTrip.date || !newTrip.time || !newTrip.price || !newTrip.seats) {
-      setStatus({ type: 'error', message: 'Заповніть всі поля для рейсу' })
-      return
-    }
-    setSubmitting(true)
+  const onAddTrip = async (values) => {
     try {
-      await addTrip({
-        ...newTrip,
-        routeId: Number(newTrip.routeId),
-        price: Number(newTrip.price),
-        seats: Number(newTrip.seats),
-      })
-      setNewTrip(EMPTY_TRIP_FORM)
+      await addTrip({ ...values, routeId: Number(values.routeId) })
+      addTripForm.reset(EMPTY_TRIP_FORM)
       setStatus({ type: 'success', message: 'Рейс додано' })
     } catch (err) {
-      setStatus({ type: 'error', message: 'Не вдалось добавити рейс: ' + err.message })
-    } finally {
-      setSubmitting(false)
+      setStatus({ type: 'error', message: 'Не вдалось додати рейс: ' + err.message })
     }
-  }
-
-  const handlePromote = (userId) => {
-    promoteUser(userId)
-    setStatus({ type: 'success', message: 'Користувача підвищено до адміна' })
   }
 
   const handleStartEditRoute = (route) => {
     setEditingRouteId(route.id)
-    setEditingRoute({ ...route })
+    // The backend stores stops as an array but the form takes a comma string.
+    editRouteForm.reset({
+      from: route.from,
+      to: route.to,
+      distance: route.distance,
+      duration: route.duration,
+      stops: Array.isArray(route.stops) ? route.stops.join(', ') : (route.stops || ''),
+    })
     setStatus(null)
   }
 
-  const handleSaveRoute = async (e) => {
-    e.preventDefault()
-    if (submitting) return
-    if (!editingRoute.from || !editingRoute.to || !editingRoute.distance || !editingRoute.duration) {
-      setStatus({ type: 'error', message: 'Заповніть всі поля для маршруту' })
-      return
-    }
-    setSubmitting(true)
-    try {
-      await updateRoute(editingRouteId, editingRoute)
-      setEditingRouteId(null)
-      setEditingRoute({ from: '', to: '', distance: '', duration: '' })
-      setStatus({ type: 'success', message: 'Маршрут оновлено' })
-    } finally {
-      setSubmitting(false)
-    }
+  const onSaveRoute = async (values) => {
+    await updateRoute(editingRouteId, values)
+    setEditingRouteId(null)
+    editRouteForm.reset(EMPTY_ROUTE_FORM)
+    setStatus({ type: 'success', message: 'Маршрут оновлено' })
   }
 
   const handleCancelEditRoute = () => {
     setEditingRouteId(null)
-    setEditingRoute({ from: '', to: '', distance: '', duration: '' })
+    editRouteForm.reset(EMPTY_ROUTE_FORM)
   }
 
   const handleStartEditTrip = (trip) => {
     setEditingTripId(trip.id)
-    setEditingTrip({
+    editTripForm.reset({
       routeId: String(trip.routeId),
       date: trip.date,
       time: trip.time,
@@ -293,37 +253,26 @@ function Admin() {
     setStatus(null)
   }
 
-  const handleSaveTrip = async (e) => {
-    e.preventDefault()
-    if (submitting) return
-    if (!editingTrip.routeId || !editingTrip.date || !editingTrip.time || !editingTrip.price || !editingTrip.seats) {
-      setStatus({ type: 'error', message: 'Заповніть всі поля для рейсу' })
-      return
-    }
-    setSubmitting(true)
-    try {
-      await updateTrip(editingTripId, {
-        ...editingTrip,
-        routeId: Number(editingTrip.routeId),
-        price: Number(editingTrip.price),
-        seats: Number(editingTrip.seats),
-      })
-      setEditingTripId(null)
-      setEditingTrip(EMPTY_TRIP_FORM)
-      setStatus({ type: 'success', message: 'Рейс оновлено' })
-    } finally {
-      setSubmitting(false)
-    }
+  const onSaveTrip = async (values) => {
+    await updateTrip(editingTripId, { ...values, routeId: Number(values.routeId) })
+    setEditingTripId(null)
+    editTripForm.reset(EMPTY_TRIP_FORM)
+    setStatus({ type: 'success', message: 'Рейс оновлено' })
   }
 
   const handleCancelEditTrip = () => {
     setEditingTripId(null)
-    setEditingTrip(EMPTY_TRIP_FORM)
+    editTripForm.reset(EMPTY_TRIP_FORM)
+  }
+
+  const handlePromote = (userId) => {
+    promoteUser(userId)
+    setStatus({ type: 'success', message: 'Користувача підвищено до адміна' })
   }
 
   const handleDeleteRoute = (routeId) => {
     deleteRoute(routeId)
-    setStatus({ type: 'success', message: 'Маршрут та пов’язані рейси видалено' })
+    setStatus({ type: 'success', message: 'Маршрут та повʼязані рейси видалено' })
   }
 
   const handleDeleteTrip = (tripId) => {
@@ -351,6 +300,11 @@ function Admin() {
     return { ...route, count }
   })
   const busiestRoute = routeBookingCount.reduce((max, route) => route.count > max.count ? route : max, { count: 0 })
+
+  const addRouteErrors = addRouteForm.formState.errors
+  const editRouteErrors = editRouteForm.formState.errors
+  const addTripErrors = addTripForm.formState.errors
+  const editTripErrors = editTripForm.formState.errors
 
   return (
     <div style={{ padding: '40px 2rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -408,53 +362,32 @@ function Admin() {
         {/* Добавление маршрута */}
         <section style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Додати маршрут</h2>
-          <form onSubmit={handleAddRoute} style={{ display: 'grid', gap: '12px' }}>
+          <form onSubmit={addRouteForm.handleSubmit(onAddRoute)} noValidate style={{ display: 'grid', gap: '12px' }}>
             <label style={{ display: 'grid', gap: '6px' }}>
               Звідки
-              <input
-                value={newRoute.from}
-                onChange={e => setNewRoute({ ...newRoute, from: e.target.value })}
-                placeholder="Наприклад: Одеса"
-                style={inputStyle}
-              />
+              <input {...addRouteForm.register('from')} placeholder="Наприклад: Одеса" style={inputStyle} />
+              {addRouteErrors.from && <span style={fieldErrorStyle}>{addRouteErrors.from.message}</span>}
             </label>
             <label style={{ display: 'grid', gap: '6px' }}>
               Куди
-              <input
-                value={newRoute.to}
-                onChange={e => setNewRoute({ ...newRoute, to: e.target.value })}
-                placeholder="Наприклад: Київ"
-                style={inputStyle}
-              />
+              <input {...addRouteForm.register('to')} placeholder="Наприклад: Київ" style={inputStyle} />
+              {addRouteErrors.to && <span style={fieldErrorStyle}>{addRouteErrors.to.message}</span>}
             </label>
             <label style={{ display: 'grid', gap: '6px' }}>
               Відстань
-              <input
-                value={newRoute.distance}
-                onChange={e => setNewRoute({ ...newRoute, distance: e.target.value })}
-                placeholder="Наприклад: 475 км"
-                style={inputStyle}
-              />
+              <input {...addRouteForm.register('distance')} placeholder="Наприклад: 475 км" style={inputStyle} />
+              {addRouteErrors.distance && <span style={fieldErrorStyle}>{addRouteErrors.distance.message}</span>}
             </label>
             <label style={{ display: 'grid', gap: '6px' }}>
               Тривалість
-              <input
-                value={newRoute.duration}
-                onChange={e => setNewRoute({ ...newRoute, duration: e.target.value })}
-                placeholder="Наприклад: 6 год"
-                style={inputStyle}
-              />
+              <input {...addRouteForm.register('duration')} placeholder="Наприклад: 6 год" style={inputStyle} />
+              {addRouteErrors.duration && <span style={fieldErrorStyle}>{addRouteErrors.duration.message}</span>}
             </label>
             <label style={{ display: 'grid', gap: '6px' }}>
               Остановки
-              <input
-                value={newRoute.stops}
-                onChange={e => setNewRoute({ ...newRoute, stops: e.target.value })}
-                placeholder="Наприклад: Полтава, Кропивницький"
-                style={inputStyle}
-              />
+              <input {...addRouteForm.register('stops')} placeholder="Наприклад: Полтава, Кропивницький" style={inputStyle} />
             </label>
-            <Button type="submit" loading={submitting} style={{
+            <Button type="submit" loading={addRouteForm.formState.isSubmitting} style={{
               padding: '12px',
               borderRadius: '8px',
               border: 'none',
@@ -470,14 +403,10 @@ function Admin() {
         {/* Добавление рейса */}
         <section style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Додати рейс</h2>
-          <form onSubmit={handleAddTrip} style={{ display: 'grid', gap: '12px' }}>
+          <form onSubmit={addTripForm.handleSubmit(onAddTrip)} noValidate style={{ display: 'grid', gap: '12px' }}>
             <label style={{ display: 'grid', gap: '6px' }}>
               Маршрут
-              <select
-                value={newTrip.routeId}
-                onChange={e => setNewTrip({ ...newTrip, routeId: e.target.value })}
-                style={inputStyle}
-              >
+              <select {...addTripForm.register('routeId')} style={inputStyle}>
                 <option value="">Оберіть маршрут</option>
                 {routes.map(route => (
                   <option key={route.id} value={route.id}>
@@ -485,53 +414,36 @@ function Admin() {
                   </option>
                 ))}
               </select>
+              {addTripErrors.routeId && <span style={fieldErrorStyle}>{addTripErrors.routeId.message}</span>}
             </label>
             <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
               <label style={{ display: 'grid', gap: '6px' }}>
                 Дата
-                <input
-                  type="date"
-                  value={newTrip.date}
-                  onChange={e => setNewTrip({ ...newTrip, date: e.target.value })}
-                  style={inputStyle}
-                />
+                <input type="date" {...addTripForm.register('date')} style={inputStyle} />
+                {addTripErrors.date && <span style={fieldErrorStyle}>{addTripErrors.date.message}</span>}
               </label>
               <label style={{ display: 'grid', gap: '6px' }}>
                 Час
-                <input
-                  type="time"
-                  value={newTrip.time}
-                  onChange={e => setNewTrip({ ...newTrip, time: e.target.value })}
-                  style={inputStyle}
-                />
+                <input type="time" {...addTripForm.register('time')} style={inputStyle} />
+                {addTripErrors.time && <span style={fieldErrorStyle}>{addTripErrors.time.message}</span>}
               </label>
             </div>
             <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
               <label style={{ display: 'grid', gap: '6px' }}>
                 Ціна (грн)
-                <input
-                  type="number"
-                  value={newTrip.price}
-                  onChange={e => setNewTrip({ ...newTrip, price: e.target.value })}
-                  placeholder="350"
-                  style={inputStyle}
-                />
+                <input type="number" {...addTripForm.register('price')} placeholder="350" style={inputStyle} />
+                {addTripErrors.price && <span style={fieldErrorStyle}>{addTripErrors.price.message}</span>}
               </label>
               <label style={{ display: 'grid', gap: '6px' }}>
                 Кількість місць
-                <input
-                  type="number"
-                  value={newTrip.seats}
-                  onChange={e => setNewTrip({ ...newTrip, seats: e.target.value })}
-                  placeholder="40"
-                  style={inputStyle}
-                />
+                <input type="number" {...addTripForm.register('seats')} placeholder="40" style={inputStyle} />
+                {addTripErrors.seats && <span style={fieldErrorStyle}>{addTripErrors.seats.message}</span>}
               </label>
             </div>
 
-            <TripDetailsFields value={newTrip} onChange={setNewTrip} inputStyle={inputStyle} />
+            <TripDetailsFields form={addTripForm} inputStyle={inputStyle} />
 
-            <Button type="submit" loading={submitting} style={{
+            <Button type="submit" loading={addTripForm.formState.isSubmitting} style={{
               padding: '12px',
               borderRadius: '8px',
               border: 'none',
@@ -555,53 +467,36 @@ function Admin() {
             {routes.map(route => (
               <div key={route.id} style={{ padding: '18px', borderRadius: '14px', background: 'var(--bg)', border: '1px solid var(--border)' }}>
                 {editingRouteId === route.id ? (
-                  <form onSubmit={handleSaveRoute} style={{ display: 'grid', gap: '12px' }}>
+                  <form onSubmit={editRouteForm.handleSubmit(onSaveRoute)} noValidate style={{ display: 'grid', gap: '12px' }}>
                     <label style={{ display: 'grid', gap: '6px' }}>
                       Звідки
-                      <input
-                        value={editingRoute.from}
-                        onChange={e => setEditingRoute({ ...editingRoute, from: e.target.value })}
-                        style={inputStyle}
-                      />
+                      <input {...editRouteForm.register('from')} style={inputStyle} />
+                      {editRouteErrors.from && <span style={fieldErrorStyle}>{editRouteErrors.from.message}</span>}
                     </label>
                     <label style={{ display: 'grid', gap: '6px' }}>
                       Куди
-                      <input
-                        value={editingRoute.to}
-                        onChange={e => setEditingRoute({ ...editingRoute, to: e.target.value })}
-                        style={inputStyle}
-                      />
+                      <input {...editRouteForm.register('to')} style={inputStyle} />
+                      {editRouteErrors.to && <span style={fieldErrorStyle}>{editRouteErrors.to.message}</span>}
                     </label>
                     <label style={{ display: 'grid', gap: '6px' }}>
                       Відстань
-                      <input
-                        value={editingRoute.distance}
-                        onChange={e => setEditingRoute({ ...editingRoute, distance: e.target.value })}
-                        style={inputStyle}
-                      />
+                      <input {...editRouteForm.register('distance')} style={inputStyle} />
+                      {editRouteErrors.distance && <span style={fieldErrorStyle}>{editRouteErrors.distance.message}</span>}
                     </label>
                     <label style={{ display: 'grid', gap: '6px' }}>
                       Тривалість
-                      <input
-                        value={editingRoute.duration}
-                        onChange={e => setEditingRoute({ ...editingRoute, duration: e.target.value })}
-                        style={inputStyle}
-                      />
+                      <input {...editRouteForm.register('duration')} style={inputStyle} />
+                      {editRouteErrors.duration && <span style={fieldErrorStyle}>{editRouteErrors.duration.message}</span>}
                     </label>
                     <label style={{ display: 'grid', gap: '6px' }}>
                       Остановки
-                      <input
-                        value={editingRoute.stops}
-                        onChange={e => setEditingRoute({ ...editingRoute, stops: e.target.value })}
-                        placeholder="Наприклад: Полтава, Кропивницький"
-                        style={inputStyle}
-                      />
+                      <input {...editRouteForm.register('stops')} placeholder="Наприклад: Полтава, Кропивницький" style={inputStyle} />
                     </label>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                      <Button type="submit" loading={submitting} style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600 }}>
+                      <Button type="submit" loading={editRouteForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600 }}>
                         Зберегти маршрут
                       </Button>
-                      <button type="button" onClick={handleCancelEditRoute} disabled={submitting} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.65 : 1 }}>
+                      <button type="button" onClick={handleCancelEditRoute} disabled={editRouteForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: editRouteForm.formState.isSubmitting ? 'not-allowed' : 'pointer', opacity: editRouteForm.formState.isSubmitting ? 0.65 : 1 }}>
                         Скасувати
                       </button>
                     </div>
@@ -639,69 +534,50 @@ function Admin() {
               return (
                 <div key={trip.id} style={{ padding: '18px', borderRadius: '14px', background: 'var(--bg)', border: '1px solid var(--border)' }}>
                   {editingTripId === trip.id ? (
-                    <form onSubmit={handleSaveTrip} style={{ display: 'grid', gap: '12px' }}>
+                    <form onSubmit={editTripForm.handleSubmit(onSaveTrip)} noValidate style={{ display: 'grid', gap: '12px' }}>
                       <label style={{ display: 'grid', gap: '6px' }}>
                         Маршрут
-                        <select
-                          value={editingTrip.routeId}
-                          onChange={e => setEditingTrip({ ...editingTrip, routeId: e.target.value })}
-                          style={inputStyle}
-                        >
+                        <select {...editTripForm.register('routeId')} style={inputStyle}>
                           {routes.map(routeOption => (
                             <option key={routeOption.id} value={routeOption.id}>
                               {routeOption.from} → {routeOption.to}
                             </option>
                           ))}
                         </select>
+                        {editTripErrors.routeId && <span style={fieldErrorStyle}>{editTripErrors.routeId.message}</span>}
                       </label>
                       <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
                         <label style={{ display: 'grid', gap: '6px' }}>
                           Дата
-                          <input
-                            type="date"
-                            value={editingTrip.date}
-                            onChange={e => setEditingTrip({ ...editingTrip, date: e.target.value })}
-                            style={inputStyle}
-                          />
+                          <input type="date" {...editTripForm.register('date')} style={inputStyle} />
+                          {editTripErrors.date && <span style={fieldErrorStyle}>{editTripErrors.date.message}</span>}
                         </label>
                         <label style={{ display: 'grid', gap: '6px' }}>
                           Час
-                          <input
-                            type="time"
-                            value={editingTrip.time}
-                            onChange={e => setEditingTrip({ ...editingTrip, time: e.target.value })}
-                            style={inputStyle}
-                          />
+                          <input type="time" {...editTripForm.register('time')} style={inputStyle} />
+                          {editTripErrors.time && <span style={fieldErrorStyle}>{editTripErrors.time.message}</span>}
                         </label>
                       </div>
                       <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
                         <label style={{ display: 'grid', gap: '6px' }}>
                           Ціна (грн)
-                          <input
-                            type="number"
-                            value={editingTrip.price}
-                            onChange={e => setEditingTrip({ ...editingTrip, price: e.target.value })}
-                            style={inputStyle}
-                          />
+                          <input type="number" {...editTripForm.register('price')} style={inputStyle} />
+                          {editTripErrors.price && <span style={fieldErrorStyle}>{editTripErrors.price.message}</span>}
                         </label>
                         <label style={{ display: 'grid', gap: '6px' }}>
                           Кількість місць
-                          <input
-                            type="number"
-                            value={editingTrip.seats}
-                            onChange={e => setEditingTrip({ ...editingTrip, seats: e.target.value })}
-                            style={inputStyle}
-                          />
+                          <input type="number" {...editTripForm.register('seats')} style={inputStyle} />
+                          {editTripErrors.seats && <span style={fieldErrorStyle}>{editTripErrors.seats.message}</span>}
                         </label>
                       </div>
 
-                      <TripDetailsFields value={editingTrip} onChange={setEditingTrip} inputStyle={inputStyle} />
+                      <TripDetailsFields form={editTripForm} inputStyle={inputStyle} />
 
                       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                        <Button type="submit" loading={submitting} style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600 }}>
+                        <Button type="submit" loading={editTripForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600 }}>
                           Зберегти рейс
                         </Button>
-                        <button type="button" onClick={handleCancelEditTrip} disabled={submitting} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.65 : 1 }}>
+                        <button type="button" onClick={handleCancelEditTrip} disabled={editTripForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: editTripForm.formState.isSubmitting ? 'not-allowed' : 'pointer', opacity: editTripForm.formState.isSubmitting ? 0.65 : 1 }}>
                           Скасувати
                         </button>
                       </div>

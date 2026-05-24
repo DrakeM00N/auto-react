@@ -1,9 +1,38 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '../context/AuthContext'
 import GoogleAuthButton from '../components/GoogleAuthButton'
 import Button from '../components/Button'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
+import { loginSchema } from '../lib/schemas'
+
+const fieldStyle = {
+  width: '100%',
+  padding: '14px 16px',
+  borderRadius: '14px',
+  border: '1px solid var(--border)',
+  background: 'var(--bg)',
+  color: 'var(--text)',
+}
+
+const fieldErrorStyle = { color: '#842029', fontSize: '0.85rem', marginTop: '-4px' }
+
+const passwordWrapperStyle = { position: 'relative', display: 'grid' }
+
+const eyeButtonStyle = {
+  position: 'absolute',
+  top: '50%',
+  right: '14px',
+  transform: 'translateY(-50%)',
+  border: 'none',
+  background: 'transparent',
+  color: 'var(--text2)',
+  cursor: 'pointer',
+  fontSize: '1.1rem',
+  padding: 0,
+}
 
 function Login() {
   useDocumentMeta({
@@ -12,55 +41,27 @@ function Login() {
   })
   const { login } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
-  const [status, setStatus] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [serverStatus, setServerStatus] = useState(null)
 
-  const fieldStyle = {
-    width: '100%',
-    padding: '14px 16px',
-    borderRadius: '14px',
-    border: '1px solid var(--border)',
-    background: 'var(--bg)',
-    color: 'var(--text)',
-  }
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(loginSchema),
+    defaultValues: { email: '', password: '' },
+  })
 
-  const passwordWrapperStyle = {
-    position: 'relative',
-    display: 'grid',
-  }
-
-  const eyeButtonStyle = {
-    position: 'absolute',
-    top: '50%',
-    right: '14px',
-    transform: 'translateY(-50%)',
-    border: 'none',
-    background: 'transparent',
-    color: 'var(--text2)',
-    cursor: 'pointer',
-    fontSize: '1.1rem',
-    padding: 0,
-  }
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    if (loading) return
-    setLoading(true)
-    try {
-      const normalizedEmail = email.trim().toLowerCase()
-      const result = await login(normalizedEmail, password)
-      if (!result.success) {
-        setStatus({ type: 'error', message: result.message })
-        return
-      }
-      setStatus({ type: 'success', message: 'Вхід виконано успішно!' })
-      navigate('/')
-    } finally {
-      setLoading(false)
+  const onSubmit = async (values) => {
+    setServerStatus(null)
+    const result = await login(values.email, values.password)
+    if (!result.success) {
+      setServerStatus({ type: 'error', message: result.message })
+      return
     }
+    setServerStatus({ type: 'success', message: 'Вхід виконано успішно!' })
+    navigate('/')
   }
 
   return (
@@ -74,28 +75,25 @@ function Login() {
         </p>
       </section>
 
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '18px' }}>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: 'grid', gap: '18px' }}>
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
           Email
           <input
-            value={email}
-            onChange={e => setEmail(e.target.value)}
+            {...register('email')}
             type="email"
-            required
             autoComplete="username"
             placeholder="example@mail.com"
-            style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+            style={fieldStyle}
           />
+          {errors.email && <span style={fieldErrorStyle}>{errors.email.message}</span>}
         </label>
 
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
           Пароль
           <div style={passwordWrapperStyle}>
             <input
-              value={password}
-              onChange={e => setPassword(e.target.value)}
+              {...register('password')}
               type={showPassword ? 'text' : 'password'}
-              required
               autoComplete="current-password"
               placeholder="••••••••"
               style={fieldStyle}
@@ -109,23 +107,24 @@ function Login() {
               {showPassword ? '👁' : '👁️'}
             </button>
           </div>
+          {errors.password && <span style={fieldErrorStyle}>{errors.password.message}</span>}
         </label>
 
-        {status && (
+        {serverStatus && (
           <div style={{
             padding: '14px 16px',
             borderRadius: '14px',
-            background: status.type === 'success' ? '#E8F6EE' : '#FDECEA',
-            border: `1px solid ${status.type === 'success' ? '#A3D9A5' : '#F5C6CB'}`,
-            color: status.type === 'success' ? '#1B6B31' : '#842029',
+            background: serverStatus.type === 'success' ? '#E8F6EE' : '#FDECEA',
+            border: `1px solid ${serverStatus.type === 'success' ? '#A3D9A5' : '#F5C6CB'}`,
+            color: serverStatus.type === 'success' ? '#1B6B31' : '#842029',
           }}>
-            {status.message}
+            {serverStatus.message}
           </div>
         )}
 
         <Button
           type="submit"
-          loading={loading}
+          loading={isSubmitting}
           style={{
             padding: '14px 18px',
             borderRadius: '14px',
@@ -138,7 +137,7 @@ function Login() {
           Увійти
         </Button>
 
-        <GoogleAuthButton onError={(message) => setStatus({ type: 'error', message })} />
+        <GoogleAuthButton onError={(message) => setServerStatus({ type: 'error', message })} />
 
         <p style={{ color: 'var(--text2)', textAlign: 'center' }}>
           Немає акаунту?{' '}

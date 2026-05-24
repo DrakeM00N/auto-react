@@ -1,28 +1,57 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
+import { useForm, useWatch } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useData } from '../context/DataContext'
 import { track } from '../lib/analytics'
 import { apiRequest } from '../lib/api'
 import { formatDate, isDeparted } from '../lib/format'
 import Button from '../components/Button'
+import { bookingSchema } from '../lib/schemas'
+
+const inputStyle = {
+  width: '100%',
+  padding: '14px 16px',
+  borderRadius: '14px',
+  border: '1px solid var(--border)',
+  background: 'var(--bg)',
+  color: 'var(--text)',
+  boxSizing: 'border-box',
+}
+
+const fieldErrorStyle = { color: '#842029', fontSize: '0.85rem', marginTop: '-4px' }
 
 function Booking() {
   const { trips, routes } = useData()
   const [searchParams] = useSearchParams()
   const tripId = Number(searchParams.get('tripId'))
-
-  const [passengerFirstName, setPassengerFirstName] = useState('')
-  const [passengerLastName, setPassengerLastName] = useState('')
-  const [passengerPhone, setPassengerPhone] = useState('')
-  const [boardingPoint, setBoardingPoint] = useState('')
-  const [alightingPoint, setAlightingPoint] = useState('')
-  const [status, setStatus] = useState(null)
-  const [loading, setLoading] = useState(false)
+  const [serverError, setServerError] = useState(null)
 
   const selectedTrip = useMemo(() => trips.find(trip => trip.id === tripId), [trips, tripId])
   const selectedRoute = useMemo(() => routes.find(route => route.id === selectedTrip?.routeId), [routes, selectedTrip])
   const freeSeats = selectedTrip ? selectedTrip.seats - (selectedTrip.bookedCount || 0) : 0
   const departed = selectedTrip ? isDeparted(selectedTrip) : false
+
+  const {
+    register,
+    handleSubmit,
+    control,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(bookingSchema),
+    defaultValues: {
+      passengerFirstName: '',
+      passengerLastName: '',
+      passengerPhone: '',
+      boardingPoint: '',
+      alightingPoint: '',
+    },
+  })
+
+  // useWatch (vs. the form's watch()) is the React-Compiler-friendly variant —
+  // it subscribes to a single field without breaking memoization.
+  const boardingPoint = useWatch({ control, name: 'boardingPoint' })
 
   // Funnel: the visitor reached the booking page with a valid trip
   useEffect(() => {
@@ -46,59 +75,33 @@ function Booking() {
     return allPoints.slice(idx + 1)
   }, [boardingPoint, allPoints])
 
-  const handleBoardingChange = (val) => {
-    setBoardingPoint(val)
-    setAlightingPoint('')
-  }
-
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-
+  const onSubmit = async (values) => {
     if (departed) {
-      setStatus({ type: 'error', message: 'Цей рейс уже відправлено.' })
+      setServerError('Цей рейс уже відправлено.')
       return
     }
-
-    if (!passengerFirstName.trim() || !passengerLastName.trim() || !passengerPhone.trim()) {
-      setStatus({ type: 'error', message: 'Будь ласка, заповніть всі поля.' })
-      return
-    }
-    if (!boardingPoint || !alightingPoint) {
-      setStatus({ type: 'error', message: 'Оберіть зупинку посадки та висадки.' })
-      return
-    }
-
-    setLoading(true)
-    setStatus(null)
+    setServerError(null)
 
     // Funnel: the visitor submitted the booking form
     track('booking_submitted', { trip_id: tripId })
 
     try {
-      const fullName = `${passengerLastName.trim()} ${passengerFirstName.trim()}`
-
-      // Ask the backend to create a monobank invoice. The booking is
-      // created server-side only after monobank confirms payment, so we
-      // never produce unpaid bookings from the client.
+      const fullName = `${values.passengerLastName.trim()} ${values.passengerFirstName.trim()}`
       const result = await apiRequest('POST', '/payments/checkout', {
         tripId,
         passengerName: fullName,
-        passengerPhone: passengerPhone.trim(),
-        boardingPoint,
-        alightingPoint,
+        passengerPhone: values.passengerPhone,
+        boardingPoint: values.boardingPoint,
+        alightingPoint: values.alightingPoint,
       })
-
-      // Fallback for recovering the order on the success page if monobank
-      // doesn't preserve the order_id query param in its redirect.
       sessionStorage.setItem('paymentOrderId', result.orderId)
-      window.location.href = result.pageUrl
+      // assign() — React Compiler flags `window.location.href = ...` as an
+      // outside-the-component mutation; the method call has identical effect.
+      window.location.assign(result.pageUrl)
     } catch (e) {
-      setStatus({ type: 'error', message: e.message })
-      setLoading(false)
+      setServerError(e.message)
     }
   }
-
-  const inputStyle = { width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)', boxSizing: 'border-box' }
 
   return (
     <div style={{ padding: '40px 2rem', maxWidth: '760px', margin: '0 auto' }}>
@@ -153,21 +156,34 @@ function Booking() {
             </div>
           </article>
 
-          <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '18px' }}>
+          <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: 'grid', gap: '18px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
               <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
                 Зупинка посадки
-                <select value={boardingPoint} onChange={e => handleBoardingChange(e.target.value)} style={inputStyle}>
+                <select
+                  {...register('boardingPoint', {
+                    // Resetting the dependent field on boarding change keeps
+                    // the option list and current value in sync.
+                    onChange: () => setValue('alightingPoint', '', { shouldValidate: false }),
+                  })}
+                  style={inputStyle}
+                >
                   <option value="">Оберіть зупинку</option>
                   {allPoints.slice(0, -1).map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
+                {errors.boardingPoint && <span style={fieldErrorStyle}>{errors.boardingPoint.message}</span>}
               </label>
               <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
                 Зупинка висадки
-                <select value={alightingPoint} onChange={e => setAlightingPoint(e.target.value)} style={{ ...inputStyle, opacity: boardingPoint ? 1 : 0.5 }} disabled={!boardingPoint}>
+                <select
+                  {...register('alightingPoint')}
+                  style={{ ...inputStyle, opacity: boardingPoint ? 1 : 0.5 }}
+                  disabled={!boardingPoint}
+                >
                   <option value="">Оберіть зупинку</option>
                   {alightingOptions.map(p => <option key={p} value={p}>{p}</option>)}
                 </select>
+                {errors.alightingPoint && <span style={fieldErrorStyle}>{errors.alightingPoint.message}</span>}
               </label>
             </div>
 
@@ -175,29 +191,32 @@ function Booking() {
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                 <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
                   Імʼя
-                  <input value={passengerFirstName} onChange={e => setPassengerFirstName(e.target.value)} placeholder="Іван" style={inputStyle} />
+                  <input {...register('passengerFirstName')} placeholder="Іван" style={inputStyle} />
+                  {errors.passengerFirstName && <span style={fieldErrorStyle}>{errors.passengerFirstName.message}</span>}
                 </label>
                 <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
                   Прізвище
-                  <input value={passengerLastName} onChange={e => setPassengerLastName(e.target.value)} placeholder="Іваненко" style={inputStyle} />
+                  <input {...register('passengerLastName')} placeholder="Іваненко" style={inputStyle} />
+                  {errors.passengerLastName && <span style={fieldErrorStyle}>{errors.passengerLastName.message}</span>}
                 </label>
               </div>
               <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
                 Телефон
-                <input value={passengerPhone} onChange={e => setPassengerPhone(e.target.value)} placeholder="+380..." style={inputStyle} />
+                <input {...register('passengerPhone')} placeholder="+380..." style={inputStyle} />
+                {errors.passengerPhone && <span style={fieldErrorStyle}>{errors.passengerPhone.message}</span>}
               </label>
             </div>
 
-            {status && (
+            {serverError && (
               <div style={{ padding: '16px 18px', borderRadius: '14px', background: '#FDECEA', border: '1px solid #F5C6CB', color: '#842029' }}>
-                {status.message}
+                {serverError}
               </div>
             )}
 
             <Button
               type="submit"
               disabled={freeSeats <= 0}
-              loading={loading}
+              loading={isSubmitting}
               loadingText="Перенаправлення на оплату…"
               style={{
                 padding: '16px 22px',
