@@ -8,7 +8,7 @@ const { authMiddleware } = require('../middleware')
 const { body, validationResult } = require('express-validator')
 const { OAuth2Client } = require('google-auth-library')
 const { logger } = require('../logger')
-const { sendPasswordResetEmail } = require('../services/email')
+const { sendPasswordResetEmail, sendPasswordChangedEmail } = require('../services/email')
 
 const log = logger('auth')
 
@@ -334,6 +334,11 @@ router.post('/reset-password', async (req, res) => {
       args: [token],
     })
 
+    // Notify the account owner that their password just changed. A failed
+    // notice must NOT block the response — the password change already
+    // succeeded and the user is waiting on this request.
+    sendPasswordChangedEmail(email).catch(e => log.error('post-reset notice failed:', e))
+
     res.json({ success: true })
   } catch (e) {
     log.error('reset-password:', e)
@@ -376,6 +381,9 @@ router.post('/change-password',
       sql: 'UPDATE users SET password = ? WHERE id = ?',
       args: [hashed, user.id]
     })
+
+    // Security notice — same fire-and-forget treatment as in /reset-password.
+    sendPasswordChangedEmail(user.email).catch(e => log.error('post-change notice failed:', e))
 
     res.json({ success: true })
   } catch (e) {

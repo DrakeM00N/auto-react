@@ -91,4 +91,71 @@ async function sendPasswordResetEmail(toEmail, resetLink) {
   }
 }
 
-module.exports = { sendPasswordResetEmail }
+// Format `date` as Kyiv local time, ukr locale — "24.05.2026, 17:42" style.
+// Kept inside the email module since this is the only consumer for now;
+// move to a shared helper if other code starts formatting timestamps for UI.
+function formatKyivTime(date) {
+  return new Intl.DateTimeFormat('uk-UA', {
+    timeZone: 'Europe/Kyiv',
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit',
+  }).format(date)
+}
+
+function buildPasswordChangedEmailHtml(changedAtKyiv) {
+  return `<!doctype html>
+<html lang="uk">
+  <body style="margin:0;padding:0;background:#F4F2EE;font-family:Helvetica,Arial,sans-serif;color:#1A1814;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="520" style="background:#FFFFFF;border-radius:16px;padding:32px;text-align:left;">
+            <tr><td style="font-size:24px;font-weight:700;margin-bottom:16px;font-family:Georgia,serif;color:#1A1814;">Ваш пароль було змінено</td></tr>
+            <tr><td style="padding-top:16px;font-size:15px;line-height:1.6;color:#333;">
+              Пароль для вашого акаунта BusTour було успішно змінено.
+            </td></tr>
+            <tr><td style="padding-top:16px;font-size:15px;line-height:1.6;color:#333;">
+              Час зміни: <strong>${changedAtKyiv}</strong> (за київським часом).
+            </td></tr>
+            <tr><td style="padding-top:24px;font-size:14px;line-height:1.6;color:#842029;background:#FDECEA;border:1px solid #F5C6CB;border-radius:10px;padding:16px;">
+              <strong>Якщо ви НЕ змінювали пароль</strong> — негайно зверніться до підтримки.
+              Можливо, ваш акаунт під загрозою: змініть пароль через «Забули пароль?» та повідомте нас.
+            </td></tr>
+            <tr><td style="padding-top:32px;font-size:12px;color:#999;">— Команда BusTour</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
+}
+
+async function sendPasswordChangedEmail(toEmail) {
+  const changedAt = formatKyivTime(new Date())
+  const client = getClient()
+  if (!client) {
+    // Same dev-tolerant behaviour as the reset email — we don't want
+    // missing mail creds to break the password-change path.
+    log.warn(`RESEND_API_KEY not set — would have notified ${toEmail} of password change at ${changedAt}`)
+    return { delivered: false, dev: true }
+  }
+  try {
+    const { error } = await client.emails.send({
+      from: fromAddress,
+      to: toEmail,
+      subject: 'Ваш пароль BusTour було змінено',
+      html: buildPasswordChangedEmailHtml(changedAt),
+    })
+    if (error) {
+      log.error('Resend error (password-changed) for', toEmail, '-', error.message || error)
+      return { delivered: false, error }
+    }
+    log.info('Password-changed notice sent to', toEmail)
+    return { delivered: true }
+  } catch (e) {
+    log.error('Resend exception (password-changed) for', toEmail, '-', e.message)
+    return { delivered: false, error: e }
+  }
+}
+
+module.exports = { sendPasswordResetEmail, sendPasswordChangedEmail }
