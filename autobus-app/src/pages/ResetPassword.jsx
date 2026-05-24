@@ -1,125 +1,145 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '../context/AuthContext'
 import Button from '../components/Button'
+import { useDocumentMeta } from '../lib/useDocumentMeta'
+import { resetPasswordSchema } from '../lib/schemas'
+
+const fieldStyle = {
+  width: '100%',
+  padding: '14px 16px',
+  borderRadius: '14px',
+  border: '1px solid var(--border)',
+  background: 'var(--bg)',
+  color: 'var(--text)',
+}
+
+const fieldErrorStyle = { color: '#842029', fontSize: '0.85rem', marginTop: '-4px' }
 
 function ResetPassword() {
+  useDocumentMeta({
+    title: 'Скидання пароля',
+    description: 'Введіть новий пароль для свого акаунта BusTour.',
+  })
   const { resetPassword } = useAuth()
   const navigate = useNavigate()
-  const [email, setEmail] = useState('')
-  const [newPassword, setNewPassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [status, setStatus] = useState(null)
-  const [loading, setLoading] = useState(false)
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
+  const [serverStatus, setServerStatus] = useState(null)
 
-  const handleSubmit = async (event) => {
-    event.preventDefault()
-    if (loading) return
-    const normalizedEmail = email.trim().toLowerCase()
-    if (!normalizedEmail || !newPassword || !confirmPassword) {
-      setStatus({ type: 'error', message: 'Заповніть всі поля.' })
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm({
+    resolver: zodResolver(resetPasswordSchema),
+    defaultValues: { newPassword: '', confirm: '' },
+  })
+
+  const onSubmit = async (values) => {
+    setServerStatus(null)
+    const result = await resetPassword(values.newPassword, token)
+    if (!result.success) {
+      setServerStatus({ type: 'error', message: result.message })
       return
     }
+    setServerStatus({ type: 'success', message: 'Пароль було успішно оновлено. Увійдіть з новим паролем.' })
+    setTimeout(() => navigate('/login'), 1200)
+  }
 
-    if (newPassword !== confirmPassword) {
-      setStatus({ type: 'error', message: 'Паролі не співпадають.' })
-      return
-    }
-
-    setLoading(true)
-    try {
-      // resetPassword is async — the previous code dropped the Promise
-      // and then read .success off it (always undefined). await it.
-      const result = await resetPassword(normalizedEmail, newPassword, token)
-      if (!result.success) {
-        setStatus({ type: 'error', message: result.message })
-        return
-      }
-      setStatus({ type: 'success', message: 'Пароль було успішно оновлено. Увійдіть з новим паролем.' })
-      setTimeout(() => navigate('/login'), 1200)
-    } finally {
-      setLoading(false)
-    }
+  // Without a token in the URL there's no useful path forward — show a
+  // dedicated dead-end view that points back to the request flow rather
+  // than letting the user fill in fields that we'd reject anyway.
+  if (!token) {
+    return (
+      <div className="auth-glow" style={{ padding: '40px 2rem', maxWidth: '520px', margin: '0 auto' }}>
+        <section style={{ marginBottom: '22px' }}>
+          <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem', marginBottom: '10px' }}>
+            Скидання пароля
+          </h1>
+          <p style={{ color: 'var(--text2)', lineHeight: 1.7 }}>
+            Недійсне посилання. Скористайтесь листом, який ми надіслали на вашу пошту, або запросіть новий.
+          </p>
+        </section>
+        <div className="form-card" style={{ display: 'grid', gap: '14px' }}>
+          <Link
+            to="/forgot-password"
+            className="btn-primary"
+            style={{ borderRadius: '14px', padding: '14px 22px' }}
+          >
+            Запросити нове посилання
+          </Link>
+          <p style={{ color: 'var(--text2)', textAlign: 'center', margin: 0 }}>
+            Повернутись до{' '}
+            <Link to="/login" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
+              входу
+            </Link>
+          </p>
+        </div>
+      </div>
+    )
   }
 
   return (
-    <div style={{ padding: '40px 2rem', maxWidth: '520px', margin: '0 auto' }}>
+    <div className="auth-glow" style={{ padding: '40px 2rem', maxWidth: '520px', margin: '0 auto' }}>
       <section style={{ marginBottom: '22px' }}>
         <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem', marginBottom: '10px' }}>
           Скидання пароля
         </h1>
         <p style={{ color: 'var(--text2)', lineHeight: 1.7 }}>
-          Введіть email та новий пароль. Якщо акаунт існує, пароль буде оновлено.
+          Задайте новий пароль для свого акаунта.
         </p>
       </section>
 
-      <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '18px' }}>
-        <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
-          Email
-          <input
-            value={email}
-            onChange={e => setEmail(e.target.value)}
-            type="email"
-            required
-            placeholder="example@mail.com"
-            style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
-          />
-        </label>
-
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="form-card" style={{ display: 'grid', gap: '18px' }}>
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
           Новий пароль
           <input
-            value={newPassword}
-            onChange={e => setNewPassword(e.target.value)}
+            {...register('newPassword')}
             type="password"
-            required
+            autoComplete="new-password"
             placeholder="••••••••"
-            style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+            style={fieldStyle}
           />
+          {errors.newPassword && <span className="field-error" style={fieldErrorStyle}>{errors.newPassword.message}</span>}
         </label>
 
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
-          Підтвердження нового пароля
+          Підтвердження пароля
           <input
-            value={confirmPassword}
-            onChange={e => setConfirmPassword(e.target.value)}
+            {...register('confirm')}
             type="password"
-            required
+            autoComplete="new-password"
             placeholder="••••••••"
-            style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+            style={fieldStyle}
           />
+          {errors.confirm && <span className="field-error" style={fieldErrorStyle}>{errors.confirm.message}</span>}
         </label>
 
-        {status && (
+        {serverStatus && (
           <div style={{
             padding: '14px 16px',
             borderRadius: '14px',
-            background: status.type === 'success' ? '#E8F6EE' : '#FDECEA',
-            border: `1px solid ${status.type === 'success' ? '#A3D9A5' : '#F5C6CB'}`,
-            color: status.type === 'success' ? '#1B6B31' : '#842029',
+            background: serverStatus.type === 'success' ? '#E8F6EE' : '#FDECEA',
+            border: `1px solid ${serverStatus.type === 'success' ? '#A3D9A5' : '#F5C6CB'}`,
+            color: serverStatus.type === 'success' ? '#1B6B31' : '#842029',
           }}>
-            {status.message}
+            {serverStatus.message}
           </div>
         )}
 
         <Button
           type="submit"
-          loading={loading}
-          style={{
-            padding: '14px 18px',
-            borderRadius: '14px',
-            border: 'none',
-            background: 'var(--accent)',
-            color: '#1A1814',
-            fontWeight: 700,
-          }}
+          loading={isSubmitting}
+          className="btn-primary"
+          style={{ borderRadius: '14px' }}
         >
           Оновити пароль
         </Button>
 
-        <p style={{ color: 'var(--text2)', textAlign: 'center' }}>
+        <p style={{ color: 'var(--text2)', textAlign: 'center', margin: 0 }}>
           Повернутись до{' '}
           <Link to="/login" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
             входу

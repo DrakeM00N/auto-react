@@ -21,6 +21,7 @@ const BookingSuccess = lazy(() => import('./pages/BookingSuccess'))
 const Ticket = lazy(() => import('./pages/Ticket'))
 const Profile = lazy(() => import('./pages/Profile'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
+const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const Admin = lazy(() => import('./pages/Admin'))
 const Analytics = lazy(() => import('./pages/Analytics'))
 
@@ -47,6 +48,7 @@ function App() {
             <Route path="/register" element={<Register />} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
             <Route path="/admin/analytics" element={<ProtectedRoute requireAdmin><Analytics /></ProtectedRoute>} />
           </Routes>

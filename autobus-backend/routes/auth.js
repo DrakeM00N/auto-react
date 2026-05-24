@@ -2,11 +2,13 @@ const express = require('express')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const crypto = require('crypto')
+const rateLimit = require('express-rate-limit')
 const { db } = require('../db')
 const { authMiddleware } = require('../middleware')
 const { body, validationResult } = require('express-validator')
 const { OAuth2Client } = require('google-auth-library')
 const { logger } = require('../logger')
+const { sendPasswordResetEmail } = require('../services/email')
 
 const log = logger('auth')
 
@@ -229,90 +231,113 @@ router.post('/google', async (req, res) => {
   }
 })
 
-// POST /api/auth/request-reset
-router.post('/request-reset',
-  [
-    body('email').isEmail().normalizeEmail().withMessage('Valid email is required')
-  ],
-  async (req, res) => {
-  try {
-    const errors = validationResult(req)
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() })
-    }
-
-    const { email } = req.body
-
-    // Check if user exists (don't reveal if not for security)
-    const userResult = await db.execute({
-      sql: 'SELECT id FROM users WHERE email = ?',
-      args: [email.toLowerCase()]
-    })
-    if (userResult.rows.length === 0) {
-      // Don't reveal that email doesn't exist - for security
-      return res.json({ success: true, message: 'If email exists, reset instructions have been sent' })
-    }
-
-    // Generate reset token
-    const token = generateResetToken()
-    const expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString() // 30 minutes
-
-    await db.execute({
-      sql: 'INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)',
-      args: [email.toLowerCase(), token, expiresAt]
-    })
-
-    // No email transport is wired up. In production, refuse to operate
-    // rather than silently dropping the token (would leak via dev logs
-    // and let any log-reader take over accounts).
-    if (process.env.NODE_ENV === 'production') {
-      log.error('Password reset requested but no email transport configured')
-      return res.status(503).json({ error: 'Password reset is not available right now' })
-    }
-    log.info(`[dev] Password reset token for ${email}: ${token}`)
-
-    res.json({ success: true, message: 'If email exists, reset instructions have been sent' })
-  } catch (e) {
-    log.error('request-reset:', e)
-    res.status(500).json({ error: 'Server error' })
-  }
+// Tighter rate limit specifically for the forgot-password endpoint — 5 per
+// IP per hour. The global /api/auth limiter (20 / 15 min) is too generous
+// for a fan-out vector like password reset, and would also be consumed by
+// legitimate login attempts on the same IP.
+const forgotPasswordLimiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 5,
+  message: { error: 'Забагато спроб скидання пароля. Спробуйте пізніше.' },
+  standardHeaders: true,
+  legacyHeaders: false,
 })
 
+// POST /api/auth/forgot-password
+// Anti-enumeration: the response is identical whether or not the email is
+// registered. The email is only really sent (and a token only really
+// created) when an account exists, but the client can't tell from outside.
+router.post('/forgot-password',
+  forgotPasswordLimiter,
+  [body('email').isEmail().normalizeEmail().withMessage('Невірний формат email')],
+  async (req, res) => {
+    try {
+      const errors = validationResult(req)
+      // Format errors are about MALFORMED input, not enumeration — safe to
+      // surface specifically so the user sees "fix your email syntax."
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ error: errors.array()[0].msg })
+      }
+
+      const email = (req.body.email || '').trim().toLowerCase()
+      const generic = { success: true, message: 'Якщо акаунт існує, ми надіслали лист з посиланням.' }
+
+      const userResult = await db.execute({
+        sql: 'SELECT id FROM users WHERE email = ?',
+        args: [email],
+      })
+      if (userResult.rows.length === 0) {
+        // Don't tell the client. Log server-side for analytics.
+        log.info(`forgot-password: no account for ${email} — silent success`)
+        return res.json(generic)
+      }
+
+      const token = generateResetToken()
+      const expiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString() // 1h
+      await db.execute({
+        sql: 'INSERT INTO password_resets (email, token, expires_at) VALUES (?, ?, ?)',
+        args: [email, token, expiresAt],
+      })
+
+      // FRONTEND_URL may be a comma-separated list (CORS allowlist). The
+      // first entry is treated as the canonical public URL for outbound
+      // links — no hardcoded domain anywhere.
+      const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173')
+        .split(',')[0].trim()
+      const resetLink = `${frontendUrl}/reset-password?token=${token}`
+
+      // Failures are logged inside the service. We don't fail the request
+      // even if delivery hiccups — the user shouldn't be able to detect
+      // outbound-mail outages either.
+      await sendPasswordResetEmail(email, resetLink)
+
+      res.json(generic)
+    } catch (e) {
+      log.error('forgot-password:', e)
+      res.status(500).json({ error: 'Помилка сервера' })
+    }
+  }
+)
+
 // POST /api/auth/reset-password
+// Token is the only credential; the email it's bound to comes from the
+// password_resets row, not the client. Client only sends { newPassword, token }.
 router.post('/reset-password', async (req, res) => {
   try {
-    const { email, newPassword, token } = req.body
-    if (!email || !newPassword || !token) {
-      return res.status(400).json({ error: 'Please fill all fields' })
+    const { newPassword, token } = req.body
+    if (!token) {
+      return res.status(400).json({ error: 'Недійсне або застаріле посилання.' })
+    }
+    if (!newPassword) {
+      return res.status(400).json({ error: 'Заповніть усі поля.' })
+    }
+    if (newPassword.length < 8 || !/\d/.test(newPassword)) {
+      return res.status(400).json({ error: 'Пароль має містити щонайменше 8 символів та хоча б одну цифру.' })
     }
 
-    // Find valid reset token
     const resetResult = await db.execute({
-      sql: 'SELECT * FROM password_resets WHERE email = ? AND token = ? AND used = 0 AND expires_at > ?',
-      args: [email.toLowerCase(), token, new Date().toISOString()]
+      sql: 'SELECT email FROM password_resets WHERE token = ? AND used = 0 AND expires_at > ?',
+      args: [token, new Date().toISOString()],
     })
-
     if (resetResult.rows.length === 0) {
-      return res.status(400).json({ error: 'Invalid or expired reset token' })
+      return res.status(400).json({ error: 'Посилання недійсне або застаріле.' })
     }
+    const email = resetResult.rows[0].email
 
-    // Update user password
     const hashed = await bcrypt.hash(newPassword, 10)
     await db.execute({
       sql: 'UPDATE users SET password = ? WHERE email = ?',
-      args: [hashed, email.toLowerCase()]
+      args: [hashed, email],
     })
-
-    // Mark token as used
     await db.execute({
-      sql: 'UPDATE password_resets SET used = 1 WHERE email = ? AND token = ?',
-      args: [email.toLowerCase(), token]
+      sql: 'UPDATE password_resets SET used = 1 WHERE token = ?',
+      args: [token],
     })
 
     res.json({ success: true })
   } catch (e) {
     log.error('reset-password:', e)
-    res.status(500).json({ error: 'Server error' })
+    res.status(500).json({ error: 'Помилка сервера' })
   }
 })
 

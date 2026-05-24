@@ -77,6 +77,36 @@ backend immediately. However, the frontend caches `currentUser` in
 whose role just changed has to **log out and log back in** before the
 admin nav shows up in their browser.
 
+### Password reset flow
+
+The flow uses transactional email through [Resend](https://resend.com):
+
+1. User submits email on `/forgot-password` (frontend).
+2. `POST /api/auth/forgot-password` is rate-limited to 5 per IP per hour.
+   The response is identical whether the email is registered or not
+   (anti-enumeration). If the user exists, a 64-char random token is
+   stored in `password_resets` with a 1-hour expiry, and an email with
+   `${FRONTEND_URL}/reset-password?token=<token>` is sent.
+3. User clicks the link → `/reset-password?token=...` opens. The token
+   is the only credential — the frontend submits `{ token, newPassword }`,
+   the backend reads the email from the `password_resets` row.
+4. `POST /api/auth/reset-password` verifies the token (existence,
+   `used = 0`, not expired), updates `users.password`, marks the token
+   as used. Subsequent reuse of the same token is rejected.
+
+**Resend setup:**
+
+- For local development, leave `RESEND_API_KEY` empty. `services/email.js`
+  logs the reset link to stdout instead of trying to send. This lets
+  you test the full flow without any external dependencies.
+- For first real-mail tests, sign up at resend.com, copy your API key
+  into `RESEND_API_KEY`, and use `EMAIL_FROM='BusTour <onboarding@resend.dev>'` —
+  Resend's sandbox sender delivers ONLY to the account-owner email,
+  perfect for end-to-end testing without spamming.
+- **Before production:** verify your own domain in the Resend dashboard
+  (DNS records — SPF, DKIM, MX). Once verified, switch `EMAIL_FROM` to
+  `noreply@your-domain`. Sandbox sender does not work for real users.
+
 ### Running the Server
 
 To start the server in development mode (with auto-restart using nodemon):
@@ -104,8 +134,8 @@ All API endpoints are prefixed with `/api`.
 #### Authentication
 - `POST /api/auth/register` - Register a new user
 - `POST /api/auth/login` - Login user
-- `POST /api/auth/request-reset` - Request password reset (sends token to email)
-- `POST /api/auth/reset-password` - Reset password with token
+- `POST /api/auth/forgot-password` - Request a password-reset email (rate-limited 5/hour/IP)
+- `POST /api/auth/reset-password` - Reset password with token from the email link
 - `POST /api/auth/change-password` - Change password (authenticated)
 
 #### Routes

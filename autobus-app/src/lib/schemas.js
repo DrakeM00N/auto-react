@@ -47,6 +47,22 @@ export const registerSchema = z
     message: 'Паролі не співпадають',
   })
 
+// ---------- password reset ----------
+
+export const forgotPasswordSchema = z.object({
+  email: emailField,
+})
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: passwordField.regex(/\d/, 'Пароль має містити щонайменше одну цифру'),
+    confirm: z.string().min(1, 'Підтвердіть пароль'),
+  })
+  .refine(d => d.newPassword === d.confirm, {
+    path: ['confirm'],
+    message: 'Паролі не співпадають',
+  })
+
 // ---------- booking ----------
 
 export const bookingSchema = z.object({

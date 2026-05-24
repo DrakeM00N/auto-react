@@ -141,7 +141,7 @@ function Login() {
         </p>
         <p style={{ color: 'var(--text2)', textAlign: 'center' }}>
           Забули пароль?{' '}
-          <Link to="/reset-password" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
+          <Link to="/forgot-password" style={{ color: 'var(--accent)', textDecoration: 'underline' }}>
             Скинути пароль
           </Link>
         </p>

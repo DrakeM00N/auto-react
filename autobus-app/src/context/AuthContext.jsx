@@ -55,16 +55,24 @@ export function AuthProvider({ children }) {
     return { success: true }
   })
 
-  const resetPassword = (email, newPassword, token) => wrap(async () => {
-    await request('POST', '/auth/reset-password', { email, newPassword, token })
+  // Reset is keyed on the token only — the bound email lives in the
+  // password_resets row server-side. Client only knows the token (from
+  // the email link) and the new password it wants.
+  const resetPassword = (newPassword, token) => wrap(async () => {
+    await request('POST', '/auth/reset-password', { newPassword, token })
     return { success: true }
+  })
+
+  const requestPasswordReset = (email) => wrap(async () => {
+    const data = await request('POST', '/auth/forgot-password', { email })
+    return { success: true, message: data.message }
   })
 
   return (
     <AuthContext.Provider value={{
       currentUser,
       register, login, loginWithGoogle, logout,
-      changePassword, resetPassword,
+      changePassword, resetPassword, requestPasswordReset,
     }}>
       {children}
     </AuthContext.Provider>

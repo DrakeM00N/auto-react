@@ -27,7 +27,9 @@
       "Bash(git push *)",
       "Bash(JWT_SECRET=test ADMIN_EMAILS=vip@example.com node -e ' *)",
       "Bash(curl -s -m 60 https://autobus-frontend.onrender.com/assets/index-C4T55CTW.js)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Bash(JWT_SECRET=test node -e \"process.env.JWT_SECRET='test'; require\\('./routes/auth.js'\\); console.log\\('auth.js loads OK'\\)\")",
+      "Bash(JWT_SECRET=test_dev_secret node *)"
     ]
   }
 }
