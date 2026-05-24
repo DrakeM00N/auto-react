@@ -86,3 +86,211 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 [data-theme="light"] input[type="time"]::-webkit-calendar-picker-indicator {
   filter: invert(0.3) brightness(1);
 }
+
+/* ======================================================================
+   HERO POLISH (Home.jsx)
+   Subtle staggered fade-in, slow amber haze, soft hover interactions.
+   Designed to feel professional, not flashy — durations short, opacity low.
+   All motion is wrapped to respect prefers-reduced-motion.
+   ====================================================================== */
+
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes hero-haze-drift {
+  0%   { transform: translate(-50%, -45%) scale(1);    opacity: 0.92; }
+  50%  { transform: translate(-46%, -50%) scale(1.06); opacity: 1;    }
+  100% { transform: translate(-50%, -45%) scale(1);    opacity: 0.92; }
+}
+
+.hero {
+  position: relative;
+  overflow: hidden;
+}
+
+/* Amber haze sits behind the content. The radial gradient uses the dark-theme
+   accent in rgba — slightly muted in the light theme, but still amber-tinted
+   so the haze reads as a soft glow rather than a colored block. */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 1100px;
+  height: 1100px;
+  transform: translate(-50%, -45%);
+  background: radial-gradient(
+    circle,
+    rgba(232, 160, 32, 0.14) 0%,
+    rgba(232, 160, 32, 0.06) 35%,
+    transparent 62%
+  );
+  pointer-events: none;
+  animation: hero-haze-drift 9s ease-in-out infinite;
+  z-index: 0;
+}
+
+.hero__inner {
+  position: relative;
+  z-index: 1;
+}
+
+.hero__eyebrow,
+.hero__title,
+.hero__subtitle,
+.hero__cta-row {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: hero-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.hero__eyebrow  { animation-delay: 0.05s; }
+.hero__title    { animation-delay: 0.18s; }
+.hero__subtitle { animation-delay: 0.31s; }
+.hero__cta-row  { animation-delay: 0.44s; }
+
+/* ---------- Hero buttons ---------- */
+
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent);
+  color: #1A1814;
+  padding: 14px 32px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: 'Unbounded', sans-serif;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(232, 160, 32, 0.22);
+}
+
+.btn-primary:active { transform: scale(0.98); }
+
+.btn-primary__arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.btn-primary:hover .btn-primary__arrow { transform: translateX(4px); }
+
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  background: transparent;
+  color: var(--text);
+  padding: 14px 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border2);
+  font-weight: 500;
+  font-size: 1rem;
+  text-decoration: none;
+  transition: border-color 0.2s ease, color 0.2s ease, transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.btn-ghost:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(232, 160, 32, 0.12);
+}
+
+.btn-ghost:active { transform: scale(0.98); }
+
+/* ---------- Stats row ---------- */
+
+.stat {
+  flex: 1;
+  max-width: 200px;
+  padding: 32px 16px;
+  text-align: center;
+  background: var(--bg);
+  transition: background 0.2s ease;
+}
+
+.stat:hover { background: var(--bg3); }
+
+/* ---------- Upcoming trip cards ---------- */
+
+.trip-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.trip-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(232, 160, 32, 0.12);
+  border-color: var(--border2);
+}
+
+.trip-card__cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent);
+  color: #1A1814;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  white-space: nowrap;
+  text-decoration: none;
+  border: 1px solid transparent;
+  transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.25s ease;
+}
+
+.trip-card__cta:hover {
+  background: var(--accent-hover);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 14px rgba(232, 160, 32, 0.18);
+}
+
+.trip-card__cta-arrow {
+  display: inline-block;
+  transition: transform 0.2s ease;
+}
+
+.trip-card__cta:hover .trip-card__cta-arrow { transform: translateX(4px); }
+
+/* ---------- Reduced motion: kill movement, keep visibility ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__eyebrow,
+  .hero__title,
+  .hero__subtitle,
+  .hero__cta-row {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+  .hero::before { animation: none; }
+  .btn-primary,
+  .btn-primary__arrow,
+  .btn-ghost,
+  .stat,
+  .trip-card,
+  .trip-card__cta,
+  .trip-card__cta-arrow {
+    transition: none;
+  }
+  .btn-primary:hover,
+  .btn-ghost:hover,
+  .trip-card:hover,
+  .trip-card__cta:hover,
+  .btn-primary:hover .btn-primary__arrow,
+  .trip-card__cta:hover .trip-card__cta-arrow {
+    transform: none;
+  }
+}

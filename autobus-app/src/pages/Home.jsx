@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useData } from '../context/DataContext'
 import { formatDate, isDeparted } from '../lib/format'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
+import { useCountUp } from '../lib/useCountUp'
 
 const FAQ_ITEMS = [
   {
@@ -87,6 +88,21 @@ function FaqItem({ item }) {
   )
 }
 
+// Each Stat owns its own useCountUp call so the hook is invoked the same
+// number of times every render (rules-of-hooks compliant) and animations
+// start independently when each value becomes available.
+function Stat({ value, label }) {
+  const display = useCountUp(value)
+  return (
+    <div className="stat">
+      <div style={{ fontFamily: 'Unbounded', fontSize: '2rem', fontWeight: 700, color: 'var(--accent)' }}>
+        {display}
+      </div>
+      <div style={{ color: 'var(--text2)', fontSize: '0.9rem', marginTop: '4px' }}>{label}</div>
+    </div>
+  )
+}
+
 function Home() {
   useDocumentMeta({
     title: 'Головна',
@@ -100,86 +116,61 @@ function Home() {
     <div>
 
       {/* ГЕРОЙ */}
-      <section style={{
+      <section className="hero" style={{
         padding: '80px 2rem',
         textAlign: 'center',
         background: 'var(--bg2)',
         borderBottom: '1px solid var(--border)',
       }}>
-        <p style={{
-          color: 'var(--accent)',
-          fontFamily: 'Unbounded',
-          fontSize: '0.75rem',
-          letterSpacing: '0.15em',
-          textTransform: 'uppercase',
-          marginBottom: '16px',
-        }}>
-          Зручні подорожі Україною
-        </p>
-
-        <h1 style={{
-          fontFamily: 'Unbounded',
-          fontSize: 'clamp(2rem, 5vw, 3.5rem)',
-          fontWeight: 700,
-          lineHeight: 1.15,
-          marginBottom: '24px',
-        }}>
-          Автобусні рейси<br />
-          <span style={{ color: 'var(--accent)' }}>швидко та зручно</span>
-        </h1>
-
-        <p style={{
-          color: 'var(--text2)',
-          fontSize: '1.1rem',
-          maxWidth: '480px',
-          margin: '0 auto 40px',
-          lineHeight: 1.7,
-        }}>
-          Бронюйте квитки онлайн, обирайте зручний час відправлення та подорожуйте з комфортом
-        </p>
-
-        <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
-          <Link to="/schedule" style={{
-            background: 'var(--accent)',
-            color: '#1A1814',
-            padding: '14px 32px',
-            borderRadius: '8px',
-            fontWeight: 600,
-            fontSize: '1rem',
+        <div className="hero__inner">
+          <p className="hero__eyebrow" style={{
+            color: 'var(--accent)',
             fontFamily: 'Unbounded',
-            textDecoration: 'none',
+            fontSize: '0.75rem',
+            letterSpacing: '0.15em',
+            textTransform: 'uppercase',
+            marginBottom: '16px',
           }}>
-            Дивитись розклад
-          </Link>
-          <Link to="/routes" style={{
-            background: 'transparent',
-            color: 'var(--text)',
-            padding: '14px 32px',
-            borderRadius: '8px',
-            fontWeight: 500,
-            fontSize: '1rem',
-            border: '1px solid var(--border2)',
-            textDecoration: 'none',
+            Зручні подорожі Україною
+          </p>
+
+          <h1 className="hero__title" style={{
+            fontFamily: 'Unbounded',
+            fontSize: 'clamp(2rem, 5vw, 3.5rem)',
+            fontWeight: 700,
+            lineHeight: 1.15,
+            marginBottom: '24px',
           }}>
-            Всі маршрути
-          </Link>
+            Автобусні рейси<br />
+            <span style={{ color: 'var(--accent)' }}>швидко та зручно</span>
+          </h1>
+
+          <p className="hero__subtitle" style={{
+            color: 'var(--text2)',
+            fontSize: '1.1rem',
+            maxWidth: '480px',
+            margin: '0 auto 40px',
+            lineHeight: 1.7,
+          }}>
+            Бронюйте квитки онлайн, обирайте зручний час відправлення та подорожуйте з комфортом
+          </p>
+
+          <div className="hero__cta-row" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap' }}>
+            <Link to="/schedule" className="btn-primary">
+              Дивитись розклад <span className="btn-primary__arrow" aria-hidden="true">→</span>
+            </Link>
+            <Link to="/routes" className="btn-ghost">
+              Всі маршрути
+            </Link>
+          </div>
         </div>
       </section>
 
       {/* СТАТИСТИКА */}
       <section style={{ display: 'flex', justifyContent: 'center', gap: '2px', background: 'var(--border)' }}>
-        {[
-          { value: routes.length, label: 'Маршрутів' },
-          { value: trips.length, label: 'Рейсів' },
-          { value: '40', label: 'Місць у автобусі' },
-        ].map((stat, i) => (
-          <div key={i} style={{ flex: 1, maxWidth: '200px', padding: '32px 16px', textAlign: 'center', background: 'var(--bg)' }}>
-            <div style={{ fontFamily: 'Unbounded', fontSize: '2rem', fontWeight: 700, color: 'var(--accent)' }}>
-              {stat.value}
-            </div>
-            <div style={{ color: 'var(--text2)', fontSize: '0.9rem', marginTop: '4px' }}>{stat.label}</div>
-          </div>
-        ))}
+        <Stat value={routes.length} label="Маршрутів" />
+        <Stat value={trips.length} label="Рейсів" />
+        <Stat value={40} label="Місць у автобусі" />
       </section>
 
       {/* НАЙБЛИЖЧІ РЕЙСИ */}
@@ -196,14 +187,11 @@ function Home() {
             const route = routes.find(r => r.id === trip.routeId)
             const freeSeats = trip.seats - (trip.bookedCount || 0)
             return (
-              <div key={trip.id} style={{
+              <div key={trip.id} className="trip-card" style={{
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'space-between',
                 padding: '20px 24px',
-                background: 'var(--bg2)',
-                borderRadius: '12px',
-                border: '1px solid var(--border)',
                 flexWrap: 'wrap',
                 gap: '16px',
               }}>
@@ -224,17 +212,8 @@ function Home() {
                     <div style={{ fontSize: '0.8rem', color: 'var(--text2)' }}>Ціна</div>
                     <div style={{ fontWeight: 600 }}>{trip.price} грн</div>
                   </div>
-                  <Link to={`/booking?tripId=${trip.id}`} style={{
-                    background: 'var(--accent)',
-                    color: '#1A1814',
-                    padding: '10px 20px',
-                    borderRadius: '8px',
-                    fontWeight: 600,
-                    fontSize: '0.9rem',
-                    whiteSpace: 'nowrap',
-                    textDecoration: 'none',
-                  }}>
-                    Забронювати
+                  <Link to={`/booking?tripId=${trip.id}`} className="trip-card__cta">
+                    Забронювати <span className="trip-card__cta-arrow" aria-hidden="true">→</span>
                   </Link>
                 </div>
               </div>
