@@ -111,6 +111,9 @@ function Home() {
   const { routes, trips } = useData()
   // Главная — только актуальные рейсы. Прошедшие отрезаются по Києву.
   const upcomingTrips = trips.filter(t => !isDeparted(t)).slice(0, 3)
+  // Cities the network covers — endpoints of every route, deduped. Stops
+  // are intentionally NOT counted (they're transit points, not destinations).
+  const citiesCovered = new Set(routes.flatMap(r => [r.from, r.to])).size
 
   return (
     <div>
@@ -170,7 +173,7 @@ function Home() {
       <section style={{ display: 'flex', justifyContent: 'center', gap: '2px', background: 'var(--border)' }}>
         <Stat value={routes.length} label="Маршрутів" />
         <Stat value={trips.length} label="Рейсів" />
-        <Stat value={40} label="Місць у автобусі" />
+        <Stat value={citiesCovered} label="Міст у мережі" />
       </section>
 
       {/* НАЙБЛИЖЧІ РЕЙСИ */}
