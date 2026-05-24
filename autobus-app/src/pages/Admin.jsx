@@ -52,26 +52,26 @@ function TripDetailsFields({ form, inputStyle }) {
       <div style={sectionTitle}>Деталі рейсу</div>
 
       <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr' }}>
-        <label style={{ display: 'grid', gap: '6px' }}>
+        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
           Точка відправлення
           <input {...register('departurePoint')} placeholder="вул. Шевченка, 1, автостанція" style={inputStyle} />
         </label>
-        <label style={{ display: 'grid', gap: '6px' }}>
+        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
           Точка прибуття
           <input {...register('arrivalPoint')} placeholder="Центральна автостанція" style={inputStyle} />
         </label>
       </div>
 
       <div style={{ display: 'grid', gap: '8px', gridTemplateColumns: '1fr 1fr 1fr' }}>
-        <label style={{ display: 'grid', gap: '6px' }}>
+        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
           Модель автобуса
           <input {...register('busModel')} placeholder="Setra S 415 GT-HD" style={inputStyle} />
         </label>
-        <label style={{ display: 'grid', gap: '6px' }}>
+        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
           Держ. номер
           <input {...register('busPlate')} placeholder="AA 1234 BB" style={inputStyle} />
         </label>
-        <label style={{ display: 'grid', gap: '6px' }}>
+        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
           Перевізник
           <input {...register('carrier')} placeholder="Prestige-bus" style={inputStyle} />
         </label>
@@ -121,15 +121,15 @@ function TripDetailsFields({ form, inputStyle }) {
             border: '1px solid var(--border)',
             borderRadius: '12px',
           }}>
-            <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)' }}>
+            <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)', minWidth: 0 }}>
               Назва
               <input {...register(`intermediateStops.${i}.name`)} style={inputStyle} placeholder="Полтава" />
             </label>
-            <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)' }}>
+            <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)', minWidth: 0 }}>
               Адреса
               <input {...register(`intermediateStops.${i}.address`)} style={inputStyle} placeholder="АС Полтава-1" />
             </label>
-            <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)' }}>
+            <label style={{ display: 'grid', gap: '4px', fontSize: '0.85rem', color: 'var(--text2)', minWidth: 0 }}>
               Час
               <input {...register(`intermediateStops.${i}.time`)} style={inputStyle} placeholder="11:30" />
             </label>
@@ -161,7 +161,11 @@ function Admin() {
   const [editingRouteId, setEditingRouteId] = useState(null)
   const [editingTripId, setEditingTripId] = useState(null)
   const [status, setStatus] = useState(null)
-  const inputStyle = { padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }
+  // width:100% + boxSizing:border-box + minWidth:0 lets inputs shrink to fit
+  // their grid column instead of overflowing to the right. minWidth:0 is the
+  // critical bit — grid items default to min-width:auto (= intrinsic content
+  // width) which an <input>/<select> never lets shrink below.
+  const inputStyle = { width: '100%', boxSizing: 'border-box', minWidth: 0, padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }
 
   // 4 separate form instances. Each has its own schema + isSubmitting flag,
   // so two admins editing different rows in the same browser tab still
@@ -363,27 +367,27 @@ function Admin() {
         <section style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Додати маршрут</h2>
           <form onSubmit={addRouteForm.handleSubmit(onAddRoute)} noValidate style={{ display: 'grid', gap: '12px' }}>
-            <label style={{ display: 'grid', gap: '6px' }}>
+            <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
               Звідки
               <input {...addRouteForm.register('from')} placeholder="Наприклад: Одеса" style={inputStyle} />
               {addRouteErrors.from && <span style={fieldErrorStyle}>{addRouteErrors.from.message}</span>}
             </label>
-            <label style={{ display: 'grid', gap: '6px' }}>
+            <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
               Куди
               <input {...addRouteForm.register('to')} placeholder="Наприклад: Київ" style={inputStyle} />
               {addRouteErrors.to && <span style={fieldErrorStyle}>{addRouteErrors.to.message}</span>}
             </label>
-            <label style={{ display: 'grid', gap: '6px' }}>
+            <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
               Відстань
               <input {...addRouteForm.register('distance')} placeholder="Наприклад: 475 км" style={inputStyle} />
               {addRouteErrors.distance && <span style={fieldErrorStyle}>{addRouteErrors.distance.message}</span>}
             </label>
-            <label style={{ display: 'grid', gap: '6px' }}>
+            <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
               Тривалість
               <input {...addRouteForm.register('duration')} placeholder="Наприклад: 6 год" style={inputStyle} />
               {addRouteErrors.duration && <span style={fieldErrorStyle}>{addRouteErrors.duration.message}</span>}
             </label>
-            <label style={{ display: 'grid', gap: '6px' }}>
+            <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
               Остановки
               <input {...addRouteForm.register('stops')} placeholder="Наприклад: Полтава, Кропивницький" style={inputStyle} />
             </label>
@@ -404,7 +408,7 @@ function Admin() {
         <section style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Додати рейс</h2>
           <form onSubmit={addTripForm.handleSubmit(onAddTrip)} noValidate style={{ display: 'grid', gap: '12px' }}>
-            <label style={{ display: 'grid', gap: '6px' }}>
+            <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
               Маршрут
               <select {...addTripForm.register('routeId')} style={inputStyle}>
                 <option value="">Оберіть маршрут</option>
@@ -417,24 +421,24 @@ function Admin() {
               {addTripErrors.routeId && <span style={fieldErrorStyle}>{addTripErrors.routeId.message}</span>}
             </label>
             <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-              <label style={{ display: 'grid', gap: '6px' }}>
+              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                 Дата
                 <input type="date" {...addTripForm.register('date')} style={inputStyle} />
                 {addTripErrors.date && <span style={fieldErrorStyle}>{addTripErrors.date.message}</span>}
               </label>
-              <label style={{ display: 'grid', gap: '6px' }}>
+              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                 Час
                 <input type="time" {...addTripForm.register('time')} style={inputStyle} />
                 {addTripErrors.time && <span style={fieldErrorStyle}>{addTripErrors.time.message}</span>}
               </label>
             </div>
             <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-              <label style={{ display: 'grid', gap: '6px' }}>
+              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                 Ціна (грн)
                 <input type="number" {...addTripForm.register('price')} placeholder="350" style={inputStyle} />
                 {addTripErrors.price && <span style={fieldErrorStyle}>{addTripErrors.price.message}</span>}
               </label>
-              <label style={{ display: 'grid', gap: '6px' }}>
+              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                 Кількість місць
                 <input type="number" {...addTripForm.register('seats')} placeholder="40" style={inputStyle} />
                 {addTripErrors.seats && <span style={fieldErrorStyle}>{addTripErrors.seats.message}</span>}
@@ -468,27 +472,27 @@ function Admin() {
               <div key={route.id} style={{ padding: '18px', borderRadius: '14px', background: 'var(--bg)', border: '1px solid var(--border)' }}>
                 {editingRouteId === route.id ? (
                   <form onSubmit={editRouteForm.handleSubmit(onSaveRoute)} noValidate style={{ display: 'grid', gap: '12px' }}>
-                    <label style={{ display: 'grid', gap: '6px' }}>
+                    <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                       Звідки
                       <input {...editRouteForm.register('from')} style={inputStyle} />
                       {editRouteErrors.from && <span style={fieldErrorStyle}>{editRouteErrors.from.message}</span>}
                     </label>
-                    <label style={{ display: 'grid', gap: '6px' }}>
+                    <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                       Куди
                       <input {...editRouteForm.register('to')} style={inputStyle} />
                       {editRouteErrors.to && <span style={fieldErrorStyle}>{editRouteErrors.to.message}</span>}
                     </label>
-                    <label style={{ display: 'grid', gap: '6px' }}>
+                    <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                       Відстань
                       <input {...editRouteForm.register('distance')} style={inputStyle} />
                       {editRouteErrors.distance && <span style={fieldErrorStyle}>{editRouteErrors.distance.message}</span>}
                     </label>
-                    <label style={{ display: 'grid', gap: '6px' }}>
+                    <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                       Тривалість
                       <input {...editRouteForm.register('duration')} style={inputStyle} />
                       {editRouteErrors.duration && <span style={fieldErrorStyle}>{editRouteErrors.duration.message}</span>}
                     </label>
-                    <label style={{ display: 'grid', gap: '6px' }}>
+                    <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                       Остановки
                       <input {...editRouteForm.register('stops')} placeholder="Наприклад: Полтава, Кропивницький" style={inputStyle} />
                     </label>
@@ -535,7 +539,7 @@ function Admin() {
                 <div key={trip.id} style={{ padding: '18px', borderRadius: '14px', background: 'var(--bg)', border: '1px solid var(--border)' }}>
                   {editingTripId === trip.id ? (
                     <form onSubmit={editTripForm.handleSubmit(onSaveTrip)} noValidate style={{ display: 'grid', gap: '12px' }}>
-                      <label style={{ display: 'grid', gap: '6px' }}>
+                      <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                         Маршрут
                         <select {...editTripForm.register('routeId')} style={inputStyle}>
                           {routes.map(routeOption => (
@@ -547,24 +551,24 @@ function Admin() {
                         {editTripErrors.routeId && <span style={fieldErrorStyle}>{editTripErrors.routeId.message}</span>}
                       </label>
                       <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-                        <label style={{ display: 'grid', gap: '6px' }}>
+                        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                           Дата
                           <input type="date" {...editTripForm.register('date')} style={inputStyle} />
                           {editTripErrors.date && <span style={fieldErrorStyle}>{editTripErrors.date.message}</span>}
                         </label>
-                        <label style={{ display: 'grid', gap: '6px' }}>
+                        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                           Час
                           <input type="time" {...editTripForm.register('time')} style={inputStyle} />
                           {editTripErrors.time && <span style={fieldErrorStyle}>{editTripErrors.time.message}</span>}
                         </label>
                       </div>
                       <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-                        <label style={{ display: 'grid', gap: '6px' }}>
+                        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                           Ціна (грн)
                           <input type="number" {...editTripForm.register('price')} style={inputStyle} />
                           {editTripErrors.price && <span style={fieldErrorStyle}>{editTripErrors.price.message}</span>}
                         </label>
-                        <label style={{ display: 'grid', gap: '6px' }}>
+                        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                           Кількість місць
                           <input type="number" {...editTripForm.register('seats')} style={inputStyle} />
                           {editTripErrors.seats && <span style={fieldErrorStyle}>{editTripErrors.seats.message}</span>}
