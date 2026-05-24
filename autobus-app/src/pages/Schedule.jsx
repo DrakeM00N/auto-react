@@ -260,7 +260,7 @@ function Schedule() {
   }
 
   return (
-    <div style={{ padding: '40px 2rem', maxWidth: '1000px', margin: '0 auto' }}>
+    <div className="page-glow" style={{ padding: '40px 2rem', maxWidth: '1000px', margin: '0 auto' }}>
       <section style={{ marginBottom: '32px' }}>
         <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem', marginBottom: '12px' }}>
           Розклад рейсів

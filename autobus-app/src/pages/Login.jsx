@@ -65,7 +65,7 @@ function Login() {
   }
 
   return (
-    <div style={{ padding: '40px 2rem', maxWidth: '520px', margin: '0 auto' }}>
+    <div className="auth-glow" style={{ padding: '40px 2rem', maxWidth: '520px', margin: '0 auto' }}>
       <section style={{ marginBottom: '22px' }}>
         <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem', marginBottom: '10px' }}>
           Увійти

@@ -47,6 +47,12 @@ body {
   transition: background 0.3s, color 0.3s;
 }
 
+/* Page-level glow layers (.page-glow, .auth-glow) intentionally spill past
+   their narrow page containers — clip any horizontal overflow at the body
+   instead of overflow:hidden on each container, which would also clip
+   .lift-card / .trip-card hover shadows. */
+html, body { overflow-x: hidden; }
+
 main {
   min-height: calc(100vh - 130px);
 }
@@ -325,6 +331,68 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   padding: 32px;
   animation: hero-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
+
+/* Page-level amber halo behind list pages (Routes, Schedule). Sits as a
+   soft top-center glow. Static (no drift) — list pages already have
+   per-card hover motion; extra ambient movement is too much.
+
+   No overflow:hidden on the container itself: card hover shadows extend
+   outside the card box and would get clipped. Body has overflow-x:hidden
+   to catch any horizontal spillover from the wide ::before. */
+.page-glow {
+  position: relative;
+}
+
+.page-glow::before {
+  content: '';
+  position: absolute;
+  top: -80px;
+  left: 50%;
+  width: 760px;
+  height: 520px;
+  transform: translateX(-50%);
+  background: radial-gradient(
+    ellipse at center,
+    rgba(232, 160, 32, 0.12) 0%,
+    rgba(232, 160, 32, 0.05) 40%,
+    transparent 65%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Lift all direct children above the ::before halo. Keeps page-glow as a
+   drop-in wrapper that doesn't require each consumer to thread z-index
+   into their own inline styles. */
+.page-glow > * { position: relative; z-index: 1; }
+
+/* Auth pages — a slim diagonal amber beam behind the form card.
+   The form already has var(--bg2) and a border, so it reads cleanly on
+   top of the beam. Beam is rotated and blurred for a soft "light from
+   one source" feel rather than a hard band. */
+.auth-glow {
+  position: relative;
+}
+
+.auth-glow::before {
+  content: '';
+  position: absolute;
+  top: 40px;
+  left: 50%;
+  width: 300px;
+  height: 600px;
+  transform: translateX(-50%) rotate(18deg);
+  background: linear-gradient(
+    180deg,
+    rgba(232, 160, 32, 0.10),
+    rgba(232, 160, 32, 0)
+  );
+  filter: blur(40px);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.auth-glow > * { position: relative; z-index: 1; }
 
 /* Validation error under a field. Subtle micro slide-in. */
 @keyframes field-error-in {

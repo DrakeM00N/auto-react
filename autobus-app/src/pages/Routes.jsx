@@ -69,7 +69,7 @@ function RoutesPage() {
   }
 
   return (
-    <div style={{ padding: '40px 2rem', maxWidth: '980px', margin: '0 auto' }}>
+    <div className="page-glow" style={{ padding: '40px 2rem', maxWidth: '980px', margin: '0 auto' }}>
       <section style={{ marginBottom: '28px' }}>
         <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem', marginBottom: '12px' }}>
           Каталог маршрутів
