@@ -5,14 +5,6 @@ import { track } from '../lib/analytics'
 import { formatDate, isDeparted, todayLocalISO } from '../lib/format'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 
-// CSS-only hover effect on the "Забронювати" icon. Inline styles can't
-// express :hover; mounting a once-per-page <style> tag is the lightest
-// solution that doesn't pull in a CSS framework.
-const HOVER_CSS = `
-.icon-cta svg { transition: transform 0.2s ease; }
-.icon-cta:hover svg { transform: translateX(4px); }
-`
-
 // One toggleable "Детальніше" panel per trip card. Renders only fields that
 // were actually filled in, so old trips with no extended data don't show
 // empty sections.
@@ -52,88 +44,90 @@ function TripDetails({ trip, route }) {
         {open ? '▾' : '▸'} Детальніше про рейс
       </button>
 
-      {open && (
-        <div style={{ display: 'grid', gap: '12px', marginTop: '12px' }}>
-          {hasDeparture && (
-            <div style={{ ...sectionStyle, display: 'grid', gap: '10px', gridTemplateColumns: '1fr 1fr' }}>
-              {trip.departurePoint && (
-                <div>
-                  <div style={labelStyle}>Точка відправлення</div>
-                  <div style={{ color: 'var(--text)' }}>{route?.from}</div>
-                  <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{trip.departurePoint}</div>
-                </div>
-              )}
-              {trip.arrivalPoint && (
-                <div>
-                  <div style={labelStyle}>Точка прибуття</div>
-                  <div style={{ color: 'var(--text)' }}>{route?.to}</div>
-                  <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{trip.arrivalPoint}</div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {hasStops && (
-            <div style={sectionStyle}>
-              <div style={labelStyle}>Проміжні зупинки</div>
-              <div style={{ display: 'grid', gap: '8px' }}>
-                {trip.intermediateStops.map((s, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-                    <div>
-                      <div style={{ fontWeight: 600 }}>{s.name}</div>
-                      {s.address && <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{s.address}</div>}
-                    </div>
-                    {s.time && <div style={{ color: 'var(--accent)', fontWeight: 600 }}>{s.time}</div>}
+      <div className={`collapse${open ? ' is-open' : ''}`}>
+        <div className="collapse__inner">
+          <div style={{ display: 'grid', gap: '12px', marginTop: '12px' }}>
+            {hasDeparture && (
+              <div style={{ ...sectionStyle, display: 'grid', gap: '10px', gridTemplateColumns: '1fr 1fr' }}>
+                {trip.departurePoint && (
+                  <div>
+                    <div style={labelStyle}>Точка відправлення</div>
+                    <div style={{ color: 'var(--text)' }}>{route?.from}</div>
+                    <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{trip.departurePoint}</div>
                   </div>
-                ))}
+                )}
+                {trip.arrivalPoint && (
+                  <div>
+                    <div style={labelStyle}>Точка прибуття</div>
+                    <div style={{ color: 'var(--text)' }}>{route?.to}</div>
+                    <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{trip.arrivalPoint}</div>
+                  </div>
+                )}
               </div>
-            </div>
-          )}
+            )}
 
-          {hasBusInfo && (
-            <div style={{ ...sectionStyle, display: 'grid', gap: '10px', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
-              {trip.busModel && (
-                <div>
-                  <div style={labelStyle}>Автобус</div>
-                  <div style={{ color: 'var(--text)' }}>{trip.busModel}</div>
+            {hasStops && (
+              <div style={sectionStyle}>
+                <div style={labelStyle}>Проміжні зупинки</div>
+                <div style={{ display: 'grid', gap: '8px' }}>
+                  {trip.intermediateStops.map((s, i) => (
+                    <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+                      <div>
+                        <div style={{ fontWeight: 600 }}>{s.name}</div>
+                        {s.address && <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{s.address}</div>}
+                      </div>
+                      {s.time && <div style={{ color: 'var(--accent)', fontWeight: 600 }}>{s.time}</div>}
+                    </div>
+                  ))}
                 </div>
-              )}
-              {trip.busPlate && (
-                <div>
-                  <div style={labelStyle}>Держ. номер</div>
-                  <div style={{ color: 'var(--text)' }}>{trip.busPlate}</div>
-                </div>
-              )}
-              {trip.carrier && (
-                <div>
-                  <div style={labelStyle}>Перевізник</div>
-                  <div style={{ color: 'var(--text)' }}>{trip.carrier}</div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {hasAmenities && (
-            <div style={sectionStyle}>
-              <div style={labelStyle}>Зручності</div>
-              <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
-                {trip.amenities.map(a => (
-                  <span key={a} style={{
-                    padding: '6px 12px',
-                    borderRadius: '999px',
-                    border: '1px solid var(--accent)',
-                    color: 'var(--accent)',
-                    fontWeight: 600,
-                    fontSize: '0.85rem',
-                  }}>
-                    {a}
-                  </span>
-                ))}
               </div>
-            </div>
-          )}
+            )}
+
+            {hasBusInfo && (
+              <div style={{ ...sectionStyle, display: 'grid', gap: '10px', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))' }}>
+                {trip.busModel && (
+                  <div>
+                    <div style={labelStyle}>Автобус</div>
+                    <div style={{ color: 'var(--text)' }}>{trip.busModel}</div>
+                  </div>
+                )}
+                {trip.busPlate && (
+                  <div>
+                    <div style={labelStyle}>Держ. номер</div>
+                    <div style={{ color: 'var(--text)' }}>{trip.busPlate}</div>
+                  </div>
+                )}
+                {trip.carrier && (
+                  <div>
+                    <div style={labelStyle}>Перевізник</div>
+                    <div style={{ color: 'var(--text)' }}>{trip.carrier}</div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {hasAmenities && (
+              <div style={sectionStyle}>
+                <div style={labelStyle}>Зручності</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                  {trip.amenities.map(a => (
+                    <span key={a} style={{
+                      padding: '6px 12px',
+                      borderRadius: '999px',
+                      border: '1px solid var(--accent)',
+                      color: 'var(--accent)',
+                      fontWeight: 600,
+                      fontSize: '0.85rem',
+                    }}>
+                      {a}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      )}
+      </div>
     </div>
   )
 }
@@ -267,7 +261,6 @@ function Schedule() {
 
   return (
     <div style={{ padding: '40px 2rem', maxWidth: '1000px', margin: '0 auto' }}>
-      <style>{HOVER_CSS}</style>
       <section style={{ marginBottom: '32px' }}>
         <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem', marginBottom: '12px' }}>
           Розклад рейсів
@@ -324,16 +317,8 @@ function Schedule() {
           <button
             type="button"
             onClick={handleSearch}
-            style={{
-              padding: '14px 18px',
-              borderRadius: '14px',
-              border: 'none',
-              background: 'var(--accent)',
-              color: '#1A1814',
-              fontWeight: 700,
-              cursor: 'pointer',
-              minHeight: '50px',
-            }}
+            className="btn-primary"
+            style={{ minHeight: '50px', cursor: 'pointer' }}
           >
             Знайти
           </button>
@@ -348,23 +333,28 @@ function Schedule() {
           <div style={{ padding: '24px', background: 'var(--bg2)', borderRadius: '16px', border: '1px solid var(--border)' }}>
             Немає доступних рейсів за обраними параметрами.
           </div>
-        ) : orderedTrips.map(trip => {
+        ) : orderedTrips.map((trip, i) => {
           const route = routes.find(r => r.id === trip.routeId)
           const freeSeats = trip.seats - (trip.bookedCount || 0)
           const departed = isDeparted(trip)
 
           return (
-            <article key={trip.id} style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              gap: '20px',
-              padding: '22px',
-              background: 'var(--bg2)',
-              borderRadius: '18px',
-              border: '1px solid var(--border)',
-              opacity: departed ? 0.55 : 1,
-            }}>
+            <article
+              key={trip.id}
+              className={`lift-card cascade-item${departed ? ' is-disabled' : ''}`}
+              style={{
+                '--i': Math.min(i, 8),
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+                gap: '20px',
+                padding: '22px',
+                background: 'var(--bg2)',
+                borderRadius: '18px',
+                border: '1px solid var(--border)',
+                opacity: departed ? 0.55 : 1,
+              }}
+            >
               <div style={{ minWidth: '220px', flex: '1 1 280px' }}>
                 <div style={{ fontSize: '0.9rem', color: 'var(--accent)', marginBottom: '8px', fontWeight: 700 }}>
                   {route?.from} {route?.stops?.length ? `→ ${route.stops.join(' → ')} →` : '→'} {route?.to}
@@ -421,21 +411,11 @@ function Schedule() {
                   ) : (
                     <Link
                       to={`/booking?tripId=${trip.id}`}
-                      className="icon-cta"
-                      style={{
-                        background: 'var(--accent)',
-                        color: '#1A1814',
-                        padding: '10px 18px',
-                        borderRadius: '10px',
-                        fontWeight: 600,
-                        textDecoration: 'none',
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '8px',
-                      }}
+                      className="trip-card__cta"
+                      style={{ padding: '10px 18px', borderRadius: '10px' }}
                     >
                       Забронювати
-                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <svg className="trip-card__cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                         <line x1="5" y1="12" x2="19" y2="12" />
                         <polyline points="12 5 19 12 12 19" />
                       </svg>

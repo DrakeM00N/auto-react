@@ -4,12 +4,6 @@ import { useData } from '../context/DataContext'
 import { todayLocalISO } from '../lib/format'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 
-// Shared CSS for the icon hover effect — see Schedule.jsx for the same rule.
-const HOVER_CSS = `
-.icon-cta svg { transition: transform 0.2s ease; }
-.icon-cta:hover svg { transform: translateX(4px); }
-`
-
 const UKRAINE_CITIES = [
   'Київ', 'Харків', 'Дніпро', 'Одеса', 'Запоріжжя', 'Львів', 'Кривий Ріг',
   'Миколаїв', 'Вінниця', 'Херсон', 'Полтава', 'Чернігів', 'Черкаси',
@@ -76,7 +70,6 @@ function RoutesPage() {
 
   return (
     <div style={{ padding: '40px 2rem', maxWidth: '980px', margin: '0 auto' }}>
-      <style>{HOVER_CSS}</style>
       <section style={{ marginBottom: '28px' }}>
         <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem', marginBottom: '12px' }}>
           Каталог маршрутів
@@ -134,7 +127,8 @@ function RoutesPage() {
           <button
             type="button"
             onClick={handleSearch}
-            style={{ padding: '14px 18px', borderRadius: '14px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 700, cursor: 'pointer', minHeight: '50px' }}
+            className="btn-primary"
+            style={{ minHeight: '50px', cursor: 'pointer' }}
           >
             Знайти квиток
           </button>
@@ -147,17 +141,23 @@ function RoutesPage() {
         </div>
       ) : (
         <div style={{ display: 'grid', gap: '18px' }}>
-          {filteredRoutes.map(route => (
-            <article key={route.id} style={{
-              display: 'flex',
-              flexWrap: 'wrap',
-              justifyContent: 'space-between',
-              gap: '18px',
-              padding: '24px',
-              borderRadius: '20px',
-              background: 'var(--bg2)',
-              border: '1px solid var(--border)',
-            }}>
+          {filteredRoutes.map((route, i) => (
+            <article
+              key={route.id}
+              className="lift-card cascade-item"
+              style={{
+                // --i is consumed by .cascade-item for the animation-delay stagger.
+                '--i': Math.min(i, 8),
+                display: 'flex',
+                flexWrap: 'wrap',
+                justifyContent: 'space-between',
+                gap: '18px',
+                padding: '24px',
+                borderRadius: '20px',
+                background: 'var(--bg2)',
+                border: '1px solid var(--border)',
+              }}
+            >
               <div style={{ minWidth: '240px', flex: '1 1 260px' }}>
                 <div style={{ fontSize: '1.3rem', color: 'var(--accent)', fontWeight: 700, marginBottom: '10px' }}>
                   {route.from} {route.stops?.length ? `→ ${route.stops.join(' → ')} →` : '→'} {route.to}
@@ -168,24 +168,9 @@ function RoutesPage() {
 
               <div style={{ display: 'grid', gap: '12px', alignItems: 'center' }}>
                 <span style={{ color: 'var(--text2)' }}>Маршрут №{route.id}</span>
-                <Link
-                  to="/schedule"
-                  className="icon-cta"
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '8px',
-                    padding: '12px 20px',
-                    background: 'var(--accent)',
-                    color: '#1A1814',
-                    borderRadius: '12px',
-                    textDecoration: 'none',
-                    fontWeight: 600,
-                  }}
-                >
+                <Link to="/schedule" className="trip-card__cta" style={{ padding: '12px 20px', borderRadius: '12px', fontSize: '1rem' }}>
                   Переглянути рейси
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <svg className="trip-card__cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />
                   </svg>

@@ -156,6 +156,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .btn-primary {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   background: var(--accent);
   color: #1A1814;
@@ -187,6 +188,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .btn-ghost {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   background: transparent;
   color: var(--text);
   padding: 14px 32px;
@@ -238,6 +240,7 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 .trip-card__cta {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 6px;
   background: var(--accent);
   color: #1A1814;
@@ -264,13 +267,101 @@ input[type="time"]::-webkit-calendar-picker-indicator {
 
 .trip-card__cta:hover .trip-card__cta-arrow { transform: translateX(4px); }
 
+/* ---------- Shared primitives reused across Routes / Schedule / Profile ---------- */
+
+/* Generic "lift on hover" — same transition recipe as .trip-card but without
+   the home-specific background/border/radius. Use it on cards that already
+   define their own bg/border. .is-disabled disables the hover lift for
+   inactive items (e.g. departed trips). */
+.lift-card {
+  transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
+}
+
+.lift-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 28px rgba(232, 160, 32, 0.12);
+  border-color: var(--border2);
+}
+
+.lift-card.is-disabled:hover {
+  transform: none;
+  box-shadow: none;
+  border-color: var(--border);
+}
+
+/* Cascade fade-in for lists. Set inline `style={{ '--i': index }}`; the
+   delay caps near 8 to avoid eternal staggers on long lists. */
+.cascade-item {
+  opacity: 0;
+  transform: translateY(16px);
+  animation: hero-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  animation-delay: calc(var(--i, 0) * 0.04s);
+}
+
+/* Smooth grid 1fr expand for unknown-height content (Schedule "Детальніше").
+   Always-rendered child, no remount on toggle. */
+.collapse {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+}
+
+.collapse.is-open { grid-template-rows: 1fr; }
+
+.collapse__inner {
+  min-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.collapse.is-open .collapse__inner { opacity: 1; }
+
+/* Form card — gentle entrance for login/register and other small forms. */
+.form-card {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  padding: 32px;
+  animation: hero-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Validation error under a field. Subtle micro slide-in. */
+@keyframes field-error-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.field-error {
+  animation: field-error-in 0.2s ease-out both;
+}
+
+/* Global focus ring for inputs/selects/textareas. Pure CSS-vars (no hex)
+   except the rgba accent which mirrors the rest of the polish. */
+input,
+select,
+textarea {
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(232, 160, 32, 0.25);
+}
+
 /* ---------- Reduced motion: kill movement, keep visibility ---------- */
 
 @media (prefers-reduced-motion: reduce) {
   .hero__eyebrow,
   .hero__title,
   .hero__subtitle,
-  .hero__cta-row {
+  .hero__cta-row,
+  .cascade-item,
+  .form-card,
+  .field-error {
     animation: none;
     opacity: 1;
     transform: none;
@@ -282,13 +373,20 @@ input[type="time"]::-webkit-calendar-picker-indicator {
   .stat,
   .trip-card,
   .trip-card__cta,
-  .trip-card__cta-arrow {
+  .trip-card__cta-arrow,
+  .lift-card,
+  .collapse,
+  .collapse__inner,
+  input,
+  select,
+  textarea {
     transition: none;
   }
   .btn-primary:hover,
   .btn-ghost:hover,
   .trip-card:hover,
   .trip-card__cta:hover,
+  .lift-card:hover,
   .btn-primary:hover .btn-primary__arrow,
   .trip-card__cta:hover .trip-card__cta-arrow {
     transform: none;

@@ -97,7 +97,7 @@ function Profile() {
       )}
 
       <section style={{ display: 'grid', gap: '22px', marginBottom: '36px' }}>
-        <div style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
+        <div className="cascade-item" style={{ '--i': 0, padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>Особисті дані</h2>
           <div style={{ display: 'grid', gap: '10px', maxWidth: '560px' }}>
             <div><strong>Ім’я:</strong> {currentUser.name}</div>
@@ -107,7 +107,7 @@ function Profile() {
           </div>
         </div>
 
-        <div style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
+        <div className="cascade-item" style={{ '--i': 1, padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>Статистика профілю</h2>
           <div style={{ display: 'grid', gap: '10px', maxWidth: '560px' }}>
             <div><strong>Всього бронювань:</strong> {userBookings.length}</div>
@@ -116,17 +116,27 @@ function Profile() {
         </div>
       </section>
 
-      <section style={{ marginBottom: '36px', padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
+      <section className="cascade-item" style={{ '--i': 2, marginBottom: '36px', padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
         <h2 style={{ fontSize: '1.4rem', marginBottom: '18px' }}>Історія бронювань</h2>
         {userBookings.length === 0 ? (
           <p>У вас ще немає бронювань.</p>
         ) : (
           <div style={{ display: 'grid', gap: '18px' }}>
-            {userBookings.map(booking => {
+            {userBookings.map((booking, i) => {
               const trip = trips.find(t => t.id === booking.tripId)
               const route = routes.find(r => r.id === trip?.routeId)
               return (
-                <article key={booking.id} style={{ padding: '20px', borderRadius: '16px', background: 'var(--bg)', border: '1px solid var(--border)' }}>
+                <article
+                  key={booking.id}
+                  className="lift-card cascade-item"
+                  style={{
+                    '--i': Math.min(i, 8),
+                    padding: '20px',
+                    borderRadius: '16px',
+                    background: 'var(--bg)',
+                    border: '1px solid var(--border)',
+                  }}
+                >
                   <div style={{ display: 'grid', gap: '10px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                       <div>
@@ -164,14 +174,16 @@ function Profile() {
                           <button
                             type="button"
                             onClick={() => handleSaveBooking(booking.id)}
-                            style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600, cursor: 'pointer' }}
+                            className="btn-primary"
+                            style={{ padding: '10px 22px', borderRadius: '12px', cursor: 'pointer' }}
                           >
                             Зберегти
                           </button>
                           <button
                             type="button"
                             onClick={() => setEditBookingId(null)}
-                            style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: 'pointer' }}
+                            className="btn-ghost"
+                            style={{ padding: '10px 22px', borderRadius: '12px', cursor: 'pointer' }}
                           >
                             Скасувати
                           </button>
@@ -212,7 +224,7 @@ function Profile() {
       </section>
 
       {currentUser.hasPassword !== false && (
-      <section style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
+      <section className="cascade-item" style={{ '--i': 3, padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
         <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Змінити пароль</h2>
         <form onSubmit={handleChangePassword} style={{ display: 'grid', gap: '14px', maxWidth: '520px' }}>
           <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
@@ -247,7 +259,8 @@ function Profile() {
           </label>
           <button
             type="submit"
-            style={{ padding: '14px 18px', borderRadius: '14px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 700, cursor: 'pointer' }}
+            className="btn-primary"
+            style={{ padding: '14px 22px', borderRadius: '14px', cursor: 'pointer' }}
           >
             Змінити пароль
           </button>

@@ -76,11 +76,11 @@ function Register() {
         </p>
       </section>
 
-      <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: 'grid', gap: '18px' }}>
+      <form onSubmit={handleSubmit(onSubmit)} noValidate className="form-card" style={{ display: 'grid', gap: '18px' }}>
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
           Імʼя
           <input {...register('name')} placeholder="Імʼя" style={fieldStyle} />
-          {errors.name && <span style={fieldErrorStyle}>{errors.name.message}</span>}
+          {errors.name && <span className="field-error" style={fieldErrorStyle}>{errors.name.message}</span>}
         </label>
 
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
@@ -91,7 +91,7 @@ function Register() {
             placeholder="example@mail.com"
             style={fieldStyle}
           />
-          {errors.email && <span style={fieldErrorStyle}>{errors.email.message}</span>}
+          {errors.email && <span className="field-error" style={fieldErrorStyle}>{errors.email.message}</span>}
         </label>
 
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
@@ -112,7 +112,7 @@ function Register() {
               {showPassword ? '👁' : '👁️'}
             </button>
           </div>
-          {errors.password && <span style={fieldErrorStyle}>{errors.password.message}</span>}
+          {errors.password && <span className="field-error" style={fieldErrorStyle}>{errors.password.message}</span>}
         </label>
 
         <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
@@ -133,7 +133,7 @@ function Register() {
               {showConfirm ? '👁' : '👁️'}
             </button>
           </div>
-          {errors.confirm && <span style={fieldErrorStyle}>{errors.confirm.message}</span>}
+          {errors.confirm && <span className="field-error" style={fieldErrorStyle}>{errors.confirm.message}</span>}
         </label>
 
         {serverStatus && (
@@ -151,14 +151,8 @@ function Register() {
         <Button
           type="submit"
           loading={isSubmitting}
-          style={{
-            padding: '14px 18px',
-            borderRadius: '14px',
-            border: 'none',
-            background: 'var(--accent)',
-            color: '#1A1814',
-            fontWeight: 700,
-          }}
+          className="btn-primary"
+          style={{ borderRadius: '14px' }}
         >
           Зареєструватися
         </Button>
