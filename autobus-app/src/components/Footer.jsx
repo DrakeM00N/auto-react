@@ -1,14 +1,18 @@
 import { Link } from 'react-router-dom'
+import UkraineMap from './UkraineMap'
 
 function Footer() {
   return (
     <footer style={{
+      position: 'relative',
+      overflow: 'hidden',
       borderTop: '1px solid var(--border)',
       background: 'var(--bg2)',
       padding: '48px 2rem 24px',
       marginTop: 'auto',
     }}>
-      <div style={{ maxWidth: '1000px', margin: '0 auto' }}>
+      <UkraineMap />
+      <div style={{ position: 'relative', zIndex: 2, maxWidth: '1000px', margin: '0 auto' }}>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '40px', marginBottom: '40px' }}>
 
@@ -42,14 +46,14 @@ function Footer() {
           <div>
             <div style={{ fontWeight: 700, marginBottom: '14px', fontSize: '0.95rem' }}>Контакти</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <a href="tel:+380800123456" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                📞 0 800 123 456
+              <a href="tel:+380500570656" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                📱 +38 (050) 057-06-56
               </a>
-              <a href="tel:+380671234567" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                📱 +38 (067) 123-45-67
+              <a href="tel:+380979075738" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                📱 +38 (097) 907-57-38
               </a>
-              <a href="tel:+380631234567" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                📱 +38 (063) 123-45-67
+              <a href="tel:+380634859399" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                📱 +38 (063) 485-93-99
               </a>
               <a href="mailto:info@avtoreis.ua" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 ✉️ info@avtoreis.ua

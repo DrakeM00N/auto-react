@@ -29,7 +29,9 @@
       "Bash(curl -s -m 60 https://autobus-frontend.onrender.com/assets/index-C4T55CTW.js)",
       "Bash(git commit *)",
       "Bash(JWT_SECRET=test node -e \"process.env.JWT_SECRET='test'; require\\('./routes/auth.js'\\); console.log\\('auth.js loads OK'\\)\")",
-      "Bash(JWT_SECRET=test_dev_secret node *)"
+      "Bash(JWT_SECRET=test_dev_secret node *)",
+      "Bash(JWT_SECRET=test node -e \"process.env.JWT_SECRET='test'; require\\('./routes/auth.js'\\); const {sendPasswordChangedEmail} = require\\('./services/email'\\); sendPasswordChangedEmail\\('test@example.com'\\).then\\(r => console.log\\('result:', JSON.stringify\\(r\\)\\)\\)\")",
+      "Bash(JWT_SECRET=test node -e \"process.env.JWT_SECRET='test'; require\\('./routes/auth.js'\\); require\\('./services/email.js'\\); console.log\\('OK — both modules load clean'\\)\")"
     ]
   }
 }
