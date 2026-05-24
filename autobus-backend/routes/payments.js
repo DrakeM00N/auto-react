@@ -69,7 +69,7 @@ router.post('/checkout',
     // unauthenticated /status endpoint from PII enumeration. (Same High-1
     // fix as the retired LiqPay flow.)
     const orderId = `order_${tripId}_${crypto.randomBytes(16).toString('hex')}`
-    const destination = `Квиток АвтоРейс: ${boardingPoint || route.from_city} → ${alightingPoint || route.to_city}, ${trip.date} ${trip.time}`
+    const destination = `Квиток BusTour: ${boardingPoint || route.from_city} → ${alightingPoint || route.to_city}, ${trip.date} ${trip.time}`
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
 
     const invoice = await createInvoice({

@@ -17,7 +17,7 @@ function Navbar() {
       borderBottom: '1px solid var(--border)',
     }}>
       <Link to="/" style={{ fontFamily: 'Unbounded', color: 'var(--accent)', fontSize: '1.1rem' }}>
-        Авто<span style={{ color: 'var(--text)' }}>Рейс</span>
+        Bus<span style={{ color: 'var(--text)' }}>Tour</span>
       </Link>
 
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>

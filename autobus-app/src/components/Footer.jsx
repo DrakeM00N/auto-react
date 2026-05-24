@@ -15,7 +15,7 @@ function Footer() {
           {/* Бренд */}
           <div>
             <div style={{ fontFamily: 'Unbounded', fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent)', marginBottom: '12px' }}>
-              АвтоРейс
+              BusTour
             </div>
             <p style={{ color: 'var(--text2)', fontSize: '0.9rem', lineHeight: 1.7, margin: 0 }}>
               Зручне бронювання автобусних квитків по всій Україні
@@ -74,7 +74,7 @@ function Footer() {
         {/* Нижня лінія */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ color: 'var(--text2)', fontSize: '0.85rem' }}>
-            © {new Date().getFullYear()} АвтоРейс. Всі права захищено.
+            © {new Date().getFullYear()} BusTour. Всі права захищено.
           </div>
           <div style={{ color: 'var(--text2)', fontSize: '0.85rem' }}>
             Зроблено в Україні 🇺🇦
