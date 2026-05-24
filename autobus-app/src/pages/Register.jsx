@@ -2,8 +2,14 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import GoogleAuthButton from '../components/GoogleAuthButton'
+import Button from '../components/Button'
+import { useDocumentMeta } from '../lib/useDocumentMeta'
 
 function Register() {
+  useDocumentMeta({
+    title: 'Реєстрація',
+    description: 'Створіть акаунт, щоб зберігати бронювання, отримувати електронні квитки та швидко повторно оформляти поїздки.',
+  })
   const { register } = useAuth()
   const navigate = useNavigate()
   const [name, setName] = useState('')
@@ -13,6 +19,7 @@ function Register() {
   const [showPassword, setShowPassword] = useState(false)
   const [showConfirm, setShowConfirm] = useState(false)
   const [status, setStatus] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   const fieldStyle = {
     width: '100%',
@@ -43,20 +50,25 @@ function Register() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
+    if (loading) return
     if (password !== confirm) {
       setStatus({ type: 'error', message: 'Паролі не співпадають' })
       return
     }
 
-    const normalizedEmail = email.trim().toLowerCase()
-    const result = await register(name.trim(), normalizedEmail, password)
-    if (!result.success) {
-      setStatus({ type: 'error', message: result.message })
-      return
+    setLoading(true)
+    try {
+      const normalizedEmail = email.trim().toLowerCase()
+      const result = await register(name.trim(), normalizedEmail, password)
+      if (!result.success) {
+        setStatus({ type: 'error', message: result.message })
+        return
+      }
+      setStatus({ type: 'success', message: 'Реєстрація пройшла успішно!' })
+      navigate('/')
+    } finally {
+      setLoading(false)
     }
-
-    setStatus({ type: 'success', message: 'Реєстрація пройшла успішно!' })
-    navigate('/')
   }
 
   return (
@@ -150,8 +162,9 @@ function Register() {
           </div>
         )}
 
-        <button
+        <Button
           type="submit"
+          loading={loading}
           style={{
             padding: '14px 18px',
             borderRadius: '14px',
@@ -159,11 +172,10 @@ function Register() {
             background: 'var(--accent)',
             color: '#1A1814',
             fontWeight: 700,
-            cursor: 'pointer',
           }}
         >
           Зареєструватися
-        </button>
+        </Button>
 
         <GoogleAuthButton onError={(message) => setStatus({ type: 'error', message })} />
 

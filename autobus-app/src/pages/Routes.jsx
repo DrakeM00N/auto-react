@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext'
 import { todayLocalISO } from '../lib/format'
+import { useDocumentMeta } from '../lib/useDocumentMeta'
 
 // Shared CSS for the icon hover effect — see Schedule.jsx for the same rule.
 const HOVER_CSS = `
@@ -18,6 +19,10 @@ const UKRAINE_CITIES = [
 ].sort()
 
 function RoutesPage() {
+  useDocumentMeta({
+    title: 'Маршрути',
+    description: 'Усі автобусні маршрути перевізника: міста відправлення та прибуття, тривалість поїздки, проміжні зупинки. Оберіть напрямок і переходьте до розкладу.',
+  })
   const { routes } = useData()
   const navigate = useNavigate()
   const [fromFilter, setFromFilter] = useState('')

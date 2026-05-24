@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import Button from '../components/Button'
 
 function ResetPassword() {
   const { resetPassword } = useAuth()
@@ -9,11 +10,13 @@ function ResetPassword() {
   const [newPassword, setNewPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [status, setStatus] = useState(null)
+  const [loading, setLoading] = useState(false)
   const [searchParams] = useSearchParams()
   const token = searchParams.get('token')
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault()
+    if (loading) return
     const normalizedEmail = email.trim().toLowerCase()
     if (!normalizedEmail || !newPassword || !confirmPassword) {
       setStatus({ type: 'error', message: 'Заповніть всі поля.' })
@@ -25,14 +28,20 @@ function ResetPassword() {
       return
     }
 
-    const result = resetPassword(normalizedEmail, newPassword, token)
-    if (!result.success) {
-      setStatus({ type: 'error', message: result.message })
-      return
+    setLoading(true)
+    try {
+      // resetPassword is async — the previous code dropped the Promise
+      // and then read .success off it (always undefined). await it.
+      const result = await resetPassword(normalizedEmail, newPassword, token)
+      if (!result.success) {
+        setStatus({ type: 'error', message: result.message })
+        return
+      }
+      setStatus({ type: 'success', message: 'Пароль було успішно оновлено. Увійдіть з новим паролем.' })
+      setTimeout(() => navigate('/login'), 1200)
+    } finally {
+      setLoading(false)
     }
-
-    setStatus({ type: 'success', message: 'Пароль було успішно оновлено. Увійдіть з новим паролем.' })
-    setTimeout(() => navigate('/login'), 1200)
   }
 
   return (
@@ -95,8 +104,9 @@ function ResetPassword() {
           </div>
         )}
 
-        <button
+        <Button
           type="submit"
+          loading={loading}
           style={{
             padding: '14px 18px',
             borderRadius: '14px',
@@ -104,11 +114,10 @@ function ResetPassword() {
             background: 'var(--accent)',
             color: '#1A1814',
             fontWeight: 700,
-            cursor: 'pointer',
           }}
         >
           Оновити пароль
-        </button>
+        </Button>
 
         <p style={{ color: 'var(--text2)', textAlign: 'center' }}>
           Повернутись до{' '}

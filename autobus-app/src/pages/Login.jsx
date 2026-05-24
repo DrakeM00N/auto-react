@@ -2,14 +2,21 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import GoogleAuthButton from '../components/GoogleAuthButton'
+import Button from '../components/Button'
+import { useDocumentMeta } from '../lib/useDocumentMeta'
 
 function Login() {
+  useDocumentMeta({
+    title: 'Вхід',
+    description: 'Увійдіть до особистого кабінету, щоб переглянути свої бронювання та квитки.',
+  })
   const { login } = useAuth()
   const navigate = useNavigate()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [status, setStatus] = useState(null)
+  const [loading, setLoading] = useState(false)
 
   const fieldStyle = {
     width: '100%',
@@ -40,14 +47,20 @@ function Login() {
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    const normalizedEmail = email.trim().toLowerCase()
-    const result = await login(normalizedEmail, password)
-    if (!result.success) {
-      setStatus({ type: 'error', message: result.message })
-      return
+    if (loading) return
+    setLoading(true)
+    try {
+      const normalizedEmail = email.trim().toLowerCase()
+      const result = await login(normalizedEmail, password)
+      if (!result.success) {
+        setStatus({ type: 'error', message: result.message })
+        return
+      }
+      setStatus({ type: 'success', message: 'Вхід виконано успішно!' })
+      navigate('/')
+    } finally {
+      setLoading(false)
     }
-    setStatus({ type: 'success', message: 'Вхід виконано успішно!' })
-    navigate('/')
   }
 
   return (
@@ -110,8 +123,9 @@ function Login() {
           </div>
         )}
 
-        <button
+        <Button
           type="submit"
+          loading={loading}
           style={{
             padding: '14px 18px',
             borderRadius: '14px',
@@ -119,11 +133,10 @@ function Login() {
             background: 'var(--accent)',
             color: '#1A1814',
             fontWeight: 700,
-            cursor: 'pointer',
           }}
         >
           Увійти
-        </button>
+        </Button>
 
         <GoogleAuthButton onError={(message) => setStatus({ type: 'error', message })} />
 

@@ -4,6 +4,7 @@ import { useData } from '../context/DataContext'
 import { track } from '../lib/analytics'
 import { apiRequest } from '../lib/api'
 import { formatDate, isDeparted } from '../lib/format'
+import Button from '../components/Button'
 
 function Booking() {
   const { trips, routes } = useData()
@@ -193,9 +194,11 @@ function Booking() {
               </div>
             )}
 
-            <button
+            <Button
               type="submit"
-              disabled={freeSeats <= 0 || loading}
+              disabled={freeSeats <= 0}
+              loading={loading}
+              loadingText="Перенаправлення на оплату…"
               style={{
                 padding: '16px 22px',
                 borderRadius: '14px',
@@ -203,7 +206,6 @@ function Booking() {
                 background: freeSeats <= 0 ? 'var(--border)' : 'var(--accent)',
                 color: freeSeats <= 0 ? 'var(--text2)' : '#1A1814',
                 fontWeight: 700,
-                cursor: freeSeats <= 0 || loading ? 'not-allowed' : 'pointer',
                 fontSize: '1rem',
                 display: 'flex',
                 alignItems: 'center',
@@ -211,8 +213,8 @@ function Booking() {
                 gap: '8px',
               }}
             >
-              {loading ? 'Перенаправлення на оплату...' : freeSeats <= 0 ? 'Місць немає' : 'Перейти до оплати'}
-            </button>
+              {freeSeats <= 0 ? 'Місць немає' : 'Перейти до оплати'}
+            </Button>
 
             <Link to="/schedule" style={{ color: 'var(--accent)', textDecoration: 'underline', textAlign: 'center' }}>
               Повернутись до розкладу

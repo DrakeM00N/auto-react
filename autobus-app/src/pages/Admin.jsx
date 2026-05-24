@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { formatDate, isDeparted } from '../lib/format'
+import Button from '../components/Button'
 
 // Fixed amenity catalogue. Used by the admin checkboxes — Schedule.jsx
 // just renders whatever amenities the backend returns, so it doesn't
@@ -180,6 +181,9 @@ function Admin() {
   const [editingTripId, setEditingTripId] = useState(null)
   const [editingTrip, setEditingTrip] = useState(EMPTY_TRIP_FORM)
   const [status, setStatus] = useState(null)
+  // Один флаг для всех submit-кнопок админки. В этом интерфейсе одновременно
+  // открыта максимум одна форма, поэтому отдельные state'ы избыточны.
+  const [submitting, setSubmitting] = useState(false)
   const inputStyle = { padding: '10px', borderRadius: '8px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }
 
   // Проверка роли
@@ -192,26 +196,34 @@ function Admin() {
     )
   }
 
-  const handleAddRoute = (e) => {
+  const handleAddRoute = async (e) => {
     e.preventDefault()
+    if (submitting) return
     if (!newRoute.from || !newRoute.to || !newRoute.distance || !newRoute.duration) {
       setStatus({ type: 'error', message: 'Заповніть всі поля для маршруту' })
       return
     }
-    addRoute({
-      ...newRoute,
-      stops: newRoute.stops.split(',').map(item => item.trim()).filter(Boolean),
-    })
-    setNewRoute({ from: '', to: '', distance: '', duration: '', stops: '' })
-    setStatus({ type: 'success', message: 'Маршрут додано' })
+    setSubmitting(true)
+    try {
+      await addRoute({
+        ...newRoute,
+        stops: newRoute.stops.split(',').map(item => item.trim()).filter(Boolean),
+      })
+      setNewRoute({ from: '', to: '', distance: '', duration: '', stops: '' })
+      setStatus({ type: 'success', message: 'Маршрут додано' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleAddTrip = async (e) => {
     e.preventDefault()
+    if (submitting) return
     if (!newTrip.routeId || !newTrip.date || !newTrip.time || !newTrip.price || !newTrip.seats) {
       setStatus({ type: 'error', message: 'Заповніть всі поля для рейсу' })
       return
     }
+    setSubmitting(true)
     try {
       await addTrip({
         ...newTrip,
@@ -223,6 +235,8 @@ function Admin() {
       setStatus({ type: 'success', message: 'Рейс додано' })
     } catch (err) {
       setStatus({ type: 'error', message: 'Не вдалось добавити рейс: ' + err.message })
+    } finally {
+      setSubmitting(false)
     }
   }
 
@@ -237,16 +251,22 @@ function Admin() {
     setStatus(null)
   }
 
-  const handleSaveRoute = (e) => {
+  const handleSaveRoute = async (e) => {
     e.preventDefault()
+    if (submitting) return
     if (!editingRoute.from || !editingRoute.to || !editingRoute.distance || !editingRoute.duration) {
       setStatus({ type: 'error', message: 'Заповніть всі поля для маршруту' })
       return
     }
-    updateRoute(editingRouteId, editingRoute)
-    setEditingRouteId(null)
-    setEditingRoute({ from: '', to: '', distance: '', duration: '' })
-    setStatus({ type: 'success', message: 'Маршрут оновлено' })
+    setSubmitting(true)
+    try {
+      await updateRoute(editingRouteId, editingRoute)
+      setEditingRouteId(null)
+      setEditingRoute({ from: '', to: '', distance: '', duration: '' })
+      setStatus({ type: 'success', message: 'Маршрут оновлено' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleCancelEditRoute = () => {
@@ -273,21 +293,27 @@ function Admin() {
     setStatus(null)
   }
 
-  const handleSaveTrip = (e) => {
+  const handleSaveTrip = async (e) => {
     e.preventDefault()
+    if (submitting) return
     if (!editingTrip.routeId || !editingTrip.date || !editingTrip.time || !editingTrip.price || !editingTrip.seats) {
       setStatus({ type: 'error', message: 'Заповніть всі поля для рейсу' })
       return
     }
-    updateTrip(editingTripId, {
-      ...editingTrip,
-      routeId: Number(editingTrip.routeId),
-      price: Number(editingTrip.price),
-      seats: Number(editingTrip.seats),
-    })
-    setEditingTripId(null)
-    setEditingTrip(EMPTY_TRIP_FORM)
-    setStatus({ type: 'success', message: 'Рейс оновлено' })
+    setSubmitting(true)
+    try {
+      await updateTrip(editingTripId, {
+        ...editingTrip,
+        routeId: Number(editingTrip.routeId),
+        price: Number(editingTrip.price),
+        seats: Number(editingTrip.seats),
+      })
+      setEditingTripId(null)
+      setEditingTrip(EMPTY_TRIP_FORM)
+      setStatus({ type: 'success', message: 'Рейс оновлено' })
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   const handleCancelEditTrip = () => {
@@ -428,17 +454,16 @@ function Admin() {
                 style={inputStyle}
               />
             </label>
-            <button type="submit" style={{
+            <Button type="submit" loading={submitting} style={{
               padding: '12px',
               borderRadius: '8px',
               border: 'none',
               background: 'var(--accent)',
               color: '#1A1814',
               fontWeight: 600,
-              cursor: 'pointer',
             }}>
               Додати маршрут
-            </button>
+            </Button>
           </form>
         </section>
 
@@ -506,17 +531,16 @@ function Admin() {
 
             <TripDetailsFields value={newTrip} onChange={setNewTrip} inputStyle={inputStyle} />
 
-            <button type="submit" style={{
+            <Button type="submit" loading={submitting} style={{
               padding: '12px',
               borderRadius: '8px',
               border: 'none',
               background: 'var(--accent)',
               color: '#1A1814',
               fontWeight: 600,
-              cursor: 'pointer',
             }}>
               Додати рейс
-            </button>
+            </Button>
           </form>
         </section>
 
@@ -574,10 +598,10 @@ function Admin() {
                       />
                     </label>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                      <button type="submit" style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600, cursor: 'pointer' }}>
+                      <Button type="submit" loading={submitting} style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600 }}>
                         Зберегти маршрут
-                      </button>
-                      <button type="button" onClick={handleCancelEditRoute} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: 'pointer' }}>
+                      </Button>
+                      <button type="button" onClick={handleCancelEditRoute} disabled={submitting} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.65 : 1 }}>
                         Скасувати
                       </button>
                     </div>
@@ -674,10 +698,10 @@ function Admin() {
                       <TripDetailsFields value={editingTrip} onChange={setEditingTrip} inputStyle={inputStyle} />
 
                       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                        <button type="submit" style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600, cursor: 'pointer' }}>
+                        <Button type="submit" loading={submitting} style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600 }}>
                           Зберегти рейс
-                        </button>
-                        <button type="button" onClick={handleCancelEditTrip} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: 'pointer' }}>
+                        </Button>
+                        <button type="button" onClick={handleCancelEditTrip} disabled={submitting} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: submitting ? 'not-allowed' : 'pointer', opacity: submitting ? 0.65 : 1 }}>
                           Скасувати
                         </button>
                       </div>

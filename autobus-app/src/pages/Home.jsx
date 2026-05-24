@@ -2,6 +2,7 @@ import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useData } from '../context/DataContext'
 import { formatDate, isDeparted } from '../lib/format'
+import { useDocumentMeta } from '../lib/useDocumentMeta'
 
 const FAQ_ITEMS = [
   {
@@ -87,6 +88,10 @@ function FaqItem({ item }) {
 }
 
 function Home() {
+  useDocumentMeta({
+    title: 'Головна',
+    description: 'Купуйте автобусні квитки онлайн: розклад рейсів, популярні маршрути, бронювання з оплатою картою та електронний квиток на телефон.',
+  })
   const { routes, trips } = useData()
   // Главная — только актуальные рейсы. Прошедшие отрезаются по Києву.
   const upcomingTrips = trips.filter(t => !isDeparted(t)).slice(0, 3)

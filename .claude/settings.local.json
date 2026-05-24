@@ -24,7 +24,9 @@
       "Bash(taskkill //F //IM node.exe)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git push *)"
+      "Bash(git push *)",
+      "Bash(JWT_SECRET=test ADMIN_EMAILS=vip@example.com node -e ' *)",
+      "Bash(curl -s -m 60 https://autobus-frontend.onrender.com/assets/index-C4T55CTW.js)"
     ]
   }
 }

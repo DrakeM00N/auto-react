@@ -1,0 +1,17 @@
+User-agent: *
+Allow: /
+Allow: /routes
+Allow: /schedule
+Allow: /login
+Allow: /register
+
+# Гілки з персональними даними — для індексації закриваємо.
+Disallow: /admin
+Disallow: /admin/analytics
+Disallow: /profile
+Disallow: /booking
+Disallow: /booking/success
+Disallow: /ticket/
+Disallow: /reset-password
+
+Sitemap: /sitemap.xml

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from 'react'
 import { useData } from '../context/DataContext'
 import { track } from '../lib/analytics'
 import { formatDate, isDeparted, todayLocalISO } from '../lib/format'
+import { useDocumentMeta } from '../lib/useDocumentMeta'
 
 // CSS-only hover effect on the "Забронювати" icon. Inline styles can't
 // express :hover; mounting a once-per-page <style> tag is the lightest
@@ -145,6 +146,10 @@ const UKRAINE_CITIES = [
 ].sort((a, b) => a.localeCompare(b, 'uk'))
 
 function Schedule() {
+  useDocumentMeta({
+    title: 'Розклад рейсів',
+    description: 'Актуальний розклад автобусних рейсів: фільтр за датою, напрямком та часом відправлення. Забронюйте місце онлайн за кілька хвилин.',
+  })
   const { trips, routes } = useData()
   const [searchParams, setSearchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
