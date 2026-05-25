@@ -17,6 +17,8 @@ const log = logger('server')
 
 const app = express()
 
+app.set('trust proxy', 1)
+
 // FRONTEND_URL may be a comma-separated list (e.g. localhost + LAN IP for phone testing).
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',').map(o => o.trim()).filter(Boolean)
