@@ -15,3 +15,4 @@ Disallow: /ticket/
 Disallow: /reset-password
 
 Sitemap: /sitemap.xml
+Sitemap: https://bustour.com.ua/sitemap.xml
