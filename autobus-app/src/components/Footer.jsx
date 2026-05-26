@@ -55,8 +55,8 @@ function Footer() {
               <a href="tel:+380634859399" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 📱 +38 (063) 485-93-99
               </a>
-              <a href="mailto:info@avtoreis.ua" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ✉️ info@avtoreis.ua
+              <a href="mailto:bustour.ukraine@gmail.com" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ✉️ bustour.ukraine@gmail.com
               </a>
             </div>
           </div>
