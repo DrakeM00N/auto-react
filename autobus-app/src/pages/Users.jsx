@@ -3,10 +3,16 @@ import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 
+const isOnline = (user) => {
+  if (!user.lastLogin) return false
+  return Date.now() - new Date(user.lastLogin) < 30 * 60 * 1000
+}
+
 function Users() {
   const { currentUser } = useAuth()
   const { users, promoteUser } = useData()
   const [status, setStatus] = useState(null)
+  const [filter, setFilter] = useState('all')
 
   if (!currentUser || currentUser.role !== 'admin') {
     return (
@@ -21,6 +27,30 @@ function Users() {
     promoteUser(userId)
     setStatus({ type: 'success', message: 'Користувача підвищено до адміна' })
   }
+
+  const filteredUsers = users.filter(user => {
+    if (filter === 'online') return isOnline(user)
+    if (filter === 'offline') return !isOnline(user)
+    return true
+  })
+
+  const filterButton = (value, label) => (
+    <button
+      type="button"
+      onClick={() => setFilter(value)}
+      style={{
+        padding: '8px 16px',
+        borderRadius: '10px',
+        border: '1px solid var(--border)',
+        background: filter === value ? 'var(--accent)' : 'transparent',
+        color: filter === value ? '#1A1814' : 'var(--text)',
+        fontWeight: 600,
+        cursor: 'pointer',
+      }}
+    >
+      {label}
+    </button>
+  )
 
   return (
     <div style={{ padding: '40px 2rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -49,11 +79,16 @@ function Users() {
 
       <section style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
         <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Користувачі</h2>
-        {users.length === 0 ? (
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: '16px', flexWrap: 'wrap' }}>
+          {filterButton('all', 'Всі')}
+          {filterButton('online', 'Онлайн')}
+          {filterButton('offline', 'Офлайн')}
+        </div>
+        {filteredUsers.length === 0 ? (
           <p>Немає зареєстрованих користувачів.</p>
         ) : (
           <div style={{ display: 'grid', gap: '12px' }}>
-            {users.map(user => (
+            {filteredUsers.map(user => (
               <div key={user.id} style={{
                 padding: '16px',
                 borderRadius: '12px',
@@ -66,7 +101,10 @@ function Users() {
                 flexWrap: 'wrap',
               }}>
                 <div style={{ minWidth: '260px' }}>
-                  <div style={{ fontWeight: 700 }}>{user.name} {user.id === currentUser?.id && '(зараз онлайн)'}</div>
+                  <div style={{ fontWeight: 700 }}>
+                    <span style={{ color: isOnline(user) ? '#2ecc71' : 'var(--text2)', marginRight: '8px' }}>●</span>
+                    {user.name} {user.id === currentUser?.id && '(зараз онлайн)'}
+                  </div>
                   <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{user.email}</div>
                   <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
                     Роль: {user.role}
