@@ -24,6 +24,8 @@ const ResetPassword = lazy(() => import('./pages/ResetPassword'))
 const ForgotPassword = lazy(() => import('./pages/ForgotPassword'))
 const Admin = lazy(() => import('./pages/Admin'))
 const Analytics = lazy(() => import('./pages/Analytics'))
+const Users = lazy(() => import('./pages/Users'))
+const Bookings = lazy(() => import('./pages/Bookings'))
 
 function PageFallback() {
   return <div style={{ padding: '60px 2rem', textAlign: 'center', color: 'var(--text2)' }}>Завантаження...</div>
@@ -51,6 +53,8 @@ function App() {
             <Route path="/forgot-password" element={<ForgotPassword />} />
             <Route path="/admin" element={<ProtectedRoute requireAdmin><Admin /></ProtectedRoute>} />
             <Route path="/admin/analytics" element={<ProtectedRoute requireAdmin><Analytics /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute requireAdmin><Users /></ProtectedRoute>} />
+            <Route path="/admin/bookings" element={<ProtectedRoute requireAdmin><Bookings /></ProtectedRoute>} />
           </Routes>
         </Suspense>
       </main>

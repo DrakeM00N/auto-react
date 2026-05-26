@@ -156,7 +156,7 @@ function TripDetailsFields({ form, inputStyle }) {
 
 function Admin() {
   const { currentUser } = useAuth()
-  const { routes, addRoute, deleteRoute, updateRoute, trips, addTrip, deleteTrip, updateTrip, users, bookings, promoteUser, cancelBooking } = useData()
+  const { routes, addRoute, deleteRoute, updateRoute, trips, addTrip, deleteTrip, updateTrip, users, bookings } = useData()
 
   const [editingRouteId, setEditingRouteId] = useState(null)
   const [editingTripId, setEditingTripId] = useState(null)
@@ -269,11 +269,6 @@ function Admin() {
     editTripForm.reset(EMPTY_TRIP_FORM)
   }
 
-  const handlePromote = (userId) => {
-    promoteUser(userId)
-    setStatus({ type: 'success', message: 'Користувача підвищено до адміна' })
-  }
-
   const handleDeleteRoute = (routeId) => {
     deleteRoute(routeId)
     setStatus({ type: 'success', message: 'Маршрут та повʼязані рейси видалено' })
@@ -282,11 +277,6 @@ function Admin() {
   const handleDeleteTrip = (tripId) => {
     deleteTrip(tripId)
     setStatus({ type: 'success', message: 'Рейс видалено' })
-  }
-
-  const handleCancelBooking = (bookingId) => {
-    cancelBooking(bookingId)
-    setStatus({ type: 'success', message: 'Бронювання скасовано' })
   }
 
   const totalBookings = bookings.length
@@ -316,16 +306,38 @@ function Admin() {
         <h1 style={{ fontFamily: 'Unbounded', fontSize: '2rem' }}>
           Адмін-панель
         </h1>
-        <Link to="/admin/analytics" style={{
-          padding: '12px 20px',
-          borderRadius: '12px',
-          background: 'var(--accent)',
-          color: '#1A1814',
-          fontWeight: 600,
-          textDecoration: 'none',
-        }}>
-          📊 Аналітика
-        </Link>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <Link to="/admin/analytics" style={{
+            padding: '12px 20px',
+            borderRadius: '12px',
+            background: 'var(--accent)',
+            color: '#1A1814',
+            fontWeight: 600,
+            textDecoration: 'none',
+          }}>
+            📊 Аналітика
+          </Link>
+          <Link to="/admin/users" style={{
+            padding: '12px 20px',
+            borderRadius: '12px',
+            background: 'var(--accent)',
+            color: '#1A1814',
+            fontWeight: 600,
+            textDecoration: 'none',
+          }}>
+            👥 Користувачі
+          </Link>
+          <Link to="/admin/bookings" style={{
+            padding: '12px 20px',
+            borderRadius: '12px',
+            background: 'var(--accent)',
+            color: '#1A1814',
+            fontWeight: 600,
+            textDecoration: 'none',
+          }}>
+            🎫 Бронювання
+          </Link>
+        </div>
       </div>
 
       <section style={{ display: 'grid', gap: '18px', marginBottom: '32px', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
@@ -631,112 +643,6 @@ function Admin() {
         )}
       </section>
 
-      {/* Список користувачів */}
-      <section style={{ marginTop: '40px', padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Користувачі</h2>
-        {users.length === 0 ? (
-          <p>Немає зареєстрованих користувачів.</p>
-        ) : (
-          <div style={{ display: 'grid', gap: '12px' }}>
-            {users.map(user => (
-              <div key={user.id} style={{
-                padding: '16px',
-                borderRadius: '12px',
-                background: 'var(--bg)',
-                border: '1px solid var(--border)',
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                gap: '14px',
-                flexWrap: 'wrap',
-              }}>
-                <div style={{ minWidth: '260px' }}>
-                  <div style={{ fontWeight: 700 }}>{user.name} {user.id === currentUser?.id && '(зараз онлайн)'}</div>
-                  <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>{user.email}</div>
-                  <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
-                    Роль: {user.role}
-                    {user.lastLogin ? ` • востаний вхід: ${new Date(user.lastLogin).toLocaleString('uk-UA')}` : ''}
-                  </div>
-                </div>
-                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
-                  {user.role !== 'admin' && (
-                    <button
-                      type="button"
-                      onClick={() => handlePromote(user.id)}
-                      style={{
-                        padding: '10px 14px',
-                        borderRadius: '10px',
-                        border: 'none',
-                        background: 'var(--accent)',
-                        color: '#1A1814',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                      }}
-                    >
-                      Зробити адміном
-                    </button>
-                  )}
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </section>
-
-      {/* Список бронювань */}
-      <section style={{ marginTop: '40px', padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Бронювання</h2>
-        {bookings.length === 0 ? (
-          <p>Немає бронювань.</p>
-        ) : (
-          <div style={{ display: 'grid', gap: '12px' }}>
-            {bookings.map(booking => {
-              const trip = trips.find(t => t.id === booking.tripId)
-              const route = routes.find(r => r.id === trip?.routeId)
-              return (
-                <div key={booking.id} style={{
-                  padding: '16px',
-                  borderRadius: '12px',
-                  background: 'var(--bg)',
-                  border: '1px solid var(--border)',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                }}>
-                  <div style={{ display: 'grid', gap: '10px' }}>
-                    <div style={{ fontWeight: 600 }}>{booking.passengerName}</div>
-                    <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
-                      {route?.from} → {route?.to} • {formatDate(trip?.date)} {trip?.time}
-                    </div>
-                    <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
-                      Телефон: {booking.passengerPhone} • Дата броні: {booking.createdAt}
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => handleCancelBooking(booking.id)}
-                      style={{
-                        padding: '10px 14px',
-                        borderRadius: '10px',
-                        border: 'none',
-                        background: '#e74c3c',
-                        color: '#fff',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        width: 'max-content',
-                      }}
-                    >
-                      Скасувати бронювання
-                    </button>
-                  </div>
-                  <div style={{ fontWeight: 600, color: 'var(--accent)' }}>
-                    {trip?.price} грн
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        )}
-      </section>
     </div>
   )
 }
