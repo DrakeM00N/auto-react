@@ -112,6 +112,9 @@ function Register() {
               {showPassword ? '👁' : '👁️'}
             </button>
           </div>
+          <span style={{ fontSize: '0.8rem', color: 'var(--text2)', marginTop: '-2px' }}>
+            Мінімум 8 символів, латинські літери та хоча б одна цифра
+          </span>
           {errors.password && <span className="field-error" style={fieldErrorStyle}>{errors.password.message}</span>}
         </label>
 
