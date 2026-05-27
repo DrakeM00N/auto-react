@@ -23,6 +23,7 @@ function Navbar() {
       <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
         <Link to="/routes" style={{ padding: '8px 16px', color: 'var(--text2)' }}>Маршрути</Link>
         <Link to="/schedule" style={{ padding: '8px 16px', color: 'var(--text2)' }}>Розклад</Link>
+        <Link to="/about" style={{ padding: '8px 16px', color: 'var(--text2)' }}>Про нас</Link>
 
         {currentUser ? (
           <>

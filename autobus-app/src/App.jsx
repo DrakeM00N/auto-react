@@ -13,6 +13,7 @@ import RoutesPage from './pages/Routes'
 import Schedule from './pages/Schedule'
 import Login from './pages/Login'
 import Register from './pages/Register'
+import About from './pages/About'
 
 // Lazy-loaded — visitors who never reach booking, the admin pages, or a
 // permanent-ticket URL shouldn't pay for the code those pages drag in.
@@ -43,6 +44,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/routes" element={<RoutesPage />} />
             <Route path="/schedule" element={<Schedule />} />
+            <Route path="/about" element={<About />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/booking/success" element={<BookingSuccess />} />
             <Route path="/ticket/:code" element={<Ticket />} />
