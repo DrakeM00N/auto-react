@@ -34,6 +34,7 @@ function Footer() {
                 { to: '/routes', label: 'Маршрути' },
                 { to: '/schedule', label: 'Розклад рейсів' },
                 { to: '/schedule', label: 'Купити квиток' },
+                { to: '/about', label: 'Про нас' },
               ].map(link => (
                 <Link key={link.to} to={link.to} style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem' }}>
                   {link.label}
