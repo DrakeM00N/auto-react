@@ -87,7 +87,7 @@ function Booking() {
 
     try {
       const fullName = `${values.passengerLastName.trim()} ${values.passengerFirstName.trim()}`
-      const result = await apiRequest('POST', '/payments/checkout', {
+      const result = await apiRequest('POST', '/payments/create', {
         tripId,
         passengerName: fullName,
         passengerPhone: values.passengerPhone,
@@ -95,9 +95,22 @@ function Booking() {
         alightingPoint: values.alightingPoint,
       })
       sessionStorage.setItem('paymentOrderId', result.orderId)
-      // assign() — React Compiler flags `window.location.href = ...` as an
-      // outside-the-component mutation; the method call has identical effect.
-      window.location.assign(result.pageUrl)
+
+      // WayForPay HPP is a form POST, not a GET redirect — build a hidden form
+      // with the signed fields and submit it from the browser.
+      const form = document.createElement('form')
+      form.method = 'POST'
+      form.action = result.formUrl
+      form.acceptCharset = 'utf-8'
+      for (const [name, value] of Object.entries(result.fields || {})) {
+        const input = document.createElement('input')
+        input.type = 'hidden'
+        input.name = name
+        input.value = value == null ? '' : String(value)
+        form.appendChild(input)
+      }
+      document.body.appendChild(form)
+      form.submit()
     } catch (e) {
       setServerError(e.message)
     }

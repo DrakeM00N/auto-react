@@ -23,7 +23,8 @@ app.set('trust proxy', 1)
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',').map(o => o.trim()).filter(Boolean)
 app.use(cors({ origin: allowedOrigins, credentials: true }))
-// Keep the raw body around so monobank webhook signatures can be verified.
+// Raw body is captured in case a future webhook needs signature verification
+// over the exact bytes; WayForPay signs JSON fields, so it doesn't need it.
 app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf } }))
 
 // Rate limiting for auth endpoints

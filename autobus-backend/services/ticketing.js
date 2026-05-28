@@ -1,13 +1,14 @@
 const crypto = require('crypto')
 const { db } = require('../db')
-const { requestInvoiceStatus } = require('./monobank')
+const { requestInvoiceStatus } = require('./wayforpay')
 const { logger } = require('../logger')
 
 const log = logger('ticketing')
 
-// monobank invoice statuses that mean the money is secured / not secured.
-const PAID_STATUSES = ['success', 'hold']
-const FAILED_STATUSES = ['failure', 'reversed', 'expired']
+// WayForPay transactionStatus values that mean the money is secured / lost.
+// Anything else (InProcessing, Pending, WaitingAuthComplete, …) is still in flight.
+const PAID_STATUSES = ['Approved']
+const FAILED_STATUSES = ['Declined', 'Expired', 'Refunded', 'Voided', 'RefundInProcessing']
 
 // --- Ticket codes ---
 

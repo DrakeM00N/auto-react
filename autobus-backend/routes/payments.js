@@ -4,7 +4,11 @@ const jwt = require('jsonwebtoken')
 const { body, validationResult } = require('express-validator')
 const { db } = require('../db')
 const { getOccupiedSeats, HOLD_MINUTES } = require('../services/seats')
-const { createInvoice, verifyWebhookSignature } = require('../services/monobank')
+const {
+  createInvoice,
+  verifyWebhookSignature,
+  buildWebhookReply,
+} = require('../services/wayforpay')
 const { issueTicket } = require('../services/ticketing')
 const { logger } = require('../logger')
 
@@ -13,10 +17,6 @@ const log = logger('payments')
 
 // server.js already exits on missing JWT_SECRET, so no fallback here.
 const JWT_SECRET = process.env.JWT_SECRET
-
-if (!process.env.MONOBANK_TOKEN) {
-  log.warn('MONOBANK_TOKEN not set — payments will not work until you add it to autobus-backend/.env')
-}
 
 // Resolve the logged-in user from a Bearer token, if one is present.
 function resolveUserId(req) {
@@ -29,8 +29,8 @@ function resolveUserId(req) {
   }
 }
 
-// POST /api/payments/checkout — reserve a seat hold and create a monobank invoice.
-router.post('/checkout',
+// POST /api/payments/create — reserve a seat hold and return WayForPay form data.
+router.post('/create',
   [
     body('tripId').isInt({ min: 1 }).withMessage('tripId must be a positive integer'),
     body('passengerName').isString().trim().notEmpty().withMessage('Passenger name is required'),
@@ -65,23 +65,21 @@ router.post('/checkout',
     const routeRes = await db.execute({ sql: 'SELECT * FROM routes WHERE id = ?', args: [trip.route_id] })
     const route = routeRes.rows[0]
 
-    // Random suffix — the order_id is the only thing protecting the
-    // unauthenticated /status endpoint from PII enumeration. (Same High-1
-    // fix as the retired LiqPay flow.)
+    // Random suffix — orderReference is the only thing protecting the
+    // unauthenticated /status endpoint from PII enumeration.
     const orderId = `order_${tripId}_${crypto.randomBytes(16).toString('hex')}`
     const destination = `Квиток BusTour: ${boardingPoint || route.from_city} → ${alightingPoint || route.to_city}, ${trip.date} ${trip.time}`
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173'
 
-    const invoice = await createInvoice({
+    const invoice = createInvoice({
       amountUah: trip.price,
       reference: orderId,
       destination,
       redirectUrl: `${frontendUrl}/booking/success?order_id=${encodeURIComponent(orderId)}`,
-      // webHookUrl only helps when the backend is reachable from the internet.
+      // serviceUrl only helps when the backend is reachable from the internet.
       webHookUrl: process.env.BACKEND_PUBLIC_URL
         ? `${process.env.BACKEND_PUBLIC_URL}/api/payments/webhook`
         : undefined,
-      validitySeconds: HOLD_MINUTES * 60,
     })
 
     await db.execute({
@@ -100,29 +98,35 @@ router.post('/checkout',
       ],
     })
 
-    res.json({ pageUrl: invoice.pageUrl, orderId })
+    res.json({
+      orderId,
+      formUrl: invoice.formUrl,
+      fields: invoice.fields,
+      // pageUrl kept for compatibility with the older redirect-style frontend.
+      pageUrl: invoice.formUrl,
+    })
   } catch (e) {
-    log.error('POST /api/payments/checkout:', e)
+    log.error('POST /api/payments/create:', e)
     res.status(500).json({ error: e.message || 'Помилка сервера' })
   }
 })
 
-// POST /api/payments/webhook — monobank server-to-server status notification.
-// Dormant on localhost (monobank can't reach it); a safety net in production.
+// POST /api/payments/webhook — WayForPay server-to-server notification.
+// Dormant on localhost (WayForPay can't reach it); a safety net in production.
 router.post('/webhook', async (req, res) => {
   try {
-    const valid = await verifyWebhookSignature(req.rawBody, req.headers['x-sign'])
-    if (!valid) return res.status(400).send('Invalid signature')
-
-    const invoiceId = req.body && req.body.invoiceId
-    if (invoiceId) {
-      const found = await db.execute({
-        sql: 'SELECT order_id FROM pending_bookings WHERE invoice_id = ?',
-        args: [invoiceId],
-      })
-      if (found.rows[0]) await issueTicket(found.rows[0].order_id)
+    const payload = req.body || {}
+    if (!verifyWebhookSignature(payload)) {
+      log.warn('webhook: invalid signature for order', payload.orderReference)
+      return res.status(400).send('Invalid signature')
     }
-    res.send('OK')
+
+    if (payload.orderReference) {
+      await issueTicket(payload.orderReference)
+    }
+
+    // WayForPay keeps retrying until it receives a properly-signed accept.
+    res.json(buildWebhookReply(payload.orderReference, 'accept'))
   } catch (e) {
     log.error('POST /api/payments/webhook:', e)
     res.status(500).send('Error')
@@ -130,7 +134,7 @@ router.post('/webhook', async (req, res) => {
 })
 
 // GET /api/payments/status/:orderId — frontend polls this after returning
-// from monobank. It asks monobank directly and issues the ticket on success.
+// from WayForPay. It asks WayForPay directly and issues the ticket on success.
 router.get('/status/:orderId', async (req, res) => {
   try {
     const result = await issueTicket(req.params.orderId)

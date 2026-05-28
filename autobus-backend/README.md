@@ -46,13 +46,16 @@ will refuse to start if `JWT_SECRET` is unset.
 ```
 JWT_SECRET=your_jwt_secret_here_change_in_production   # required
 PORT=3001
-MONOBANK_TOKEN=your_monobank_acquiring_token_here
+WAYFORPAY_MERCHANT_ACCOUNT=your_merchant_account
+WAYFORPAY_SECRET_KEY=your_wayforpay_secret_key
+WAYFORPAY_MERCHANT_DOMAIN=your-domain.com
 FRONTEND_URL=http://localhost:5173
 ADMIN_EMAILS=                                          # see below
 ```
 
-The `MONOBANK_TOKEN` is the monobank acquiring ("Plata by mono") token.
-Get a free test token at https://api.monobank.ua/ for development.
+The WayForPay credentials come from your merchant cabinet at
+https://wayforpay.com/. `WAYFORPAY_MERCHANT_DOMAIN` must match the
+domain registered for the merchant account.
 
 ### Bootstrapping the admin role
 
@@ -162,9 +165,9 @@ Note: bookings are created only by a confirmed payment (see Payments), not by a 
 - `GET /api/users` - Get all users (admin only)
 - `POST /api/users/:id/promote` - Promote a user to admin (admin only)
 
-#### Payments (monobank acquiring / "Plata by mono")
-- `POST /api/payments/checkout` - Hold a seat and create a monobank invoice; returns `pageUrl`
-- `POST /api/payments/webhook` - monobank server-to-server status notification (X-Sign verified)
+#### Payments (WayForPay)
+- `POST /api/payments/create` - Hold a seat and return signed WayForPay form fields
+- `POST /api/payments/webhook` - WayForPay server-to-server notification (merchantSignature verified)
 - `GET /api/payments/status/:orderId` - Check payment status; issues the ticket on success
 
 #### Tickets
@@ -182,7 +185,7 @@ The database schema includes tables for:
 - `routes`
 - `trips`
 - `bookings` (includes a unique `ticket_code` per issued ticket)
-- `pending_bookings` (seat holds + monobank invoice ids, awaiting payment)
+- `pending_bookings` (seat holds + WayForPay order references, awaiting payment)
 - `password_resets` (for password reset tokens)
 
 The database is initialized and seeded with initial data when the server starts if the tables are empty.
@@ -208,7 +211,7 @@ autobus-backend/
 │   ├── trips.js
 │   └── users.js
 └── services/        # Business logic
-    ├── monobank.js  # monobank acquiring API client
+    ├── wayforpay.js # WayForPay signing + status API + webhook verification
     ├── seats.js     # seat availability / hold counting
     └── ticketing.js # ticket issuance and lookup
 ```
