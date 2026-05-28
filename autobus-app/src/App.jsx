@@ -14,11 +14,11 @@ import Schedule from './pages/Schedule'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import About from './pages/About'
+import BookingSuccess from './pages/BookingSuccess'
 
 // Lazy-loaded — visitors who never reach booking, the admin pages, or a
 // permanent-ticket URL shouldn't pay for the code those pages drag in.
 const Booking = lazy(() => import('./pages/Booking'))
-const BookingSuccess = lazy(() => import('./pages/BookingSuccess'))
 const Ticket = lazy(() => import('./pages/Ticket'))
 const Profile = lazy(() => import('./pages/Profile'))
 const ResetPassword = lazy(() => import('./pages/ResetPassword'))
