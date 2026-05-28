@@ -65,7 +65,14 @@ function createInvoice({ amountUah, reference, destination, redirectUrl, webHook
     productPrice: [productPrice],
     language: 'UA',
   }
-  if (redirectUrl) fields.returnUrl = redirectUrl
+  // WayForPay POSTs the customer's browser to returnUrl, which kills client-side
+  // routing on a React SPA. Route the return through a backend bounce that
+  // 302s to the SPA with order_id in the query string.
+  fields.returnUrl = process.env.BACKEND_PUBLIC_URL
+    ? `${process.env.BACKEND_PUBLIC_URL}/api/payments/return`
+    : 'https://autobus-backend.onrender.com/api/payments/return'
+  // Accept the caller's redirectUrl only as a fallback marker — currently unused.
+  void redirectUrl
   if (webHookUrl) fields.serviceUrl = webHookUrl
 
   // Keep parity with the prior monobank shape so callers don't care which gateway is wired.

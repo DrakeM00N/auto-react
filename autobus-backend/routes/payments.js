@@ -134,6 +134,20 @@ router.post('/webhook', async (req, res) => {
   }
 })
 
+// POST /api/payments/return — WayForPay form-submits the customer's browser
+// here after payment (its returnUrl flow). We extract orderReference from
+// the form body and 302 the browser to the SPA success page — direct
+// returnUrl-to-SPA doesn't work because POST kills client-side routing.
+router.post('/return', (req, res) => {
+  const frontendUrl = (process.env.FRONTEND_URL || 'https://bustour.com.ua')
+    .split(',')[0].trim()
+  const orderReference = (req.body && req.body.orderReference) || ''
+  const target = orderReference
+    ? `${frontendUrl}/booking/success?order_id=${encodeURIComponent(orderReference)}`
+    : `${frontendUrl}/booking/success`
+  res.redirect(302, target)
+})
+
 // GET /api/payments/status/:orderId — frontend polls this after returning
 // from WayForPay. It asks WayForPay directly and issues the ticket on success.
 router.get('/status/:orderId', async (req, res) => {
