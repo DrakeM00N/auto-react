@@ -47,9 +47,9 @@ function createInvoice({ amountUah, reference, destination, redirectUrl, webHook
     orderDate,
     amount,
     UAH,
-    productName,
-    productCount,
-    productPrice,
+    [productName],
+    [productCount],
+    [productPrice],
   ])
 
   const fields = {
@@ -60,9 +60,9 @@ function createInvoice({ amountUah, reference, destination, redirectUrl, webHook
     orderDate: String(orderDate),
     amount,
     currency: UAH,
-    productName,
-    productCount: String(productCount),
-    productPrice,
+    productName: [productName],
+    productCount: [String(productCount)],
+    productPrice: [productPrice],
     language: 'UA',
   }
   if (redirectUrl) fields.returnUrl = redirectUrl
@@ -92,6 +92,12 @@ async function requestInvoiceStatus(orderReference) {
     })
     if (!res.ok) return null
     const data = await res.json()
+    // WayForPay returns transactionStatus="Declined" with reasonCode=1127
+    // ("Order Not Found") for orders it has not yet registered — e.g. a user
+    // who reached /booking/success before propagation completed. Treat this
+    // as "still pending" so the polling loop keeps trying instead of failing
+    // immediately. A real Declined comes with a different reasonCode.
+    if (Number(data.reasonCode) === 1127) return null
     return data.transactionStatus || null
   } catch (e) {
     log.error('status request failed:', e.message)

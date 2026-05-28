@@ -97,17 +97,26 @@ function Booking() {
       sessionStorage.setItem('paymentOrderId', result.orderId)
 
       // WayForPay HPP is a form POST, not a GET redirect — build a hidden form
-      // with the signed fields and submit it from the browser.
+      // with the signed fields and submit it from the browser. Array values
+      // (productName/productCount/productPrice for multi-product invoices)
+      // become one input per element with a name="...[]" suffix.
       const form = document.createElement('form')
       form.method = 'POST'
       form.action = result.formUrl
       form.acceptCharset = 'utf-8'
-      for (const [name, value] of Object.entries(result.fields || {})) {
+      const appendInput = (name, value) => {
         const input = document.createElement('input')
         input.type = 'hidden'
         input.name = name
         input.value = value == null ? '' : String(value)
         form.appendChild(input)
+      }
+      for (const [name, value] of Object.entries(result.fields || {})) {
+        if (Array.isArray(value)) {
+          for (const item of value) appendInput(`${name}[]`, item)
+        } else {
+          appendInput(name, value)
+        }
       }
       document.body.appendChild(form)
       form.submit()
