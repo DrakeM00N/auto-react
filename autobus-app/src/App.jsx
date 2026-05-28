@@ -14,6 +14,7 @@ import Schedule from './pages/Schedule'
 import Login from './pages/Login'
 import Register from './pages/Register'
 import About from './pages/About'
+import Oferta from './pages/Oferta'
 import BookingSuccess from './pages/BookingSuccess'
 
 // Lazy-loaded — visitors who never reach booking, the admin pages, or a
@@ -45,6 +46,7 @@ function App() {
             <Route path="/routes" element={<RoutesPage />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/about" element={<About />} />
+            <Route path="/oferta" element={<Oferta />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/booking/success" element={<BookingSuccess />} />
             <Route path="/ticket/:code" element={<Ticket />} />

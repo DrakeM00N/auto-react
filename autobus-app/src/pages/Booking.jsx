@@ -31,6 +31,7 @@ function Booking() {
   const selectedRoute = useMemo(() => routes.find(route => route.id === selectedTrip?.routeId), [routes, selectedTrip])
   const freeSeats = selectedTrip ? selectedTrip.seats - (selectedTrip.bookedCount || 0) : 0
   const departed = selectedTrip ? isDeparted(selectedTrip) : false
+  const [agreed, setAgreed] = useState(false)
 
   const {
     register,
@@ -78,6 +79,10 @@ function Booking() {
   const onSubmit = async (values) => {
     if (departed) {
       setServerError('Цей рейс уже відправлено.')
+      return
+    }
+    if (!agreed) {
+      setServerError('Підтвердіть згоду з умовами Публічної оферти.')
       return
     }
     setServerError(null)
@@ -235,23 +240,40 @@ function Booking() {
               </div>
             )}
 
+            <label style={{ display: 'flex', alignItems: 'flex-start', gap: '10px', color: 'var(--text2)', lineHeight: 1.5, fontSize: '0.95rem', cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={agreed}
+                onChange={e => setAgreed(e.target.checked)}
+                style={{ marginTop: '4px', accentColor: 'var(--accent)', width: '18px', height: '18px', cursor: 'pointer' }}
+              />
+              <span>
+                Я згоден з умовами{' '}
+                <Link to="/oferta" target="_blank" rel="noopener noreferrer" style={{ color: 'var(--accent)' }}>
+                  Публічної оферти
+                </Link>{' '}
+                та політикою повернення коштів.
+              </span>
+            </label>
+
             <Button
               type="submit"
-              disabled={freeSeats <= 0}
+              disabled={freeSeats <= 0 || !agreed}
               loading={isSubmitting}
               loadingText="Перенаправлення на оплату…"
               style={{
                 padding: '16px 22px',
                 borderRadius: '14px',
                 border: 'none',
-                background: freeSeats <= 0 ? 'var(--border)' : 'var(--accent)',
-                color: freeSeats <= 0 ? 'var(--text2)' : '#1A1814',
+                background: (freeSeats <= 0 || !agreed) ? 'var(--border)' : 'var(--accent)',
+                color: (freeSeats <= 0 || !agreed) ? 'var(--text2)' : '#1A1814',
                 fontWeight: 700,
                 fontSize: '1rem',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: '8px',
+                cursor: (freeSeats <= 0 || !agreed) ? 'not-allowed' : 'pointer',
               }}
             >
               {freeSeats <= 0 ? 'Місць немає' : 'Перейти до оплати'}

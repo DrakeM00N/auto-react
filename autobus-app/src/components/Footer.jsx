@@ -35,8 +35,10 @@ function Footer() {
                 { to: '/schedule', label: 'Розклад рейсів' },
                 { to: '/schedule', label: 'Купити квиток' },
                 { to: '/about', label: 'Про нас' },
-              ].map(link => (
-                <Link key={link.to} to={link.to} style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem' }}>
+                { to: '/oferta', label: 'Публічна оферта' },
+                { to: '/oferta', label: 'Політика конфіденційності' },
+              ].map((link, i) => (
+                <Link key={`${link.to}-${i}`} to={link.to} style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem' }}>
                   {link.label}
                 </Link>
               ))}
