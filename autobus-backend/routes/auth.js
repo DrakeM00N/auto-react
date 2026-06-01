@@ -97,7 +97,7 @@ router.post('/register',
     })).rows[0]
 
     const user = { id: userRow.id, name: userRow.name, email: userRow.email, role: userRow.role }
-    const token = jwt.sign(user, SECRET, { expiresIn: '7d' })
+    const token = jwt.sign(user, SECRET, { expiresIn: '30d' })
 
     res.json({ token, user: { ...user, hasPassword: true } })
   } catch (e) {
@@ -142,7 +142,7 @@ router.post('/login',
     })
 
     const userData = { id: user.id, name: user.name, email: user.email, role: user.role, lastLogin: now }
-    const token = jwt.sign(userData, SECRET, { expiresIn: '7d' })
+    const token = jwt.sign(userData, SECRET, { expiresIn: '30d' })
 
     res.json({ token, user: { ...userData, hasPassword: true } })
   } catch (e) {
@@ -222,7 +222,7 @@ router.post('/google', async (req, res) => {
     })
 
     const userData = { id: user.id, name: user.name, email: user.email, role: user.role, lastLogin: now }
-    const token = jwt.sign(userData, SECRET, { expiresIn: '7d' })
+    const token = jwt.sign(userData, SECRET, { expiresIn: '30d' })
 
     res.json({ token, user: { ...userData, hasPassword: !!user.password } })
   } catch (e) {
