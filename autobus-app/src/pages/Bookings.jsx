@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
-import { formatDate } from '../lib/format'
+import { formatDate, isDeparted } from '../lib/format'
 
 function Bookings() {
   const { currentUser } = useAuth()
@@ -75,22 +75,28 @@ function Bookings() {
                     <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
                       Телефон: {booking.passengerPhone} • Дата броні: {booking.createdAt}
                     </div>
-                    <button
-                      type="button"
-                      onClick={() => handleCancelBooking(booking.id)}
-                      style={{
-                        padding: '10px 14px',
-                        borderRadius: '10px',
-                        border: 'none',
-                        background: '#e74c3c',
-                        color: '#fff',
-                        fontWeight: 600,
-                        cursor: 'pointer',
-                        width: 'max-content',
-                      }}
-                    >
-                      Скасувати бронювання
-                    </button>
+                    {!isDeparted(trip) ? (
+                      <button
+                        type="button"
+                        onClick={() => handleCancelBooking(booking.id)}
+                        style={{
+                          padding: '10px 14px',
+                          borderRadius: '10px',
+                          border: 'none',
+                          background: '#e74c3c',
+                          color: '#fff',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          width: 'max-content',
+                        }}
+                      >
+                        Скасувати бронювання
+                      </button>
+                    ) : (
+                      <span style={{ fontSize: '0.8rem', color: 'var(--text2)', fontWeight: 600 }}>
+                        Рейс відправлено
+                      </span>
+                    )}
                   </div>
                   <div style={{ fontWeight: 600, color: 'var(--accent)' }}>
                     {trip?.price} грн
