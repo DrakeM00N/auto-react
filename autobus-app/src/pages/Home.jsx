@@ -173,15 +173,8 @@ function Home() {
         background: 'var(--bg2)',
         borderBottom: '1px solid var(--border)',
       }}>
-        <div style={{
-          maxWidth: '1100px',
-          margin: '0 auto',
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          alignItems: 'center',
-          gap: '60px',
-        }}>
-          <div>
+        <div className="hero-grid">
+        <div>
             <p style={{
               color: 'var(--accent)', fontFamily: 'Unbounded',
               fontSize: '0.75rem', letterSpacing: '0.15em',

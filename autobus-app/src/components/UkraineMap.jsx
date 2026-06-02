@@ -107,7 +107,7 @@ function UkraineMap() {
       <svg
         className="uk-map__svg"
         viewBox={`0 0 ${VB_W} ${VB_H}`}
-        preserveAspectRatio="xMidYMid slice"
+        preserveAspectRatio="xMidYMid meet"
       >
         <path className="uk-map__outline" d={outlineD} />
 

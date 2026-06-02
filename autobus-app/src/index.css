@@ -558,3 +558,46 @@ textarea:focus {
     transform: none;
   }
 }
+
+/* ---------- Hero two-column grid (Home.jsx) ---------- */
+
+.hero-grid {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 60px;
+}
+
+@media (max-width: 900px) {
+  .hero-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+    text-align: center;
+  }
+  .hero-bus {
+    display: none;
+  }
+  .hero-grid .btn-primary,
+  .hero-grid .btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .hero-grid {
+    gap: 0;
+  }
+}
+
+/* ---------- Ukraine map mobile fix ---------- */
+
+@media (max-width: 768px) {
+  .uk-map__svg {
+    width: 140%;
+    left: -20%;
+    top: -10%;
+  }
+}
