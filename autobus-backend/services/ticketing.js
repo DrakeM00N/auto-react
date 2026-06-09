@@ -39,7 +39,7 @@ async function uniqueTicketCode() {
 
 const TICKET_SQL = `
   SELECT b.id, b.ticket_code, b.trip_id,
-         b.passenger_name, b.passenger_phone, b.boarding_point, b.alighting_point, b.created_at,
+         b.passenger_name, b.passenger_phone, b.boarding_point, b.alighting_point, b.created_at, b.status,
          t.date AS trip_date, t.time AS trip_time, t.price AS trip_price,
          r.from_city, r.to_city, r.stops, r.duration
   FROM bookings b
@@ -66,6 +66,7 @@ function mapTicket(row) {
     toCity: row.to_city,
     stops,
     duration: row.duration,
+    status: row.status,
   }
 }
 

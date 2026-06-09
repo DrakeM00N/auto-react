@@ -206,7 +206,7 @@ function Home() {
             </div>
           </div>
 
-          <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <div className="hero-bus" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
             <BusIllustration />
           </div>
         </div>

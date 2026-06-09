@@ -13,6 +13,9 @@ router.get('/:code', async (req, res) => {
   try {
     const ticket = await loadTicketByCode(req.params.code)
     if (!ticket) return res.status(404).json({ error: 'Квиток не знайдено' })
+    if (ticket.status === 'cancelled') {
+      return res.json({ valid: false, reason: 'Бронювання скасовано' })
+    }
     res.json(ticket)
   } catch (e) {
     log.error('GET /api/tickets/:code:', e)

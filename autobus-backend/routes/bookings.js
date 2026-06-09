@@ -64,6 +64,7 @@ router.get('/my', authMiddleware, async (req, res) => {
       alightingPoint: b.alighting_point,
       ticketCode: b.ticket_code,
       createdAt: b.created_at,
+      status: b.status,
     })))
   } catch (e) {
     log.error('GET /api/bookings/my:', e)
@@ -85,6 +86,7 @@ router.get('/', adminMiddleware, async (req, res) => {
       alightingPoint: b.alighting_point,
       ticketCode: b.ticket_code,
       createdAt: b.created_at,
+      status: b.status,
     })))
   } catch (e) {
     log.error('GET /api/bookings:', e)
@@ -136,7 +138,20 @@ router.delete('/:id', authMiddleware, async (req, res) => {
       return res.status(403).json({ error: 'Немає доступу' })
     }
 
-    await db.execute({ sql: 'DELETE FROM bookings WHERE id = ?', args: [req.params.id] })
+    // Get trip details to check departure time
+    const tripRes = await db.execute({ sql: 'SELECT date, time FROM trips WHERE id = ?', args: [booking.trip_id] })
+    const trip = tripRes.rows[0]
+    if (!trip) return res.status(404).json({ error: 'Рейс не знайдено' })
+
+    const now = new Date()
+    const departure = new Date(`${trip.date}T${trip.time}`)
+    const diffHours = (departure - now) / (1000 * 60 * 60)
+    if (diffHours < 24 && req.user.role !== 'admin') {
+      return res.status(400).json({ error: 'Скасування можливе не пізніше ніж за 24 години до відправлення' })
+    }
+
+    // Update status to cancelled instead of deleting
+    await db.execute({ sql: 'UPDATE bookings SET status = ? WHERE id = ?', args: ['cancelled', req.params.id] })
     res.json({ success: true })
   } catch (e) {
     log.error('DELETE /api/bookings/:id:', e)
