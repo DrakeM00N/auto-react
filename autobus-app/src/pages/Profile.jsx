@@ -4,6 +4,14 @@ import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { formatDate } from '../lib/format'
 
+// Returns true if departure is less than 24 hours away
+function isWithin24Hours(trip) {
+  if (!trip?.date || !trip?.time) return false
+  const departure = new Date(`${trip.date}T${trip.time}`)
+  const diffHours = (departure - new Date()) / (1000 * 60 * 60)
+  return diffHours < 24
+}
+
 function Profile() {
   const { currentUser, changePassword } = useAuth()
   const { bookings, trips, routes, cancelBooking, updateBooking } = useData()
@@ -12,10 +20,8 @@ function Profile() {
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' })
   const [status, setStatus] = useState(null)
 
-  // Hooks must run on every render in the same order, so this useMemo
-  // sits above the early-return for the unauthenticated case.
   const userBookings = useMemo(
-    () => (currentUser ? bookings.filter(b => b.userId === currentUser.id) : []),
+    () => (currentUser ? bookings.filter(b => b.userId === currentUser.id && b.status !== 'cancelled') : []),
     [bookings, currentUser]
   )
 
@@ -39,7 +45,6 @@ function Profile() {
       setStatus({ type: 'error', message: 'Заповніть імʼя та телефон для збереження.' })
       return
     }
-
     updateBooking(bookingId, {
       passengerName: editData.passengerName.trim(),
       passengerPhone: editData.passengerPhone.trim(),
@@ -48,30 +53,30 @@ function Profile() {
     setStatus({ type: 'success', message: 'Дані бронювання оновлено.' })
   }
 
-  const handleCancelBooking = (bookingId) => {
-    cancelBooking(bookingId)
+  const handleCancelBooking = async (bookingId) => {
+    const result = await cancelBooking(bookingId)
+    if (result && !result.success) {
+      setStatus({ type: 'error', message: result.message || 'Не вдалося скасувати бронювання.' })
+      return
+    }
     setStatus({ type: 'success', message: 'Бронювання скасовано.' })
   }
 
   const handleChangePassword = async (event) => {
     event.preventDefault()
-
     if (!passwords.current || !passwords.new || !passwords.confirm) {
       setStatus({ type: 'error', message: 'Заповніть всі поля для зміни пароля.' })
       return
     }
-
     if (passwords.new !== passwords.confirm) {
       setStatus({ type: 'error', message: 'Новий пароль і підтвердження не співпадають.' })
       return
     }
-
     const result = await changePassword(passwords.current, passwords.new)
     if (!result.success) {
       setStatus({ type: 'error', message: result.message })
       return
     }
-
     setPasswords({ current: '', new: '', confirm: '' })
     setStatus({ type: 'success', message: 'Пароль успішно змінено.' })
   }
@@ -100,7 +105,7 @@ function Profile() {
         <div className="cascade-item" style={{ '--i': 0, padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
           <h2 style={{ fontSize: '1.4rem', marginBottom: '12px' }}>Особисті дані</h2>
           <div style={{ display: 'grid', gap: '10px', maxWidth: '560px' }}>
-            <div><strong>Ім’я:</strong> {currentUser.name}</div>
+            <div><strong>Ім'я:</strong> {currentUser.name}</div>
             <div><strong>Email:</strong> {currentUser.email}</div>
             {currentUser.role === 'admin' && <div><strong>Роль:</strong> {currentUser.role}</div>}
             {currentUser.lastLogin && <div><strong>Останній вхід:</strong> {new Date(currentUser.lastLogin).toLocaleString('uk-UA')}</div>}
@@ -125,6 +130,7 @@ function Profile() {
             {userBookings.map((booking, i) => {
               const trip = trips.find(t => t.id === booking.tripId)
               const route = routes.find(r => r.id === trip?.routeId)
+              const canCancel = !isWithin24Hours(trip)
               return (
                 <article
                   key={booking.id}
@@ -154,7 +160,7 @@ function Profile() {
                       <div style={{ display: 'grid', gap: '12px', marginTop: '12px' }}>
                         <div style={{ display: 'grid', gap: '8px' }}>
                           <label style={{ color: 'var(--text2)' }}>
-                            Ім’я пасажира
+                            Ім'я пасажира
                             <input
                               value={editData.passengerName}
                               onChange={e => setEditData(prev => ({ ...prev, passengerName: e.target.value }))}
@@ -190,7 +196,7 @@ function Profile() {
                         </div>
                       </div>
                     ) : (
-                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '12px' }}>
+                      <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '12px', alignItems: 'center' }}>
                         {booking.ticketCode && (
                           <Link
                             to={`/ticket/${booking.ticketCode}`}
@@ -206,13 +212,19 @@ function Profile() {
                         >
                           Редагувати
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleCancelBooking(booking.id)}
-                          style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid #e74c3c', background: 'transparent', color: '#e74c3c', cursor: 'pointer' }}
-                        >
-                          Скасувати бронювання
-                        </button>
+                        {canCancel ? (
+                          <button
+                            type="button"
+                            onClick={() => handleCancelBooking(booking.id)}
+                            style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid #e74c3c', background: 'transparent', color: '#e74c3c', cursor: 'pointer' }}
+                          >
+                            Скасувати бронювання
+                          </button>
+                        ) : (
+                          <span style={{ fontSize: '0.8rem', color: 'var(--text2)' }}>
+                            Скасування недоступне (менше 24 год до рейсу)
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -224,48 +236,48 @@ function Profile() {
       </section>
 
       {currentUser.hasPassword !== false && (
-      <section className="cascade-item" style={{ '--i': 3, padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Змінити пароль</h2>
-        <form onSubmit={handleChangePassword} style={{ display: 'grid', gap: '14px', maxWidth: '520px' }}>
-          <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
-            Поточний пароль
-            <input
-              type="password"
-              value={passwords.current}
-              onChange={e => setPasswords(prev => ({ ...prev, current: e.target.value }))}
-              placeholder="••••••••"
-              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
-            />
-          </label>
-          <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
-            Новий пароль
-            <input
-              type="password"
-              value={passwords.new}
-              onChange={e => setPasswords(prev => ({ ...prev, new: e.target.value }))}
-              placeholder="••••••••"
-              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
-            />
-          </label>
-          <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
-            Підтвердження пароля
-            <input
-              type="password"
-              value={passwords.confirm}
-              onChange={e => setPasswords(prev => ({ ...prev, confirm: e.target.value }))}
-              placeholder="••••••••"
-              style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
-            />
-          </label>
-          <button
-            type="submit"
-            className="btn-primary"
-            style={{ padding: '14px 22px', borderRadius: '14px', cursor: 'pointer' }}
-          >
-            Змінити пароль
-          </button>
-        </form>
-      </section>
+        <section className="cascade-item" style={{ '--i': 3, padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
+          <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Змінити пароль</h2>
+          <form onSubmit={handleChangePassword} style={{ display: 'grid', gap: '14px', maxWidth: '520px' }}>
+            <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
+              Поточний пароль
+              <input
+                type="password"
+                value={passwords.current}
+                onChange={e => setPasswords(prev => ({ ...prev, current: e.target.value }))}
+                placeholder="••••••••"
+                style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+              />
+            </label>
+            <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
+              Новий пароль
+              <input
+                type="password"
+                value={passwords.new}
+                onChange={e => setPasswords(prev => ({ ...prev, new: e.target.value }))}
+                placeholder="••••••••"
+                style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+              />
+            </label>
+            <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
+              Підтвердження пароля
+              <input
+                type="password"
+                value={passwords.confirm}
+                onChange={e => setPasswords(prev => ({ ...prev, confirm: e.target.value }))}
+                placeholder="••••••••"
+                style={{ width: '100%', padding: '14px 16px', borderRadius: '14px', border: '1px solid var(--border)', background: 'var(--bg)', color: 'var(--text)' }}
+              />
+            </label>
+            <button
+              type="submit"
+              className="btn-primary"
+              style={{ padding: '14px 22px', borderRadius: '14px', cursor: 'pointer' }}
+            >
+              Змінити пароль
+            </button>
+          </form>
+        </section>
       )}
     </div>
   )
