@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
-import { formatDate } from '../lib/format'
+import { formatDate, isDeparted } from '../lib/format'
 
 // Returns true if departure is less than 24 hours away
 function isWithin24Hours(trip) {
@@ -21,7 +21,7 @@ function Profile() {
   const [status, setStatus] = useState(null)
 
   const userBookings = useMemo(
-    () => (currentUser ? bookings.filter(b => b.userId === currentUser.id && b.status !== 'cancelled') : []),
+    () => (currentUser ? bookings.filter(b => b.userId === currentUser.id) : []),
     [bookings, currentUser]
   )
 
@@ -146,14 +146,25 @@ function Profile() {
                   <div style={{ display: 'grid', gap: '10px' }}>
                     <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
                       <div>
-                        <div style={{ fontWeight: 700 }}>{route?.from} → {route?.to}</div>
+                        <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          {route?.from} → {route?.to}
+                          {booking.status === 'cancelled' ? (
+                            <span style={{ background: '#ffebee', color: '#c62828', padding: '2px 6px', borderRadius: '4px', fontSize: '0.85rem' }}>
+                              Скасовано
+                            </span>
+                          ) : isDeparted(trip) ? (
+                            <span style={{ background: '#f5f5f5', color: '#616161', padding: '2px 6px', borderRadius: '4px', fontSize: '0.85rem' }}>
+                              Рейс відправлено
+                            </span>
+                          ) : null}
+                        </div>
                         <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>{formatDate(trip?.date)} • {trip?.time}</div>
                       </div>
                       <div style={{ fontWeight: 700, color: 'var(--accent)' }}>{trip?.price} грн</div>
                     </div>
 
                     <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>
-                      Телефон: {booking.passengerPhone} • Дата броні: {booking.createdAt}
+                      Телефон: {booking.passengerPhone} • Дата броні: {new Date(booking.createdAt).toLocaleString('uk-UA')}
                     </div>
 
                     {editBookingId === booking.id ? (
@@ -205,25 +216,33 @@ function Profile() {
                             🎫 Переглянути квиток
                           </Link>
                         )}
-                        <button
-                          type="button"
-                          onClick={() => handleEditClick(booking)}
-                          style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600, cursor: 'pointer' }}
-                        >
-                          Редагувати
-                        </button>
-                        {canCancel ? (
-                          <button
-                            type="button"
-                            onClick={() => handleCancelBooking(booking.id)}
-                            style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid #e74c3c', background: 'transparent', color: '#e74c3c', cursor: 'pointer' }}
-                          >
-                            Скасувати бронювання
-                          </button>
-                        ) : (
-                          <span style={{ fontSize: '0.8rem', color: 'var(--text2)' }}>
-                            Скасування недоступне (менше 24 год до рейсу)
-                          </span>
+                        {booking.status !== 'cancelled' && (
+                          <>
+                            <button
+                              type="button"
+                              onClick={() => handleEditClick(booking)}
+                              style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600, cursor: 'pointer' }}
+                            >
+                              Редагувати
+                            </button>
+                            {isDeparted(trip) ? null : (
+                              <>
+                                {canCancel ? (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCancelBooking(booking.id)}
+                                    style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid #e74c3c', background: 'transparent', color: '#e74c3c', cursor: 'pointer' }}
+                                  >
+                                    Скасувати бронювання
+                                  </button>
+                                ) : (
+                                  <span style={{ fontSize: '0.8rem', color: 'var(--text2)' }}>
+                                    Скасування недоступне (менше 24 год до рейсу)
+                                  </span>
+                                )}
+                              </>
+                            )}
+                          </>
                         )}
                       </div>
                     )}
