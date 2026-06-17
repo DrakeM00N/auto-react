@@ -56,6 +56,7 @@ export function DataProvider({ children }) {
   const [error, setError] = useState(null)
 
   const loadData = useCallback(async () => {
+    setLoading(true)
     try {
       const [routesData, tripsData] = await Promise.all([
         request('GET', '/routes'),
@@ -65,9 +66,6 @@ export function DataProvider({ children }) {
       setTrips(tripsData.map(mapTrip))
 
       if (currentUser) {
-        const bookingsData = await request('GET', '/bookings/my')
-        setBookings(bookingsData)
-
         if (currentUser.role === 'admin') {
           const [allBookings, usersData] = await Promise.all([
             request('GET', '/bookings'),
@@ -75,6 +73,9 @@ export function DataProvider({ children }) {
           ])
           setBookings(allBookings)
           setUsers(usersData)
+        } else {
+          const bookingsData = await request('GET', '/bookings/my')
+          setBookings(bookingsData)
         }
       } else {
         setBookings([])
@@ -92,10 +93,7 @@ export function DataProvider({ children }) {
     }
   }, [currentUser])
 
-  const reload = useCallback(() => {
-    setLoading(true)
-    return loadData()
-  }, [loadData])
+  const reload = useCallback(() => loadData(), [loadData])
 
   // Syncing external state (server data) into React state on auth change
   // is the documented valid use of useEffect — the lint rule fires a
@@ -103,7 +101,7 @@ export function DataProvider({ children }) {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData()
-  }, [loadData])
+  }, [currentUser])
 
   const wrap = async (fn) => {
     try { return await fn() }
@@ -130,11 +128,10 @@ export function DataProvider({ children }) {
 
   const deleteRoute = (id) => wrap(async () => {
     await request('DELETE', `/routes/${id}`)
+    const deletedTripIds = trips.filter(t => t.routeId === id).map(t => t.id)
     setRoutes(prev => prev.filter(r => r.id !== id))
-    setTrips((await request('GET', '/trips')).map(mapTrip))
-    if (currentUser?.role === 'admin') {
-      setBookings(await request('GET', '/bookings'))
-    }
+    setTrips(prev => prev.filter(t => t.routeId !== id))
+    setBookings(prev => prev.filter(b => !deletedTripIds.includes(b.tripId)))
     return { success: true }
   })
 

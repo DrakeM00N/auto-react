@@ -31,9 +31,6 @@ function BookingSuccess() {
     orderId ? '' : 'Замовлення не знайдено. Поверніться до розкладу та забронюйте квиток.'
   )
 
-  console.log('DEBUG orderId:', orderId)
-  console.log('DEBUG phase:', phase)
-  console.log('DEBUG searchParams:', window.location.search)
 
   useEffect(() => {
     if (!orderId) return
