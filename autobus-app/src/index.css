@@ -592,6 +592,155 @@ textarea:focus {
   }
 }
 
+/* ======================================================================
+   NAVBAR (Navbar.jsx)
+   Desktop: horizontal link row, unchanged from before.
+   Mobile (<=860px): link row hidden, burger button shown, tapping it
+   opens a full-screen overlay menu with stacked links.
+   ====================================================================== */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 64px;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar__logo {
+  font-family: 'Unbounded', sans-serif;
+  color: var(--accent);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.navbar__links--desktop {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.navbar__pill-btn {
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  color: var(--text);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.navbar__theme-btn {
+  background: var(--bg3);
+}
+
+/* Burger — hidden on desktop */
+.navbar__burger {
+  display: none;
+  position: relative;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+}
+
+.navbar__burger:hover {
+  background: var(--bg3);
+}
+
+.navbar__burger span {
+  position: absolute;
+  left: 9px;
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  border-radius: 2px;
+  transition: transform 0.25s ease, opacity 0.2s ease, top 0.25s ease;
+}
+
+.navbar__burger span:nth-child(1) { top: 13px; }
+.navbar__burger span:nth-child(2) { top: 19px; }
+.navbar__burger span:nth-child(3) { top: 25px; }
+
+.navbar__burger.is-open span:nth-child(1) { top: 19px; transform: rotate(45deg); }
+.navbar__burger.is-open span:nth-child(2) { opacity: 0; }
+.navbar__burger.is-open span:nth-child(3) { top: 19px; transform: rotate(-45deg); }
+
+/* Mobile overlay menu — hidden by default on all sizes, only ever
+   toggled visible under the mobile breakpoint below. */
+.navbar__overlay {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  .navbar { padding: 0 1.25rem; }
+
+  .navbar__links--desktop { display: none; }
+
+  .navbar__burger { display: flex; }
+
+  .navbar__overlay {
+    display: block;
+    position: fixed;
+    top: 64px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    z-index: 49;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-8px);
+    transition: opacity 0.2s ease, transform 0.2s ease, visibility 0.2s;
+    overflow-y: auto;
+  }
+
+  .navbar__overlay.is-open {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+  }
+
+  .navbar__overlay-links {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 1.25rem 32px;
+  }
+
+  .navbar__overlay-links a,
+  .navbar__overlay-user {
+    padding: 16px 4px;
+    font-size: 1.05rem;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .navbar__overlay-links .navbar__pill-btn {
+    margin-top: 16px;
+    width: 100%;
+    padding: 12px;
+    text-align: center;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar__overlay,
+  .navbar__burger span {
+    transition: none;
+  }
+}
+
 /* ---------- Ukraine map mobile fix ---------- */
 
 @media (max-width: 768px) {
