@@ -741,6 +741,102 @@ textarea:focus {
   }
 }
 
+/* ---------- Navbar (responsive) ---------- */
+
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  background: var(--bg2);
+  border-bottom: 1px solid var(--border);
+}
+
+.navbar__bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 64px;
+}
+
+.navbar__logo {
+  font-family: 'Unbounded', sans-serif;
+  color: var(--accent);
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.navbar__links { display: flex; gap: 8px; align-items: center; }
+
+.navbar__link {
+  padding: 8px 16px;
+  color: var(--text2);
+  border-radius: 8px;
+  transition: color 0.2s ease, background 0.2s ease;
+}
+
+.navbar__link:hover { color: var(--text); background: var(--bg3); }
+
+.navbar__pill {
+  background: transparent;
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 6px 14px;
+  color: var(--text);
+  font-size: 14px;
+}
+
+.navbar__burger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: transparent;
+  border: none;
+  padding: 0;
+  flex-shrink: 0;
+}
+
+.navbar__burger-line {
+  width: 22px;
+  height: 2px;
+  background: var(--text);
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.navbar__burger-line.is-open:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.navbar__burger-line.is-open:nth-child(2) { opacity: 0; }
+.navbar__burger-line.is-open:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.navbar__mobile { display: none; }
+.navbar__mobile-inner { display: flex; flex-direction: column; }
+
+.navbar__mobile-link {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 14px 2rem;
+  color: var(--text2);
+  border-top: 1px solid var(--border);
+  background: var(--bg2);
+  font-size: 0.95rem;
+}
+
+.navbar__mobile-link--button { cursor: pointer; }
+
+@media (max-width: 760px) {
+  .navbar__links { display: none; }
+  .navbar__burger { display: flex; }
+  .navbar__mobile { display: block; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .navbar__burger-line { transition: none; }
+}
+
+
 /* ---------- Ukraine map mobile fix ---------- */
 
 @media (max-width: 768px) {
