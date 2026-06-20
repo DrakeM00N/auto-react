@@ -67,7 +67,8 @@ function Booking() {
 
   const allPoints = useMemo(() => {
     if (!selectedRoute) return []
-    return [selectedRoute.from, ...(selectedRoute.stops || []), selectedRoute.to]
+    const stopsCities = selectedRoute.stops?.map(s => s.city) || []
+    return [selectedRoute.from, ...stopsCities, selectedRoute.to]
   }, [selectedRoute])
 
   const alightingOptions = useMemo(() => {
