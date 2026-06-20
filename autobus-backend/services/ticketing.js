@@ -40,6 +40,7 @@ async function uniqueTicketCode() {
 const TICKET_SQL = `
   SELECT b.id, b.ticket_code, b.trip_id,
          b.passenger_name, b.passenger_phone, b.boarding_point, b.alighting_point, b.created_at, b.status,
+         b.amount AS booking_amount,
          t.date AS trip_date, t.time AS trip_time, t.price AS trip_price,
          r.from_city, r.to_city, r.stops, r.duration
   FROM bookings b
@@ -50,6 +51,8 @@ const TICKET_SQL = `
 function mapTicket(row) {
   let stops = []
   try { stops = JSON.parse(row.stops || '[]') } catch { stops = [] }
+  // Use the booking amount if available (not null), otherwise fall back to trip price
+  const amount = row.booking_amount !== null ? row.booking_amount : row.trip_price
   return {
     bookingId: Number(row.id),
     ticketCode: row.ticket_code,
@@ -62,6 +65,7 @@ function mapTicket(row) {
     tripDate: row.trip_date,
     tripTime: row.trip_time,
     tripPrice: row.trip_price,
+    amount, // The actual amount paid for this booking
     fromCity: row.from_city,
     toCity: row.to_city,
     stops,
@@ -135,8 +139,8 @@ async function issueTicket(orderId) {
 
     const inserted = await tx.execute({
       sql: `INSERT INTO bookings
-              (trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point, ticket_code)
-            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              (trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point, ticket_code, amount)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         pending.trip_id,
         pending.user_id,
@@ -145,6 +149,7 @@ async function issueTicket(orderId) {
         pending.boarding_point,
         pending.alighting_point,
         ticketCode,
+        pending.amount,
       ],
     })
     bookingId = Number(inserted.lastInsertRowid)

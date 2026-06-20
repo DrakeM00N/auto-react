@@ -35,7 +35,7 @@ function PageFallback() {
 
 function App() {
   return (
-    <BrowserRouter>
+    <>
       <RouteTracker />
       <Navbar />
       <ServerErrorBanner />
@@ -63,7 +63,7 @@ function App() {
         </Suspense>
       </main>
       <Footer />
-    </BrowserRouter>
+    </>
   )
 }
 

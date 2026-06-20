@@ -10,6 +10,7 @@ const {
   buildWebhookReply,
 } = require('../services/wayforpay')
 const { issueTicket } = require('../services/ticketing')
+const { computeSegmentPrice } = require('../services/pricing')
 const { logger } = require('../logger')
 
 const router = express.Router()
@@ -72,8 +73,11 @@ router.post('/create',
     const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173')
       .split(',')[0].trim()
 
+    // Compute the price for the segment based on boarding and alighting points
+    const amountUah = computeSegmentPrice({ route, trip, boardingPoint, alightingPoint });
+
     const invoice = createInvoice({
-      amountUah: trip.price,
+      amountUah,
       reference: orderId,
       destination,
       redirectUrl: `${frontendUrl}/booking/success?order_id=${encodeURIComponent(orderId)}`,
@@ -85,8 +89,8 @@ router.post('/create',
 
     await db.execute({
       sql: `INSERT INTO pending_bookings
-              (order_id, invoice_id, trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+              (order_id, invoice_id, trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point, amount)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         orderId,
         invoice.invoiceId,
@@ -96,6 +100,7 @@ router.post('/create',
         passengerPhone,
         boardingPoint,
         alightingPoint,
+        amountUah,
       ],
     })
 

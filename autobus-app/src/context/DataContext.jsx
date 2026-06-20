@@ -43,19 +43,19 @@ function tripPayload(trip) {
   }
 }
 
-export function DataProvider({ children }) {
+export function DataProvider({ children, initialData = null }) {
   const { currentUser } = useAuth()
-  const [routes, setRoutes] = useState([])
-  const [trips, setTrips] = useState([])
-  const [users, setUsers] = useState([])
-  const [bookings, setBookings] = useState([])
-  const [loading, setLoading] = useState(true)
-  // Surfaced to the UI so a connectivity failure shows an explicit
-  // message instead of a silently-empty list. Cleared on the next
-  // successful load.
-  const [error, setError] = useState(null)
+  // If initialData is provided, use it to set state and skip the effect
+  const [routes, setRoutes] = useState(initialData?.routes || [])
+  const [trips, setTrips] = useState(initialData?.trips || [])
+  const [users, setUsers] = useState(initialData?.users || [])
+  const [bookings, setBookings] = useState(initialData?.bookings || [])
+  const [loading, setLoading] = useState(!initialData) // If we have initialData, we are not loading
+  const [error, setError] = useState(initialData ? null : null)
 
   const loadData = useCallback(async () => {
+    // Only load data if we don't have initialData (i.e., on the client after hydration)
+    if (initialData) return
     setLoading(true)
     try {
       const [routesData, tripsData] = await Promise.all([
@@ -91,17 +91,20 @@ export function DataProvider({ children }) {
     } finally {
       setLoading(false)
     }
-  }, [currentUser])
+  }, [currentUser, initialData])
 
   const reload = useCallback(() => loadData(), [loadData])
 
   // Syncing external state (server data) into React state on auth change
   // is the documented valid use of useEffect — the lint rule fires a
   // false positive here.
+  // We skip the effect if we have initialData (server render)
   useEffect(() => {
+    // If we have initialData, we assume the data is already loaded and skip
+    if (initialData) return
     // eslint-disable-next-line react-hooks/set-state-in-effect
     loadData()
-  }, [currentUser])
+  }, [currentUser, initialData])
 
   const wrap = async (fn) => {
     try { return await fn() }
@@ -109,10 +112,36 @@ export function DataProvider({ children }) {
   }
 
   // --- Routes ---
-  const normalizeStops = (stops) =>
-    typeof stops === 'string'
-      ? stops.split(',').map(s => s.trim()).filter(Boolean)
-      : (stops || [])
+  // Normalizes stops to an array of objects: [{ city: string, km: number | null }]
+  // Accepts:
+  //   - a comma-separated string (old format) -> converts to objects with km: null
+  //   - an array of strings (old format) -> converts to objects with km: null
+  //   - an array of objects with {city, km} (new format) -> returns as is
+  const normalizeStops = (stops) => {
+    if (typeof stops === 'string') {
+      // Old format: comma-separated string
+      return stops
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean)
+        .map(city => ({ city, km: null }));
+    }
+    if (Array.isArray(stops)) {
+      if (stops.length === 0) {
+        return [];
+      }
+      // Check the type of the first element to determine format
+      if (typeof stops[0] === 'string') {
+        // Old format: array of strings
+        return stops.map(city => ({ city, km: null }));
+      }
+      // Assume new format: array of objects with city and km
+      // We don't validate the shape here; we assume it's correct.
+      return stops;
+    }
+    // If it's neither a string nor an array, return empty array
+    return [];
+  }
 
   const addRoute = (route) => wrap(async () => {
     await request('POST', '/routes', { ...route, stops: normalizeStops(route.stops) })

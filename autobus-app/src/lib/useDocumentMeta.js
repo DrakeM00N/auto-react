@@ -1,21 +1,23 @@
 import { useEffect } from 'react'
 
-// SPA-side <title>/<meta description>/<og> updater. Avoids react-helmet-async
-// (one less dependency) — we just mutate the existing tags from index.html on
-// route change. Without SSR crawlers still see only index.html, so this is a
-// best-effort improvement for browser tabs, social-share previews fetched
-// after JS executes, and search-engine bots that render JS (Googlebot does).
-const DEFAULT_TITLE = document.title
+// Check if we are in the browser
+const DEFAULT_TITLE =
+  typeof document !== 'undefined' ? document.title : 'BusTour — Автобусні квитки онлайн, розклад, маршрути, бронювання'
 const DEFAULT_DESCRIPTION =
-  document.querySelector('meta[name="description"]')?.getAttribute('content') || ''
+  typeof document !== 'undefined'
+    ? document.querySelector('meta[name="description"]')?.getAttribute('content') ||
+      'Купуйте автобусні квитки онлайн: актуальний розклад, прямі та транзитні маршрути, бронювання місць з оплатою картою.'
+    : 'Купуйте автобусні квитки онлайн: актуальний розклад, прямі та транзитні маршрути, бронювання місць з оплатою картою.'
 
 function setMeta(selector, attr, value) {
+  if (typeof document === 'undefined') return
   const el = document.querySelector(selector)
   if (el) el.setAttribute(attr, value)
 }
 
 export function useDocumentMeta({ title, description } = {}) {
   useEffect(() => {
+    if (typeof document === 'undefined') return
     const nextTitle = title ? `${title} — BusTour` : DEFAULT_TITLE
     const nextDescription = description || DEFAULT_DESCRIPTION
 
@@ -27,6 +29,7 @@ export function useDocumentMeta({ title, description } = {}) {
     setMeta('meta[name="twitter:description"]', 'content', nextDescription)
 
     return () => {
+      if (typeof document === 'undefined') return
       document.title = DEFAULT_TITLE
       setMeta('meta[name="description"]', 'content', DEFAULT_DESCRIPTION)
       setMeta('meta[property="og:title"]', 'content', DEFAULT_TITLE)

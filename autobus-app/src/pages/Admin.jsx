@@ -20,7 +20,7 @@ const AMENITY_CATALOGUE = [
   'Місце для багажу',
 ]
 
-const EMPTY_ROUTE_FORM = { from: '', to: '', distance: '', duration: '', stops: '' }
+const EMPTY_ROUTE_FORM = { from: '', to: '', distance: '', duration: '', distanceKm: null, stops: [] }
 const EMPTY_TRIP_FORM = {
   routeId: '', date: '', time: '', price: '', seats: '',
   departurePoint: '', arrivalPoint: '', busModel: '', busPlate: '', carrier: '',
@@ -215,13 +215,13 @@ function Admin() {
 
   const handleStartEditRoute = (route) => {
     setEditingRouteId(route.id)
-    // The backend stores stops as an array but the form takes a comma string.
     editRouteForm.reset({
       from: route.from,
       to: route.to,
       distance: route.distance,
       duration: route.duration,
-      stops: Array.isArray(route.stops) ? route.stops.join(', ') : (route.stops || ''),
+      distanceKm: route.distanceKm ?? null,
+      stops: route.stops || [],
     })
     setStatus(null)
   }
@@ -400,9 +400,50 @@ function Admin() {
               {addRouteErrors.duration && <span style={fieldErrorStyle}>{addRouteErrors.duration.message}</span>}
             </label>
             <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-              Остановки
-              <input {...addRouteForm.register('stops')} placeholder="Наприклад: Полтава, Кропивницький" style={inputStyle} />
+              Відносна відстань від старту (км)
+              <input {...addRouteForm.register('distanceKm')} type="number" placeholder="Наприклад: 475" style={inputStyle} />
             </label>
+            <div style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+              Остановки
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                {addRouteForm.control._names.stops ? (
+                  <>
+                    {addRouteForm.getValues('stops').map((stop, index) => (
+                      <div key={stop.id || index} style={{ display: 'flex', gap: '10px', alignItems: 'end' }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text2)', marginBottom: '2px' }}>Місто {index + 1}</label>
+                          <input {...addRouteForm.register(`stops[${index}].city`)} placeholder="Наприклад: Полтава" style={inputStyle} />
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text2)', marginBottom: '2px' }}>Відстань от старту (км)</label>
+                          <input {...addRouteForm.register(`stops[${index}].km`)} type="number" placeholder="Наприклад: 120" style={inputStyle} />
+                        </div>
+                        <button type="button"
+                          onClick={() => {
+                            const stops = addRouteForm.getValues('stops');
+                            stops.splice(index, 1);
+                            addRouteForm.setValue('stops', stops);
+                          }}
+                          style={{ padding: '8px 12px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                          −
+                        </button>
+                      </div>
+                    ))}
+                    <button type="button"
+                      onClick={() => {
+                        const stops = addRouteForm.getValues('stops');
+                        stops.push({ city: '', km: null });
+                        addRouteForm.setValue('stops', stops);
+                      }}
+                      style={{ padding: '10px 14px', background: 'transparent', color: 'var(--text)', border: '1px dashed var(--border)', borderRadius: '4px', cursor: 'pointer' }}>
+                      + Додати зупинку
+                    </button>
+                  </>
+                ) : (
+                  <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>Немає зупинок.</div>
+                )}
+              </div>
+            </div>
             <Button type="submit" loading={addRouteForm.formState.isSubmitting} style={{
               padding: '12px',
               borderRadius: '8px',
@@ -504,10 +545,51 @@ function Admin() {
                       <input {...editRouteForm.register('duration')} style={inputStyle} />
                       {editRouteErrors.duration && <span style={fieldErrorStyle}>{editRouteErrors.duration.message}</span>}
                     </label>
-                    <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                      Остановки
-                      <input {...editRouteForm.register('stops')} placeholder="Наприклад: Полтава, Кропивницький" style={inputStyle} />
+                    <div style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                      Відносна відстань від старту (км)
+                      <input {...editRouteForm.register('distanceKm')} type="number" placeholder="Наприклад: 475" style={inputStyle} />
                     </label>
+                    <div style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                      Остановки
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        {editRouteForm.control._names.stops ? (
+                          <>
+                            {editRouteForm.getValues('stops').map((stop, index) => (
+                              <div key={stop.id || index} style={{ display: 'flex', gap: '10px', alignItems: 'end' }}>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text2)', marginBottom: '2px' }}>Місто {index + 1}</label>
+                                  <input {...editRouteForm.register(`stops[${index}].city`)} placeholder="Наприклад: Полтава" style={inputStyle} />
+                                </div>
+                                <div style={{ flex: 1, minWidth: 0 }}>
+                                  <label style={{ display: 'block', fontSize: '0.85rem', color: 'var(--text2)', marginBottom: '2px' }}>Відстань от старту (км)</label>
+                                  <input {...editRouteForm.register(`stops[${index}].km`)} type="number" placeholder="Наприклад: 120" style={inputStyle} />
+                                </div>
+                                <button type="button"
+                                  onClick={() => {
+                                    const stops = editRouteForm.getValues('stops');
+                                    stops.splice(index, 1);
+                                    editRouteForm.setValue('stops', stops);
+                                  }}
+                                  style={{ padding: '8px 12px', background: '#e74c3c', color: '#fff', border: 'none', borderRadius: '4px', cursor: 'pointer' }}>
+                                  −
+                                </button>
+                              </div>
+                            ))}
+                            <button type="button"
+                              onClick={() => {
+                                const stops = editRouteForm.getValues('stops');
+                                stops.push({ city: '', km: null });
+                                editRouteForm.setValue('stops', stops);
+                              }}
+                              style={{ padding: '10px 14px', background: 'transparent', color: 'var(--text)', border: '1px dashed var(--border)', borderRadius: '4px', cursor: 'pointer' }}>
+                              + Додати зупинку
+                            </button>
+                          </>
+                        ) : (
+                          <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>Немає зупинок.</div>
+                        )}
+                      </div>
+                    </div>
                     <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                       <Button type="submit" loading={editRouteForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600 }}>
                         Зберегти маршрут

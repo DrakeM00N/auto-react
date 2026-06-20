@@ -106,6 +106,11 @@ async function initDB() {
   await addColumnIfMissing('pending_bookings', 'user_id', 'INTEGER')
   await addColumnIfMissing('bookings', 'status', "TEXT DEFAULT 'active'")
 
+  // New columns for proportional pricing
+  await addColumnIfMissing('routes', 'distance_km', 'REAL')
+  await addColumnIfMissing('pending_bookings', 'amount', 'REAL')
+  await addColumnIfMissing('bookings', 'amount', 'REAL')
+
   // Extended trip metadata (busfor-style detail block). Old rows get '[]'
   // for the JSON columns via the ADD COLUMN default; the plain TEXT
   // columns stay NULL on old rows and are normalized to '' on the way
@@ -117,6 +122,33 @@ async function initDB() {
   await addColumnIfMissing('trips', 'carrier', 'TEXT')
   await addColumnIfMissing('trips', 'amenities', "TEXT DEFAULT '[]'")
   await addColumnIfMissing('trips', 'intermediate_stops', "TEXT DEFAULT '[]'")
+
+  // Migrate existing stops from string array to object array with km: null
+  // We do this after adding the columns because we need to read and update the stops column.
+  try {
+    const routes = await db.execute('SELECT id, stops FROM routes')
+    for (const route of routes.rows) {
+      let stops = []
+      try {
+        stops = JSON.parse(route.stops)
+      } catch (e) {
+        // If parsing fails, assume it's an empty array
+        stops = []
+      }
+      // If the array contains strings, convert to objects with km: null
+      if (stops.length > 0 && typeof stops[0] === 'string') {
+        stops = stops.map(city => ({ city, km: null }))
+        await db.execute(
+          'UPDATE routes SET stops = ? WHERE id = ?',
+          [JSON.stringify(stops), route.id]
+        )
+      }
+      // If the array is already objects, we leave it as is.
+      // If it's empty, we leave it as empty array.
+    }
+  } catch (e) {
+    log.error('Failed to migrate stops data:', e.message)
+  }
 
   // Seed initial data if empty
   const routeCount = await db.execute('SELECT COUNT(*) as cnt FROM routes')
