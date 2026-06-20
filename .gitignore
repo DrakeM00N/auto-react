@@ -1,11 +1,49 @@
-# Backend - Sensitive files and dependencies
-autobus-backend/.env*
-!autobus-backend/.env.example
-autobus-backend/node_modules/
-autobus-backend/autobus.db
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Frontend - Sensitive files and dependencies
-autobus-app/.env*
-!autobus-app/.env.example
-autobus-app/node_modules/
-autobus-app/dist/
+# Node modules
+node_modules/
+**/node_modules/
+
+# Build outputs
+dist/
+**/dist/
+
+# Environment files
+**/.env
+**/.env.local
+.env.*
+!**/.env.example
+
+# Database files
+**/*.db
+**/*.sqlite
+
+# Claude settings
+.claude/settings.local.json
+
+# OS generated files
+.DS_Store
+Thumbs.db
+._*
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Misc
+# (keep lockfiles)
+.puppeteer-cache
+.local-chromium
