@@ -29,7 +29,7 @@ function RoutesPage() {
 
 
   const filteredRoutes = useMemo(() => routes.filter(route => {
-  const allPoints = [route.from, ...(route.stops || []), route.to]
+  const allPoints = [route.from, ...(route.stops?.map(s => s.city) || []), route.to]
 
   const fromIndex = fromFilter
     ? allPoints.findIndex(p => p === fromFilter)
@@ -160,7 +160,7 @@ function RoutesPage() {
             >
               <div style={{ minWidth: '240px', flex: '1 1 260px' }}>
                 <div style={{ fontSize: '1.3rem', color: 'var(--accent)', fontWeight: 700, marginBottom: '10px' }}>
-                  {route.from} {route.stops?.length ? `→ ${route.stops.join(' → ')} →` : '→'} {route.to}
+                  {route.from} {route.stops?.length ? `→ ${route.stops.map(s => s.city).join(' → ')} →` : '→'} {route.to}
                 </div>
                 <h2 style={{ fontSize: '1.4rem', margin: 0, lineHeight: 1.2 }}>{route.distance}</h2>
                 <p style={{ margin: '12px 0 0', color: 'var(--text2)' }}>Тривалість поїздки: {route.duration}</p>

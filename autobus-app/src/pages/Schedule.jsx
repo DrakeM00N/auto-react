@@ -179,7 +179,7 @@ function Schedule() {
     if (!route) return false
 
     // Повний список точок маршруту: від → зупинки → до
-    const allPoints = [route.from, ...(route.stops || []), route.to]
+    const allPoints = [route.from, ...(route.stops?.map(s => s.city) || []), route.to]
 
     const fromIndex = filterFrom
       ? allPoints.findIndex(p => p === filterFrom)
@@ -198,7 +198,7 @@ function Schedule() {
           : true
 
     const dateMatch = filterDate ? trip.date === filterDate : true
-    const stopsText = route.stops?.join(' ') || ''
+    const stopsText = route.stops?.map(s => s.city).join(' ') || ''
     const searchText = `${route.from} ${route.to} ${stopsText} ${trip.date} ${trip.time}`.toLowerCase()
     const searchMatch = searchQuery ? searchText.includes(searchQuery.toLowerCase()) : true
 
@@ -357,7 +357,7 @@ function Schedule() {
             >
               <div style={{ minWidth: '220px', flex: '1 1 280px' }}>
                 <div style={{ fontSize: '0.9rem', color: 'var(--accent)', marginBottom: '8px', fontWeight: 700 }}>
-                  {route?.from} {route?.stops?.length ? `→ ${route.stops.join(' → ')} →` : '→'} {route?.to}
+                  {route?.from} {route?.stops?.length ? `→ ${route.stops.map(s => s.city).join(' → ')} →` : '→'} {route?.to}
                 </div>
                 <h2 style={{ fontSize: '1.3rem', margin: 0, lineHeight: 1.2, display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
                   <span>{formatDate(trip.date)} • {trip.time}</span>
