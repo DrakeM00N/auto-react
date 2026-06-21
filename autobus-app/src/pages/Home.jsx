@@ -157,9 +157,9 @@ function Stat({ value, label }) {
 
 function Home() {
   useDocumentMeta({
-    title: 'Головна',
-    description: 'Купуйте автобусні квитки онлайн: розклад рейсів, популярні маршрути, бронювання з оплатою картою та електронний квиток на телефон.',
-  })
+  title: 'Автобусні квитки онлайн по Україні',
+  description: 'Купуйте автобусні квитки онлайн: розклад рейсів, популярні маршрути, бронювання з оплатою картою та електронний квиток на телефон.',
+})
   const { routes, trips } = useData()
   const upcomingTrips = trips.filter(t => !isDeparted(t)).slice(0, 3)
   const citiesCovered = new Set(routes.flatMap(r => [r.from, r.to])).size
