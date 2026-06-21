@@ -7,7 +7,7 @@ function TicketCard({ ticket }) {
   // VITE_PUBLIC_URL lets the QR point at a LAN IP so a phone can scan it.
   const base = import.meta.env.VITE_PUBLIC_URL || window.location.origin
   const ticketUrl = `${base}/ticket/${ticket.ticketCode}`
-  const routeLine = [ticket.fromCity, ...(ticket.stops?.map(s => s.city) || []), ticket.toCity].join(' → ')
+  const routeLine = [ticket.fromCity, ...(ticket.stops || []), ticket.toCity].join(' → ')
 
   const labelStyle = { fontSize: '0.75rem', color: 'var(--text2)', marginBottom: '4px' }
 

@@ -113,11 +113,11 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
       }
     }
 
-    await browser.close()
+   await browser.close()
     await close()
     console.log('🎉 Prerendering completed successfully.')
   } catch (err) {
-    console.error('💥 Prerendering failed:', err)
-    process.exit(1)
+    console.error('💥 Prerendering failed (сайт всё одно задеплоїться, просто без пререндеру):', err)
+    process.exit(0)
   }
 })()
