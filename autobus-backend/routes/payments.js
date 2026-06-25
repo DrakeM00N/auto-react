@@ -35,6 +35,7 @@ router.post('/create',
     body('tripId').isInt({ min: 1 }).withMessage('tripId must be a positive integer'),
     body('passengerName').isString().trim().notEmpty().withMessage('Passenger name is required'),
     body('passengerPhone').isString().trim().notEmpty().withMessage('Passenger phone is required'),
+    body('contactEmail').optional({ nullable: true }).isEmail().withMessage('Contact email is invalid'),
     body('boardingPoint').optional({ nullable: true }).isString(),
     body('alightingPoint').optional({ nullable: true }).isString(),
   ],
@@ -49,6 +50,7 @@ router.post('/create',
     const tripId = Number(req.body.tripId)
     const passengerName = safe(req.body.passengerName)
     const passengerPhone = safe(req.body.passengerPhone)
+    const contactEmail = safe(req.body.contactEmail).toLowerCase()
     const boardingPoint = safe(req.body.boardingPoint)
     const alightingPoint = safe(req.body.alightingPoint)
 
@@ -85,8 +87,8 @@ router.post('/create',
 
     await db.execute({
       sql: `INSERT INTO pending_bookings
-              (order_id, invoice_id, trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+              (order_id, invoice_id, trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point, contact_email)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         orderId,
         invoice.invoiceId,
@@ -96,6 +98,7 @@ router.post('/create',
         passengerPhone,
         boardingPoint,
         alightingPoint,
+        contactEmail || null,
       ],
     })
 

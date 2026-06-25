@@ -165,15 +165,13 @@ async function issueTicket(orderId) {
 
   if (ticket) {
     try {
-      const userRes = await db.execute({
-        sql: 'SELECT email FROM users WHERE id = ?',
-        args: [pending.user_id],
-      })
-      const recipientEmail = userRes.rows[0]?.email
+      const recipientEmail = pending.contact_email || (pending.user_id
+        ? (await db.execute({ sql: 'SELECT email FROM users WHERE id = ?', args: [pending.user_id] })).rows[0]?.email
+        : null)
       if (recipientEmail) {
         await sendTicketEmail(recipientEmail, ticket)
       } else {
-        log.info(`No email found for user ${pending.user_id}; skipping ticket email`)
+        log.info(`No email found for order ${orderId}; skipping ticket email`)
       }
     } catch (e) {
       log.error('Failed to send ticket email for order', orderId, '-', e.message)

@@ -45,6 +45,7 @@ function Booking() {
       passengerFirstName: '',
       passengerLastName: '',
       passengerPhone: '',
+      contactEmail: '',
       boardingPoint: '',
       alightingPoint: '',
     },
@@ -97,6 +98,7 @@ function Booking() {
         tripId,
         passengerName: fullName,
         passengerPhone: values.passengerPhone,
+        contactEmail: values.contactEmail,
         boardingPoint: values.boardingPoint,
         alightingPoint: values.alightingPoint,
       })
@@ -232,6 +234,10 @@ function Booking() {
                 Телефон
                 <input {...register('passengerPhone')} placeholder="+380..." style={inputStyle} />
                 {errors.passengerPhone && <span style={fieldErrorStyle}>{errors.passengerPhone.message}</span>}
+              </label>
+              <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
+                Email для квитка
+                <input {...register('contactEmail')} type="email" placeholder="name@example.com" style={inputStyle} />
               </label>
             </div>
 

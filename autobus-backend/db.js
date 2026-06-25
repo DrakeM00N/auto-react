@@ -70,6 +70,7 @@ async function initDB() {
       passenger_phone TEXT NOT NULL,
       boarding_point TEXT,
       alighting_point TEXT,
+      contact_email TEXT,
       booking_id INTEGER,
       created_at TEXT DEFAULT (datetime('now'))
     )`,
@@ -104,6 +105,7 @@ async function initDB() {
   await addColumnIfMissing('bookings', 'ticket_code', 'TEXT')
   await addColumnIfMissing('pending_bookings', 'invoice_id', 'TEXT')
   await addColumnIfMissing('pending_bookings', 'user_id', 'INTEGER')
+  await addColumnIfMissing('pending_bookings', 'contact_email', 'TEXT')
   await addColumnIfMissing('bookings', 'status', "TEXT DEFAULT 'active'")
 
   // Extended trip metadata (busfor-style detail block). Old rows get '[]'
