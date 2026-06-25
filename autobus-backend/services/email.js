@@ -158,4 +158,84 @@ async function sendPasswordChangedEmail(toEmail) {
   }
 }
 
-module.exports = { sendPasswordResetEmail, sendPasswordChangedEmail }
+function buildTicketQrCodeUrl(ticketCode) {
+  const encodedCode = encodeURIComponent(ticketCode || 'BusTour-ticket')
+  return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodedCode}`
+}
+
+function buildTicketEmailHtml(ticket) {
+  const qrCodeUrl = buildTicketQrCodeUrl(ticket?.ticketCode)
+  const routeLabel = `${ticket?.fromCity || 'Маршрут'} → ${ticket?.toCity || 'Призначення'}`
+  const tripLabel = [ticket?.tripDate, ticket?.tripTime].filter(Boolean).join(' • ')
+  const boarding = ticket?.boardingPoint || '—'
+  const alighting = ticket?.alightingPoint || '—'
+  const passenger = ticket?.passengerName || '—'
+
+  return `<!doctype html>
+<html lang="uk">
+  <body style="margin:0;padding:0;background:#F4F2EE;font-family:Helvetica,Arial,sans-serif;color:#1A1814;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="640" style="background:#FFFFFF;border-radius:16px;padding:32px;text-align:left;">
+            <tr><td style="font-size:24px;font-weight:700;margin-bottom:8px;font-family:Georgia,serif;color:#1A1814;">Ваш квиток BusTour</td></tr>
+            <tr><td style="padding-top:8px;font-size:15px;line-height:1.6;color:#333;">
+              Платіж підтверджено. Нижче ваш справжній квиток з QR-кодом для посадки.
+            </td></tr>
+            <tr>
+              <td style="padding-top:24px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#FFF8E8;border:1px solid #E8A020;border-radius:12px;padding:16px;">
+                  <tr>
+                    <td valign="top" style="width:60%;padding-right:16px;">
+                      <div style="font-size:13px;text-transform:uppercase;letter-spacing:0.08em;color:#8A5A00;font-weight:700;">Маршрут</div>
+                      <div style="font-size:20px;font-weight:700;padding-top:6px;color:#1A1814;">${routeLabel}</div>
+                      <div style="font-size:14px;padding-top:10px;color:#333;">${tripLabel || 'Дата та час'}</div>
+                      <div style="font-size:14px;padding-top:10px;color:#333;"><strong>Пасажир:</strong> ${passenger}</div>
+                      <div style="font-size:14px;padding-top:6px;color:#333;"><strong>З:</strong> ${boarding} &nbsp; <strong>До:</strong> ${alighting}</div>
+                      <div style="font-size:14px;padding-top:10px;color:#333;"><strong>Код квитка:</strong> ${ticket?.ticketCode || '—'}</div>
+                    </td>
+                    <td valign="top" align="center" style="width:40%;">
+                      <img src="${qrCodeUrl}" alt="QR-код квитка" width="220" height="220" style="display:block;border-radius:12px;" />
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+            <tr><td style="padding-top:24px;font-size:14px;line-height:1.6;color:#333;">
+              Покажіть QR-код контролеру або збережіть це повідомлення до посадки.
+            </td></tr>
+            <tr><td style="padding-top:32px;font-size:12px;color:#999;">— Команда BusTour</td></tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>`
+}
+
+async function sendTicketEmail(toEmail, ticket) {
+  const client = getClient()
+  if (!client) {
+    log.warn(`RESEND_API_KEY not set — would have sent ticket email to ${toEmail}`)
+    return { delivered: false, dev: true }
+  }
+  try {
+    const { error } = await client.emails.send({
+      from: fromAddress,
+      to: toEmail,
+      subject: 'Ваш квиток BusTour — посадка підтверджена',
+      html: buildTicketEmailHtml(ticket),
+    })
+    if (error) {
+      log.error('Resend error (ticket) for', toEmail, '-', error.message || error)
+      return { delivered: false, error }
+    }
+    log.info('Ticket email sent to', toEmail)
+    return { delivered: true }
+  } catch (e) {
+    log.error('Resend exception (ticket) for', toEmail, '-', e.message)
+    return { delivered: false, error: e }
+  }
+}
+
+module.exports = { sendPasswordResetEmail, sendPasswordChangedEmail, sendTicketEmail }

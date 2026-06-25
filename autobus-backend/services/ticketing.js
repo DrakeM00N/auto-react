@@ -2,6 +2,7 @@ const crypto = require('crypto')
 const { db } = require('../db')
 const { requestInvoiceStatus } = require('./wayforpay')
 const { logger } = require('../logger')
+const { sendTicketEmail } = require('./email')
 
 const log = logger('ticketing')
 
@@ -160,7 +161,26 @@ async function issueTicket(orderId) {
     throw e
   }
 
-  return { state: 'paid', ticket: await loadTicketByBookingId(bookingId) }
+  const ticket = await loadTicketByBookingId(bookingId)
+
+  if (ticket) {
+    try {
+      const userRes = await db.execute({
+        sql: 'SELECT email FROM users WHERE id = ?',
+        args: [pending.user_id],
+      })
+      const recipientEmail = userRes.rows[0]?.email
+      if (recipientEmail) {
+        await sendTicketEmail(recipientEmail, ticket)
+      } else {
+        log.info(`No email found for user ${pending.user_id}; skipping ticket email`)
+      }
+    } catch (e) {
+      log.error('Failed to send ticket email for order', orderId, '-', e.message)
+    }
+  }
+
+  return { state: 'paid', ticket }
 }
 
 module.exports = {
