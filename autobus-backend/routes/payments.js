@@ -126,7 +126,8 @@ router.post('/webhook', async (req, res) => {
     }
 
     if (payload.orderReference) {
-      await issueTicket(payload.orderReference)
+      log.info(`webhook: order ${payload.orderReference} status ${payload.transactionStatus || 'unknown'} reason ${payload.reasonCode || 'n/a'}`)
+      await issueTicket(payload.orderReference, payload.transactionStatus)
     }
 
     // WayForPay keeps retrying until it receives a properly-signed accept.

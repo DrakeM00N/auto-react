@@ -86,7 +86,7 @@ async function loadTicketByBookingId(bookingId) {
 // Turns a paid pending_bookings row into a real booking + ticket.
 // Idempotent: safe to call repeatedly for the same order (poll + webhook both
 // land here). Returns { state, ticket }, state ∈ paid | pending | failed | not_found.
-async function issueTicket(orderId) {
+async function issueTicket(orderId, webhookStatus = null) {
   const pendingRes = await db.execute({
     sql: 'SELECT * FROM pending_bookings WHERE order_id = ?',
     args: [orderId],
@@ -99,7 +99,7 @@ async function issueTicket(orderId) {
     return { state: 'paid', ticket: await loadTicketByBookingId(Number(pending.booking_id)) }
   }
 
-  const status = await requestInvoiceStatus(pending.invoice_id)
+  const status = webhookStatus || await requestInvoiceStatus(pending.invoice_id)
   if (FAILED_STATUSES.includes(status)) return { state: 'failed' }
   if (!PAID_STATUSES.includes(status)) return { state: 'pending' }
 
