@@ -42,6 +42,7 @@ const TICKET_SQL = `
   SELECT b.id, b.ticket_code, b.trip_id,
          b.passenger_name, b.passenger_phone, b.boarding_point, b.alighting_point, b.created_at, b.status,
          t.date AS trip_date, t.time AS trip_time, t.price AS trip_price,
+         t.departure_point, t.arrival_point,
          r.from_city, r.to_city, r.stops, r.duration
   FROM bookings b
   JOIN trips t ON b.trip_id = t.id
@@ -59,6 +60,8 @@ function mapTicket(row) {
     passengerPhone: row.passenger_phone,
     boardingPoint: row.boarding_point,
     alightingPoint: row.alighting_point,
+    departurePoint: row.departure_point || '',  // ← адрес отправления рейса
+    arrivalPoint: row.arrival_point || '',      // ← адрес прибытия рейса
     createdAt: row.created_at,
     tripDate: row.trip_date,
     tripTime: row.trip_time,

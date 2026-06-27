@@ -165,46 +165,134 @@ function buildTicketQrCodeUrl(ticketCode) {
 
 function buildTicketEmailHtml(ticket) {
   const qrCodeUrl = buildTicketQrCodeUrl(ticket?.ticketCode)
-  const routeLabel = `${ticket?.fromCity || 'Маршрут'} → ${ticket?.toCity || 'Призначення'}`
-  const tripLabel = [ticket?.tripDate, ticket?.tripTime].filter(Boolean).join(' • ')
-  const boarding = ticket?.boardingPoint || '—'
-  const alighting = ticket?.alightingPoint || '—'
+  const fromCity = ticket?.fromCity || 'Маршрут'
+  const toCity = ticket?.toCity || 'Призначення'
+  const departureAddr = ticket?.departurePoint || ticket?.boardingPoint || '—'
+  const arrivalAddr = ticket?.arrivalPoint || ticket?.alightingPoint || '—'
+  const tripDate = ticket?.tripDate || ''
+  const tripTime = ticket?.tripTime || ''
   const passenger = ticket?.passengerName || '—'
+  const phone = ticket?.passengerPhone || '—'
+  const price = ticket?.tripPrice ? `${ticket.tripPrice} грн` : '—'
 
   return `<!doctype html>
 <html lang="uk">
-  <body style="margin:0;padding:0;background:#F4F2EE;font-family:Helvetica,Arial,sans-serif;color:#1A1814;">
-    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="padding:32px 16px;">
+  <body style="margin:0;padding:0;background:#1A1814;font-family:Helvetica,Arial,sans-serif;">
+    <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="padding:32px 16px;background:#1A1814;">
       <tr>
         <td align="center">
-          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="640" style="background:#FFFFFF;border-radius:16px;padding:32px;text-align:left;">
-            <tr><td style="font-size:24px;font-weight:700;margin-bottom:8px;font-family:Georgia,serif;color:#1A1814;">Ваш квиток BusTour</td></tr>
-            <tr><td style="padding-top:8px;font-size:15px;line-height:1.6;color:#333;">
-              Платіж підтверджено. Нижче ваш справжній квиток з QR-кодом для посадки.
-            </td></tr>
+          <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="600" style="border-radius:20px;overflow:hidden;">
+
+            <!-- Заголовок -->
             <tr>
-              <td style="padding-top:24px;">
-                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%" style="background:#FFF8E8;border:1px solid #E8A020;border-radius:12px;padding:16px;">
+              <td style="background:#E8A020;padding:20px 28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td valign="top" style="width:60%;padding-right:16px;">
-                      <div style="font-size:13px;text-transform:uppercase;letter-spacing:0.08em;color:#8A5A00;font-weight:700;">Маршрут</div>
-                      <div style="font-size:20px;font-weight:700;padding-top:6px;color:#1A1814;">${routeLabel}</div>
-                      <div style="font-size:14px;padding-top:10px;color:#333;">${tripLabel || 'Дата та час'}</div>
-                      <div style="font-size:14px;padding-top:10px;color:#333;"><strong>Пасажир:</strong> ${passenger}</div>
-                      <div style="font-size:14px;padding-top:6px;color:#333;"><strong>З:</strong> ${boarding} &nbsp; <strong>До:</strong> ${alighting}</div>
-                      <div style="font-size:14px;padding-top:10px;color:#333;"><strong>Код квитка:</strong> ${ticket?.ticketCode || '—'}</div>
+                    <td>
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#7A4A00;font-weight:700;">Електронний квиток</div>
+                      <div style="font-size:26px;font-weight:900;color:#1A1814;font-family:Georgia,serif;">BusTour</div>
                     </td>
-                    <td valign="top" align="center" style="width:40%;">
-                      <img src="${qrCodeUrl}" alt="QR-код квитка" width="220" height="220" style="display:block;border-radius:12px;" />
+                    <td align="right">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#7A4A00;">№ квитка</div>
+                      <div style="font-size:20px;font-weight:800;color:#1A1814;letter-spacing:0.05em;">${ticket?.ticketCode || '—'}</div>
                     </td>
                   </tr>
                 </table>
               </td>
             </tr>
-            <tr><td style="padding-top:24px;font-size:14px;line-height:1.6;color:#333;">
-              Покажіть QR-код контролеру або збережіть це повідомлення до посадки.
-            </td></tr>
-            <tr><td style="padding-top:32px;font-size:12px;color:#999;">— Команда BusTour</td></tr>
+
+            <!-- Маршрут -->
+            <tr>
+              <td style="background:#242018;padding:24px 28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td width="42%" valign="top">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Посадка</div>
+                      <div style="font-size:22px;font-weight:800;color:#FFFFFF;padding-top:4px;">${fromCity}</div>
+                      <div style="font-size:13px;color:#B0A070;padding-top:6px;line-height:1.4;">${departureAddr}</div>
+                    </td>
+                    <td width="16%" align="center" valign="middle" style="padding-top:16px;">
+                      <div style="font-size:20px;">🚌</div>
+                      <div style="border-top:2px dashed #E8A020;margin:6px 0;"></div>
+                      <div style="font-size:11px;color:#8A7A50;">${ticket?.duration || ''}</div>
+                    </td>
+                    <td width="42%" valign="top" align="right">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Висадка</div>
+                      <div style="font-size:22px;font-weight:800;color:#FFFFFF;padding-top:4px;">${toCity}</div>
+                      <div style="font-size:13px;color:#B0A070;padding-top:6px;line-height:1.4;">${arrivalAddr}</div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Разделитель -->
+            <tr>
+              <td style="background:#1E1C16;padding:0 28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td style="border-top:1px dashed #3A3520;padding:0;font-size:0;">&nbsp;</td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Детали -->
+            <tr>
+              <td style="background:#1E1C16;padding:20px 28px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td width="50%" valign="top" style="padding-bottom:16px;">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Дата</div>
+                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${tripDate}</div>
+                    </td>
+                    <td width="50%" valign="top" style="padding-bottom:16px;">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Час</div>
+                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${tripTime}</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="50%" valign="top">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Пасажир</div>
+                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${passenger}</div>
+                    </td>
+                    <td width="50%" valign="top">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Телефон</div>
+                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${phone}</div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- QR + цена -->
+            <tr>
+              <td style="background:#1E1C16;padding:0 28px 24px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
+                  <tr>
+                    <td width="40%" valign="middle">
+                      <img src="${qrCodeUrl}" alt="QR-код" width="160" height="160"
+                           style="display:block;border-radius:12px;background:#fff;padding:8px;" />
+                    </td>
+                    <td width="60%" valign="middle" align="right">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Вартість квитка</div>
+                      <div style="font-size:32px;font-weight:900;color:#E8A020;padding-top:6px;">${price}</div>
+                      <div style="margin-top:14px;display:inline-block;background:#E8A020;color:#1A1814;font-size:13px;font-weight:800;padding:10px 22px;border-radius:8px;letter-spacing:0.05em;">✓ ОПЛАЧЕНО</div>
+                    </td>
+                  </tr>
+                </table>
+              </td>
+            </tr>
+
+            <!-- Футер -->
+            <tr>
+              <td style="background:#141210;padding:16px 28px;border-radius:0 0 20px 20px;">
+                <div style="font-size:12px;color:#5A5040;text-align:center;">
+                  Покажіть QR-код водієві під час посадки — Команда BusTour
+                </div>
+              </td>
+            </tr>
+
           </table>
         </td>
       </tr>
