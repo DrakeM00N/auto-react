@@ -169,7 +169,9 @@ function buildTicketEmailHtml(ticket) {
   const toCity = ticket?.toCity || 'Призначення'
   const departureAddr = ticket?.departurePoint || ticket?.boardingPoint || '—'
   const arrivalAddr = ticket?.arrivalPoint || ticket?.alightingPoint || '—'
-  const tripDate = ticket?.tripDate || ''
+  const tripDate = ticket?.tripDate
+  ? ticket.tripDate.split('-').reverse().join('-')
+  : ''
   const tripTime = ticket?.tripTime || ''
   const passenger = ticket?.passengerName || '—'
   const phone = ticket?.passengerPhone || '—'
