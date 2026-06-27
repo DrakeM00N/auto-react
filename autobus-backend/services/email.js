@@ -216,7 +216,8 @@ function buildTicketEmailHtml(ticket) {
 async function sendTicketEmail(toEmail, ticket) {
   const client = getClient()
   if (!client) {
-    log.warn(`RESEND_API_KEY not set — would have sent ticket email to ${toEmail}`)
+    log.warn(`RESEND_API_KEY not set — ticket email not sent to ${toEmail}`)
+    log.warn(`Ticket email fallback: ticketCode=${ticket?.ticketCode || 'unknown'}`)
     return { delivered: false, dev: true }
   }
   try {
