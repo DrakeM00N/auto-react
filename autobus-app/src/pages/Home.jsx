@@ -47,8 +47,8 @@ const BusIllustration = () => (
     <circle cx="60" cy="65" r="1" fill="#FFC93C" opacity="0.25"/>
     <circle cx="400" cy="55" r="1" fill="#FFC93C" opacity="0.25"/>
 
-    <line x1="0" y1="195" x2="480" y2="195" stroke="#FFC93C" stroke-width="1.5" opacity="0.12"/>
-    <line x1="0" y1="208" x2="480" y2="208" stroke="#FFC93C" stroke-width="1" opacity="0.07"/>
+    <line x1="0" y1="195" x2="480" y2="195" stroke="#FFC93C" strokeWidth="1.5" opacity="0.12"/>
+    <line x1="0" y1="208" x2="480" y2="208" stroke="#FFC93C" strokeWidth="1" opacity="0.07"/>
 
     <rect x="0" y="210" width="30" height="3" rx="1.5" fill="#FFC93C" opacity="0.25"/>
     <rect x="55" y="210" width="45" height="3" rx="1.5" fill="#FFC93C" opacity="0.25"/>
@@ -59,52 +59,38 @@ const BusIllustration = () => (
     <rect x="430" y="210" width="50" height="3" rx="1.5" fill="#FFC93C" opacity="0.25"/>
 
     <g transform="translate(20, 80)">
-      <rect x="0" y="0" width="440" height="105" rx="14" fill="none" stroke="#FFC93C" stroke-width="2"/>
+      <rect x="0" y="0" width="440" height="105" rx="14" fill="none" stroke="#FFC93C" strokeWidth="2"/>
       <rect x="0" y="0" width="440" height="105" rx="14" fill="#FFC93C" opacity="0.04"/>
-
       <rect x="0" y="68" width="440" height="37" rx="0" fill="#FFC93C" opacity="0.06"/>
       <rect x="0" y="68" width="440" height="2.5" fill="#FFC93C" opacity="0.35"/>
-
-      <line x1="0" y1="34" x2="440" y2="34" stroke="#FFC93C" stroke-width="1.5" opacity="0.25"/>
-
-      <rect x="14" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" stroke-width="1.5" opacity="0.55"/>
+      <line x1="0" y1="34" x2="440" y2="34" stroke="#FFC93C" strokeWidth="1.5" opacity="0.25"/>
+      <rect x="14" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
       <rect x="16" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-
-      <rect x="70" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" stroke-width="1.5" opacity="0.55"/>
+      <rect x="70" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
       <rect x="72" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-
-      <rect x="126" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" stroke-width="1.5" opacity="0.55"/>
+      <rect x="126" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
       <rect x="128" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-
-      <rect x="182" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" stroke-width="1.5" opacity="0.55"/>
+      <rect x="182" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
       <rect x="184" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-
-      <rect x="238" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" stroke-width="1.5" opacity="0.55"/>
+      <rect x="238" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
       <rect x="240" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-
-      <rect x="294" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" stroke-width="1.5" opacity="0.55"/>
+      <rect x="294" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
       <rect x="296" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-
-      <rect x="352" y="4" width="72" height="30" rx="6" fill="none" stroke="#FFC93C" stroke-width="2" opacity="0.75"/>
+      <rect x="352" y="4" width="72" height="30" rx="6" fill="none" stroke="#FFC93C" strokeWidth="2" opacity="0.75"/>
       <rect x="354" y="6" width="68" height="26" rx="4" fill="#FFC93C" opacity="0.12"/>
-
-      <rect x="426" y="40" width="14" height="24" rx="3" fill="none" stroke="#FFC93C" stroke-width="1.5" opacity="0.45"/>
+      <rect x="426" y="40" width="14" height="24" rx="3" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.45"/>
       <rect x="428" y="42" width="10" height="10" rx="2" fill="#FFC93C" opacity="0.18"/>
-
-      <rect x="0" y="40" width="10" height="24" rx="3" fill="#FFC93C" opacity="0.12" stroke="#FFC93C" stroke-width="1" opacity="0.35"/>
-
-      <circle cx="68" cy="103" r="24" fill="none" stroke="#FFC93C" stroke-width="2"/>
-      <circle cx="68" cy="103" r="13" fill="none" stroke="#FFC93C" stroke-width="1.5" opacity="0.45"/>
+      <rect x="0" y="40" width="10" height="24" rx="3" fill="#FFC93C" opacity="0.12"/>
+      <circle cx="68" cy="103" r="24" fill="none" stroke="#FFC93C" strokeWidth="2"/>
+      <circle cx="68" cy="103" r="13" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.45"/>
       <circle cx="68" cy="103" r="5" fill="#FFC93C" opacity="0.35"/>
-
-      <circle cx="338" cy="103" r="24" fill="none" stroke="#FFC93C" stroke-width="2"/>
-      <circle cx="338" cy="103" r="13" fill="none" stroke="#FFC93C" stroke-width="1.5" opacity="0.45"/>
+      <circle cx="338" cy="103" r="24" fill="none" stroke="#FFC93C" strokeWidth="2"/>
+      <circle cx="338" cy="103" r="13" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.45"/>
       <circle cx="338" cy="103" r="5" fill="#FFC93C" opacity="0.35"/>
-
-      <line x1="14" y1="46" x2="14" y2="65" stroke="#FFC93C" stroke-width="1" opacity="0.25"/>
-      <line x1="26" y1="46" x2="26" y2="65" stroke="#FFC93C" stroke-width="1" opacity="0.25"/>
-      <line x1="420" y1="46" x2="420" y2="65" stroke="#FFC93C" stroke-width="1" opacity="0.25"/>
-      <line x1="432" y1="46" x2="432" y2="65" stroke="#FFC93C" stroke-width="1" opacity="0.25"/>
+      <line x1="14" y1="46" x2="14" y2="65" stroke="#FFC93C" strokeWidth="1" opacity="0.25"/>
+      <line x1="26" y1="46" x2="26" y2="65" stroke="#FFC93C" strokeWidth="1" opacity="0.25"/>
+      <line x1="420" y1="46" x2="420" y2="65" stroke="#FFC93C" strokeWidth="1" opacity="0.25"/>
+      <line x1="432" y1="46" x2="432" y2="65" stroke="#FFC93C" strokeWidth="1" opacity="0.25"/>
     </g>
 
     <circle cx="80" cy="240" r="3" fill="#FFC93C" opacity="0.15"/>
@@ -157,32 +143,33 @@ function Stat({ value, label }) {
 
 function Home() {
   useDocumentMeta({
-  title: 'Автобусні квитки онлайн по Україні',
-  description: 'Купуйте автобусні квитки онлайн: розклад рейсів, популярні маршрути, бронювання з оплатою картою та електронний квиток на телефон.',
-})
-  const { routes, trips } = useData()
+    title: 'Автобусні квитки онлайн по Україні',
+    description: 'Купуйте автобусні квитки онлайн: розклад рейсів, популярні маршрути, бронювання з оплатою картою та електронний квиток на телефон.',
+  })
+
+  const { routes, trips, loading } = useData()
   const upcomingTrips = trips.filter(t => !isDeparted(t)).slice(0, 3)
   const citiesCovered = new Set(routes.flatMap(r => [r.from, r.to])).size
 
   return (
     <div>
 
-      {/* ГЕРОЙ */}
+      {/* ГЕРОЙ — показується одразу, не залежить від API */}
       <section className="hero" style={{
         padding: '80px 2rem',
         background: 'var(--bg2)',
         borderBottom: '1px solid var(--border)',
       }}>
         <div className="hero-grid">
-        <div>
-            <p style={{
+          <div>
+            <p className="hero__eyebrow" style={{
               color: 'var(--accent)', fontFamily: 'Unbounded',
               fontSize: '0.75rem', letterSpacing: '0.15em',
               textTransform: 'uppercase', marginBottom: '16px',
             }}>
               Зручні подорожі Україною
             </p>
-            <h1 style={{
+            <h1 className="hero__title" style={{
               fontFamily: 'Unbounded',
               fontSize: 'clamp(1.8rem, 4vw, 3rem)',
               fontWeight: 700, lineHeight: 1.15, marginBottom: '24px',
@@ -190,13 +177,13 @@ function Home() {
               Автобусні рейси<br />
               <span style={{ color: 'var(--accent)' }}>швидко та зручно</span>
             </h1>
-            <p style={{
+            <p className="hero__subtitle" style={{
               color: 'var(--text2)', fontSize: '1.1rem',
               maxWidth: '440px', marginBottom: '40px', lineHeight: 1.7,
             }}>
               Бронюйте квитки онлайн, обирайте зручний час відправлення та подорожуйте з комфортом
             </p>
-            <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
+            <div className="hero__cta-row" style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
               <Link to="/schedule" className="btn-primary">
                 Дивитись розклад <span aria-hidden="true">→</span>
               </Link>
@@ -228,7 +215,13 @@ function Home() {
           Актуальні рейси на найближчі дні
         </p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {upcomingTrips.map(trip => {
+          {loading ? (
+            <>
+              <div style={{ height: '80px', background: 'var(--bg3)', borderRadius: '12px' }} />
+              <div style={{ height: '80px', background: 'var(--bg3)', borderRadius: '12px' }} />
+              <div style={{ height: '80px', background: 'var(--bg3)', borderRadius: '12px' }} />
+            </>
+          ) : upcomingTrips.map(trip => {
             const route = routes.find(r => r.id === trip.routeId)
             const freeSeats = trip.seats - (trip.bookedCount || 0)
             return (
