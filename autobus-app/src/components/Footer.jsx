@@ -21,9 +21,46 @@ function Footer() {
             <div style={{ fontFamily: 'Unbounded', fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent)', marginBottom: '12px' }}>
               BusTour
             </div>
-            <p style={{ color: 'var(--text2)', fontSize: '0.9rem', lineHeight: 1.7, margin: 0 }}>
+            <p style={{ color: 'var(--text2)', fontSize: '0.9rem', lineHeight: 1.7, margin: '0 0 16px' }}>
               Зручне бронювання автобусних квитків по всій Україні
             </p>
+
+            {/* Соцмережі */}
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <a
+                href="https://www.instagram.com/bustour.bus?igsh=MWxyMTFsZTNobjhsdw=="
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Instagram"
+                style={{
+                  width: '38px',
+                  height: '38px',
+                  borderRadius: '50%',
+                  border: '1px solid var(--border)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: 'var(--text2)',
+                  transition: 'background 0.2s, color 0.2s, border-color 0.2s',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'var(--accent)'
+                  e.currentTarget.style.color = '#fff'
+                  e.currentTarget.style.borderColor = 'var(--accent)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'transparent'
+                  e.currentTarget.style.color = 'var(--text2)'
+                  e.currentTarget.style.borderColor = 'var(--border)'
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2"/>
+                  <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/>
+                </svg>
+              </a>
+            </div>
           </div>
 
           {/* Навігація */}
