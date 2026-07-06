@@ -27,6 +27,9 @@ const EMPTY_TRIP_FORM = {
   amenities: [], intermediateStops: [],
 }
 
+// How many trips to show per page in the "Управління рейсами" table.
+const TRIPS_PER_PAGE = 15
+
 const fieldErrorStyle = { color: '#842029', fontSize: '0.85rem', marginTop: '4px' }
 
 // Shared "extended trip details" block used by both the create and edit
@@ -154,6 +157,46 @@ function TripDetailsFields({ form, inputStyle }) {
   )
 }
 
+// Compact pager used below the trips table. Pure presentational — all
+// state lives in the parent (currentPage / totalPages / onChange).
+function TripPager({ currentPage, totalPages, onChange }) {
+  if (totalPages <= 1) return null
+
+  const pagerButtonStyle = (disabled) => ({
+    padding: '8px 14px',
+    borderRadius: '8px',
+    border: '1px solid var(--border)',
+    background: 'transparent',
+    color: 'var(--text)',
+    cursor: disabled ? 'not-allowed' : 'pointer',
+    opacity: disabled ? 0.5 : 1,
+  })
+
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '10px', marginTop: '18px' }}>
+      <button
+        type="button"
+        onClick={() => onChange(currentPage - 1)}
+        disabled={currentPage === 1}
+        style={pagerButtonStyle(currentPage === 1)}
+      >
+        ← Назад
+      </button>
+      <span style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
+        Сторінка {currentPage} з {totalPages}
+      </span>
+      <button
+        type="button"
+        onClick={() => onChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+        style={pagerButtonStyle(currentPage === totalPages)}
+      >
+        Вперед →
+      </button>
+    </div>
+  )
+}
+
 function Admin() {
   const { currentUser } = useAuth()
   const { routes, addRoute, deleteRoute, updateRoute, trips, addTrip, deleteTrip, updateTrip, users, bookings } = useData()
@@ -161,6 +204,11 @@ function Admin() {
   const [editingRouteId, setEditingRouteId] = useState(null)
   const [editingTripId, setEditingTripId] = useState(null)
   const [status, setStatus] = useState(null)
+
+  // Search + pagination state for the "Управління рейсами" table only.
+  const [tripSearch, setTripSearch] = useState('')
+  const [tripPage, setTripPage] = useState(1)
+
   // width:100% + boxSizing:border-box + minWidth:0 lets inputs shrink to fit
   // their grid column instead of overflowing to the right. minWidth:0 is the
   // critical bit — grid items default to min-width:auto (= intrinsic content
@@ -279,6 +327,13 @@ function Admin() {
     setStatus({ type: 'success', message: 'Рейс видалено' })
   }
 
+  // Reset the trip page whenever the search text changes, so the user
+  // doesn't end up stranded on an empty page 6 after narrowing results.
+  const handleTripSearchChange = (e) => {
+    setTripSearch(e.target.value)
+    setTripPage(1)
+  }
+
   const totalBookings = bookings.length
   const totalRevenue = bookings.reduce((sum, booking) => {
     const trip = trips.find(t => t.id === booking.tripId)
@@ -295,10 +350,47 @@ function Admin() {
   })
   const busiestRoute = routeBookingCount.reduce((max, route) => route.count > max.count ? route : max, { count: 0 })
 
+  // Filter trips by route names, date, carrier or plate, then slice out
+  // the current page. Everything downstream (the table) only ever sees
+  // `pagedTrips`, so it never has to render more than TRIPS_PER_PAGE rows.
+  const tripSearchNormalized = tripSearch.trim().toLowerCase()
+  const filteredTrips = trips.filter(trip => {
+    if (!tripSearchNormalized) return true
+    const route = routes.find(r => r.id === trip.routeId)
+    const haystack = [
+      route?.from, route?.to, trip.date, trip.carrier, trip.busPlate, trip.busModel,
+    ].join(' ').toLowerCase()
+    return haystack.includes(tripSearchNormalized)
+  })
+
+  const tripTotalPages = Math.max(1, Math.ceil(filteredTrips.length / TRIPS_PER_PAGE))
+  const currentTripPage = Math.min(tripPage, tripTotalPages)
+  const pagedTrips = filteredTrips.slice(
+    (currentTripPage - 1) * TRIPS_PER_PAGE,
+    currentTripPage * TRIPS_PER_PAGE,
+  )
+
   const addRouteErrors = addRouteForm.formState.errors
   const editRouteErrors = editRouteForm.formState.errors
   const addTripErrors = addTripForm.formState.errors
   const editTripErrors = editTripForm.formState.errors
+
+  // Compact table cell style used throughout "Управління рейсами".
+  const thStyle = {
+    textAlign: 'left',
+    padding: '10px 12px',
+    color: 'var(--text2)',
+    fontSize: '0.8rem',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+    borderBottom: '1px solid var(--border)',
+    whiteSpace: 'nowrap',
+  }
+  const tdStyle = {
+    padding: '10px 12px',
+    borderBottom: '1px solid var(--border)',
+    verticalAlign: 'middle',
+  }
 
   return (
     <div style={{ padding: '40px 2rem', maxWidth: '1200px', margin: '0 auto' }}>
@@ -539,107 +631,154 @@ function Admin() {
         )}
       </section>
 
+      {/* ------------------------------------------------------------------ */}
+      {/* Управління рейсами — компактна таблиця з пошуком і пагінацією,     */}
+      {/* щоб 200+ рейсів не розтягували сторінку на кілометри вниз.         */}
+      {/* ------------------------------------------------------------------ */}
       <section style={{ marginTop: '40px', padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Управління рейсами</h2>
-        {trips.length === 0 ? (
-          <p>Немає рейсів.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+          <h2 style={{ fontSize: '1.4rem' }}>Управління рейсами ({filteredTrips.length})</h2>
+          <input
+            value={tripSearch}
+            onChange={handleTripSearchChange}
+            placeholder="Пошук: маршрут, дата, перевізник, номер..."
+            style={{ ...inputStyle, maxWidth: '320px' }}
+          />
+        </div>
+
+        {filteredTrips.length === 0 ? (
+          <p>{trips.length === 0 ? 'Немає рейсів.' : 'Нічого не знайдено за цим запитом.'}</p>
         ) : (
-          <div style={{ display: 'grid', gap: '14px' }}>
-            {trips.map(trip => {
-              const route = routes.find(r => r.id === trip.routeId)
-              return (
-                <div key={trip.id} style={{ padding: '18px', borderRadius: '14px', background: 'var(--bg)', border: '1px solid var(--border)' }}>
-                  {editingTripId === trip.id ? (
-                    <form onSubmit={editTripForm.handleSubmit(onSaveTrip)} noValidate style={{ display: 'grid', gap: '12px' }}>
-                      <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                        Маршрут
-                        <select {...editTripForm.register('routeId')} style={inputStyle}>
-                          {routes.map(routeOption => (
-                            <option key={routeOption.id} value={routeOption.id}>
-                              {routeOption.from} → {routeOption.to}
-                            </option>
-                          ))}
-                        </select>
-                        {editTripErrors.routeId && <span style={fieldErrorStyle}>{editTripErrors.routeId.message}</span>}
-                      </label>
-                      <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-                        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                          Дата
-                          <input type="date" {...editTripForm.register('date')} style={inputStyle} />
-                          {editTripErrors.date && <span style={fieldErrorStyle}>{editTripErrors.date.message}</span>}
-                        </label>
-                        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                          Час
-                          <input type="time" {...editTripForm.register('time')} style={inputStyle} />
-                          {editTripErrors.time && <span style={fieldErrorStyle}>{editTripErrors.time.message}</span>}
-                        </label>
-                      </div>
-                      <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
-                        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                          Ціна (грн)
-                          <input type="number" {...editTripForm.register('price')} style={inputStyle} />
-                          {editTripErrors.price && <span style={fieldErrorStyle}>{editTripErrors.price.message}</span>}
-                        </label>
-                        <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                          Кількість місць
-                          <input type="number" {...editTripForm.register('seats')} style={inputStyle} />
-                          {editTripErrors.seats && <span style={fieldErrorStyle}>{editTripErrors.seats.message}</span>}
-                        </label>
-                      </div>
+          <>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.92rem' }}>
+                <thead>
+                  <tr>
+                    <th style={thStyle}>Маршрут</th>
+                    <th style={thStyle}>Дата / час</th>
+                    <th style={thStyle}>Ціна</th>
+                    <th style={thStyle}>Місць</th>
+                    <th style={thStyle}>Заброньовано</th>
+                    <th style={thStyle}>Статус</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>Дії</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagedTrips.map(trip => {
+                    const route = routes.find(r => r.id === trip.routeId)
+                    const departed = isDeparted(trip)
 
-                      <TripDetailsFields form={editTripForm} inputStyle={inputStyle} />
+                    if (editingTripId === trip.id) {
+                      // Editing this row: replace it with a single full-width
+                      // cell holding the same form/fields as before, just
+                      // moved into the table so the layout doesn't jump.
+                      return (
+                        <tr key={trip.id}>
+                          <td colSpan={7} style={{ ...tdStyle, background: 'var(--bg)' }}>
+                            <form onSubmit={editTripForm.handleSubmit(onSaveTrip)} noValidate style={{ display: 'grid', gap: '12px', padding: '6px 0' }}>
+                              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                Маршрут
+                                <select {...editTripForm.register('routeId')} style={inputStyle}>
+                                  {routes.map(routeOption => (
+                                    <option key={routeOption.id} value={routeOption.id}>
+                                      {routeOption.from} → {routeOption.to}
+                                    </option>
+                                  ))}
+                                </select>
+                                {editTripErrors.routeId && <span style={fieldErrorStyle}>{editTripErrors.routeId.message}</span>}
+                              </label>
+                              <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
+                                <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                  Дата
+                                  <input type="date" {...editTripForm.register('date')} style={inputStyle} />
+                                  {editTripErrors.date && <span style={fieldErrorStyle}>{editTripErrors.date.message}</span>}
+                                </label>
+                                <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                  Час
+                                  <input type="time" {...editTripForm.register('time')} style={inputStyle} />
+                                  {editTripErrors.time && <span style={fieldErrorStyle}>{editTripErrors.time.message}</span>}
+                                </label>
+                              </div>
+                              <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
+                                <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                  Ціна (грн)
+                                  <input type="number" {...editTripForm.register('price')} style={inputStyle} />
+                                  {editTripErrors.price && <span style={fieldErrorStyle}>{editTripErrors.price.message}</span>}
+                                </label>
+                                <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                  Кількість місць
+                                  <input type="number" {...editTripForm.register('seats')} style={inputStyle} />
+                                  {editTripErrors.seats && <span style={fieldErrorStyle}>{editTripErrors.seats.message}</span>}
+                                </label>
+                              </div>
 
-                      <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                        <Button type="submit" loading={editTripForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600 }}>
-                          Зберегти рейс
-                        </Button>
-                        <button type="button" onClick={handleCancelEditTrip} disabled={editTripForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: editTripForm.formState.isSubmitting ? 'not-allowed' : 'pointer', opacity: editTripForm.formState.isSubmitting ? 0.65 : 1 }}>
-                          Скасувати
-                        </button>
-                      </div>
-                    </form>
-                  ) : (
-                    <div style={{ display: 'grid', gap: '12px', opacity: isDeparted(trip) ? 0.65 : 1 }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-                        <div>
-                          <div style={{ fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                            <span>{route?.from} → {route?.to}</span>
-                            {isDeparted(trip) && (
-                              <span style={{
-                                fontSize: '0.7rem',
-                                letterSpacing: '0.08em',
-                                textTransform: 'uppercase',
-                                padding: '3px 8px',
-                                borderRadius: '999px',
-                                background: 'var(--border)',
-                                color: 'var(--text2)',
-                                fontWeight: 700,
-                              }}>
-                                Відправлено
-                              </span>
-                            )}
-                          </div>
-                          <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>{formatDate(trip.date)} • {trip.time}</div>
-                        </div>
-                        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                          <button type="button" onClick={() => handleStartEditTrip(trip)} style={{ padding: '10px 14px', borderRadius: '10px', border: 'none', background: 'var(--bg3)', color: 'var(--text)', cursor: 'pointer' }}>
+                              <TripDetailsFields form={editTripForm} inputStyle={inputStyle} />
+
+                              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                <Button type="submit" loading={editTripForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600 }}>
+                                  Зберегти рейс
+                                </Button>
+                                <button type="button" onClick={handleCancelEditTrip} disabled={editTripForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: editTripForm.formState.isSubmitting ? 'not-allowed' : 'pointer', opacity: editTripForm.formState.isSubmitting ? 0.65 : 1 }}>
+                                  Скасувати
+                                </button>
+                              </div>
+                            </form>
+                          </td>
+                        </tr>
+                      )
+                    }
+
+                    return (
+                      <tr key={trip.id} style={{ opacity: departed ? 0.6 : 1 }}>
+                        <td style={{ ...tdStyle, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                          {route?.from} → {route?.to}
+                        </td>
+                        <td style={{ ...tdStyle, whiteSpace: 'nowrap', color: 'var(--text2)' }}>
+                          {formatDate(trip.date)} • {trip.time}
+                        </td>
+                        <td style={tdStyle}>{trip.price} грн</td>
+                        <td style={tdStyle}>{trip.seats}</td>
+                        <td style={tdStyle}>{trip.bookedCount || 0}</td>
+                        <td style={tdStyle}>
+                          {departed ? (
+                            <span style={{
+                              fontSize: '0.7rem',
+                              letterSpacing: '0.08em',
+                              textTransform: 'uppercase',
+                              padding: '3px 8px',
+                              borderRadius: '999px',
+                              background: 'var(--border)',
+                              color: 'var(--text2)',
+                              fontWeight: 700,
+                              whiteSpace: 'nowrap',
+                            }}>
+                              Відправлено
+                            </span>
+                          ) : (
+                            <span style={{ color: 'var(--text2)' }}>—</span>
+                          )}
+                        </td>
+                        <td style={{ ...tdStyle, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          <button type="button" onClick={() => handleStartEditTrip(trip)} style={{ padding: '8px 12px', borderRadius: '10px', border: 'none', background: 'var(--bg3)', color: 'var(--text)', cursor: 'pointer', marginRight: '8px' }}>
                             Редагувати
                           </button>
-                          <button type="button" onClick={() => handleDeleteTrip(trip.id)} style={{ padding: '10px 14px', borderRadius: '10px', border: 'none', background: '#e74c3c', color: '#fff', cursor: 'pointer' }}>
+                          <button type="button" onClick={() => handleDeleteTrip(trip.id)} style={{ padding: '8px 12px', borderRadius: '10px', border: 'none', background: '#e74c3c', color: '#fff', cursor: 'pointer' }}>
                             Видалити
                           </button>
-                        </div>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', flexWrap: 'wrap', gap: '14px' }}>
-                        <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>Ціна: {trip.price} грн • Місць: {trip.seats}</div>
-                        <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>Заброньовано: {trip.bookedCount || 0}</div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <TripPager
+              currentPage={currentTripPage}
+              totalPages={tripTotalPages}
+              onChange={setTripPage}
+            />
+          </>
         )}
       </section>
 
