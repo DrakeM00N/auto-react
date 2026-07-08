@@ -27,8 +27,9 @@ const EMPTY_TRIP_FORM = {
   amenities: [], intermediateStops: [],
 }
 
-// How many trips to show per page in the "Управління рейсами" table.
-const TRIPS_PER_PAGE = 15
+// How many trips/routes to show per page in their respective tables.
+const TRIPS_PER_PAGE = 25
+const ROUTES_PER_PAGE = 20
 
 const fieldErrorStyle = { color: '#842029', fontSize: '0.85rem', marginTop: '4px' }
 
@@ -157,9 +158,9 @@ function TripDetailsFields({ form, inputStyle }) {
   )
 }
 
-// Compact pager used below the trips table. Pure presentational — all
-// state lives in the parent (currentPage / totalPages / onChange).
-function TripPager({ currentPage, totalPages, onChange }) {
+// Compact pager used below the routes/trips tables. Pure presentational —
+// all state lives in the parent (currentPage / totalPages / onChange).
+function Pager({ currentPage, totalPages, onChange }) {
   if (totalPages <= 1) return null
 
   const pagerButtonStyle = (disabled) => ({
@@ -205,7 +206,11 @@ function Admin() {
   const [editingTripId, setEditingTripId] = useState(null)
   const [status, setStatus] = useState(null)
 
-  // Search + pagination state for the "Управління рейсами" table only.
+  // Search + pagination state for the "Управління маршрутами" table.
+  const [routeSearch, setRouteSearch] = useState('')
+  const [routePage, setRoutePage] = useState(1)
+
+  // Search + pagination state for the "Управління рейсами" table.
   const [tripSearch, setTripSearch] = useState('')
   const [tripPage, setTripPage] = useState(1)
 
@@ -327,8 +332,14 @@ function Admin() {
     setStatus({ type: 'success', message: 'Рейс видалено' })
   }
 
-  // Reset the trip page whenever the search text changes, so the user
-  // doesn't end up stranded on an empty page 6 after narrowing results.
+  // Reset the route page whenever the search text changes, so the user
+  // doesn't end up stranded on an empty page after narrowing results.
+  const handleRouteSearchChange = (e) => {
+    setRouteSearch(e.target.value)
+    setRoutePage(1)
+  }
+
+  // Same idea for the trips table below.
   const handleTripSearchChange = (e) => {
     setTripSearch(e.target.value)
     setTripPage(1)
@@ -349,6 +360,23 @@ function Admin() {
     return { ...route, count }
   })
   const busiestRoute = routeBookingCount.reduce((max, route) => route.count > max.count ? route : max, { count: 0 })
+
+  // Filter routes by from/to/distance/duration, then slice out the current
+  // page. Everything downstream (the table) only ever sees `pagedRoutes`,
+  // so it never has to render more than ROUTES_PER_PAGE rows.
+  const routeSearchNormalized = routeSearch.trim().toLowerCase()
+  const filteredRoutes = routes.filter(route => {
+    if (!routeSearchNormalized) return true
+    const haystack = [route.from, route.to, route.distance, route.duration].join(' ').toLowerCase()
+    return haystack.includes(routeSearchNormalized)
+  })
+
+  const routeTotalPages = Math.max(1, Math.ceil(filteredRoutes.length / ROUTES_PER_PAGE))
+  const currentRoutePage = Math.min(routePage, routeTotalPages)
+  const pagedRoutes = filteredRoutes.slice(
+    (currentRoutePage - 1) * ROUTES_PER_PAGE,
+    currentRoutePage * ROUTES_PER_PAGE,
+  )
 
   // Filter trips by route names, date, carrier or plate, then slice out
   // the current page. Everything downstream (the table) only ever sees
@@ -566,68 +594,115 @@ function Admin() {
 
       </div>
 
+      {/* ------------------------------------------------------------------ */}
+      {/* Управління маршрутами — та сама компактна таблиця з пошуком і      */}
+      {/* пагінацією, що й для рейсів нижче.                                 */}
+      {/* ------------------------------------------------------------------ */}
       <section style={{ marginTop: '40px', padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
-        <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Управління маршрутами</h2>
-        {routes.length === 0 ? (
-          <p>Немає маршрутів.</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '16px' }}>
+          <h2 style={{ fontSize: '1.4rem' }}>Управління маршрутами ({filteredRoutes.length})</h2>
+          <input
+            value={routeSearch}
+            onChange={handleRouteSearchChange}
+            placeholder="Пошук: звідки, куди, відстань..."
+            style={{ ...inputStyle, maxWidth: '320px' }}
+          />
+        </div>
+
+        {filteredRoutes.length === 0 ? (
+          <p>{routes.length === 0 ? 'Немає маршрутів.' : 'Нічого не знайдено за цим запитом.'}</p>
         ) : (
-          <div style={{ display: 'grid', gap: '14px' }}>
-            {routes.map(route => (
-              <div key={route.id} style={{ padding: '18px', borderRadius: '14px', background: 'var(--bg)', border: '1px solid var(--border)' }}>
-                {editingRouteId === route.id ? (
-                  <form onSubmit={editRouteForm.handleSubmit(onSaveRoute)} noValidate style={{ display: 'grid', gap: '12px' }}>
-                    <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                      Звідки
-                      <input {...editRouteForm.register('from')} style={inputStyle} />
-                      {editRouteErrors.from && <span style={fieldErrorStyle}>{editRouteErrors.from.message}</span>}
-                    </label>
-                    <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                      Куди
-                      <input {...editRouteForm.register('to')} style={inputStyle} />
-                      {editRouteErrors.to && <span style={fieldErrorStyle}>{editRouteErrors.to.message}</span>}
-                    </label>
-                    <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                      Відстань
-                      <input {...editRouteForm.register('distance')} style={inputStyle} />
-                      {editRouteErrors.distance && <span style={fieldErrorStyle}>{editRouteErrors.distance.message}</span>}
-                    </label>
-                    <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                      Тривалість
-                      <input {...editRouteForm.register('duration')} style={inputStyle} />
-                      {editRouteErrors.duration && <span style={fieldErrorStyle}>{editRouteErrors.duration.message}</span>}
-                    </label>
-                    <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                      Остановки
-                      <input {...editRouteForm.register('stops')} placeholder="Наприклад: Полтава, Кропивницький" style={inputStyle} />
-                    </label>
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                      <Button type="submit" loading={editRouteForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600 }}>
-                        Зберегти маршрут
-                      </Button>
-                      <button type="button" onClick={handleCancelEditRoute} disabled={editRouteForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: editRouteForm.formState.isSubmitting ? 'not-allowed' : 'pointer', opacity: editRouteForm.formState.isSubmitting ? 0.65 : 1 }}>
-                        Скасувати
-                      </button>
-                    </div>
-                  </form>
-                ) : (
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '14px', flexWrap: 'wrap' }}>
-                    <div>
-                      <div style={{ fontWeight: 700 }}>{route.from} → {route.to}</div>
-                      <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>Відстань: {route.distance} • Тривалість: {route.duration}</div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                      <button type="button" onClick={() => handleStartEditRoute(route)} style={{ padding: '10px 14px', borderRadius: '10px', border: 'none', background: 'var(--bg3)', color: 'var(--text)', cursor: 'pointer' }}>
-                        Редагувати
-                      </button>
-                      <button type="button" onClick={() => handleDeleteRoute(route.id)} style={{ padding: '10px 14px', borderRadius: '10px', border: 'none', background: '#e74c3c', color: '#fff', cursor: 'pointer' }}>
-                        Видалити
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+          <>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.92rem' }}>
+                <thead>
+                  <tr>
+                    <th style={thStyle}>Маршрут</th>
+                    <th style={thStyle}>Відстань</th>
+                    <th style={thStyle}>Тривалість</th>
+                    <th style={thStyle}>Зупинки</th>
+                    <th style={{ ...thStyle, textAlign: 'right' }}>Дії</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {pagedRoutes.map(route => {
+                    if (editingRouteId === route.id) {
+                      // Editing this row: replace it with a single full-width
+                      // cell holding the same form/fields as before, just
+                      // moved into the table so the layout doesn't jump.
+                      return (
+                        <tr key={route.id}>
+                          <td colSpan={5} style={{ ...tdStyle, background: 'var(--bg)' }}>
+                            <form onSubmit={editRouteForm.handleSubmit(onSaveRoute)} noValidate style={{ display: 'grid', gap: '12px', padding: '6px 0' }}>
+                              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                Звідки
+                                <input {...editRouteForm.register('from')} style={inputStyle} />
+                                {editRouteErrors.from && <span style={fieldErrorStyle}>{editRouteErrors.from.message}</span>}
+                              </label>
+                              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                Куди
+                                <input {...editRouteForm.register('to')} style={inputStyle} />
+                                {editRouteErrors.to && <span style={fieldErrorStyle}>{editRouteErrors.to.message}</span>}
+                              </label>
+                              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                Відстань
+                                <input {...editRouteForm.register('distance')} style={inputStyle} />
+                                {editRouteErrors.distance && <span style={fieldErrorStyle}>{editRouteErrors.distance.message}</span>}
+                              </label>
+                              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                Тривалість
+                                <input {...editRouteForm.register('duration')} style={inputStyle} />
+                                {editRouteErrors.duration && <span style={fieldErrorStyle}>{editRouteErrors.duration.message}</span>}
+                              </label>
+                              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                Остановки
+                                <input {...editRouteForm.register('stops')} placeholder="Наприклад: Полтава, Кропивницький" style={inputStyle} />
+                              </label>
+                              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                                <Button type="submit" loading={editRouteForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: 'none', background: 'var(--accent)', color: '#1A1814', fontWeight: 600 }}>
+                                  Зберегти маршрут
+                                </Button>
+                                <button type="button" onClick={handleCancelEditRoute} disabled={editRouteForm.formState.isSubmitting} style={{ padding: '10px 16px', borderRadius: '12px', border: '1px solid var(--border)', background: 'transparent', color: 'var(--text)', cursor: editRouteForm.formState.isSubmitting ? 'not-allowed' : 'pointer', opacity: editRouteForm.formState.isSubmitting ? 0.65 : 1 }}>
+                                  Скасувати
+                                </button>
+                              </div>
+                            </form>
+                          </td>
+                        </tr>
+                      )
+                    }
+
+                    const stopsList = Array.isArray(route.stops) ? route.stops.join(', ') : (route.stops || '')
+
+                    return (
+                      <tr key={route.id}>
+                        <td style={{ ...tdStyle, fontWeight: 600, whiteSpace: 'nowrap' }}>
+                          {route.from} → {route.to}
+                        </td>
+                        <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{route.distance}</td>
+                        <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>{route.duration}</td>
+                        <td style={{ ...tdStyle, color: 'var(--text2)' }}>{stopsList || '—'}</td>
+                        <td style={{ ...tdStyle, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                          <button type="button" onClick={() => handleStartEditRoute(route)} style={{ padding: '8px 12px', borderRadius: '10px', border: 'none', background: 'var(--bg3)', color: 'var(--text)', cursor: 'pointer', marginRight: '8px' }}>
+                            Редагувати
+                          </button>
+                          <button type="button" onClick={() => handleDeleteRoute(route.id)} style={{ padding: '8px 12px', borderRadius: '10px', border: 'none', background: '#e74c3c', color: '#fff', cursor: 'pointer' }}>
+                            Видалити
+                          </button>
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+
+            <Pager
+              currentPage={currentRoutePage}
+              totalPages={routeTotalPages}
+              onChange={setRoutePage}
+            />
+          </>
         )}
       </section>
 
@@ -773,7 +848,7 @@ function Admin() {
               </table>
             </div>
 
-            <TripPager
+            <Pager
               currentPage={currentTripPage}
               totalPages={tripTotalPages}
               onChange={setTripPage}
