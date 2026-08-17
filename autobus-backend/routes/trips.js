@@ -161,10 +161,10 @@ router.put('/:id', adminMiddleware, tripValidators, async (req, res) => {
 
     await db.execute({
       sql: `UPDATE trips SET
-              route_id=?, date=?, time=?, price=?, seats=?,
-              departure_point=?, arrival_point=?, arrival_time=, bus_model=?, bus_plate=?, carrier=?,
-              amenities=?, intermediate_stops=?
-            WHERE id=?`,
+        route_id=?, date=?, time=?, price=?, seats=?,
+        departure_point=?, arrival_point=?, arrival_time=?, bus_model=?, bus_plate=?, carrier=?,
+        amenities=?, intermediate_stops=?
+      WHERE id=?`,
       args: [
         routeId, date, time, price, seats,
         safeString(departurePoint),
