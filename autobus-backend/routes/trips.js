@@ -14,6 +14,7 @@ const tripValidators = [
   // Extended trip metadata — all optional with safe defaults.
   body('departurePoint').optional({ nullable: true }).isString(),
   body('arrivalPoint').optional({ nullable: true }).isString(),
+  body('arrivalTime').optional({ nullable: true }).matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage('arrivalTime must be HH:MM'),
   body('busModel').optional({ nullable: true }).isString(),
   body('busPlate').optional({ nullable: true }).isString(),
   body('carrier').optional({ nullable: true }).isString(),
@@ -78,6 +79,7 @@ function mapTripRow(row) {
     // Extended fields — old rows have NULL on TEXT columns; normalize to ''.
     departurePoint: row.departure_point || '',
     arrivalPoint: row.arrival_point || '',
+    arrivalTime: row.arrival_time || '',
     busModel: row.bus_model || '',
     busPlate: row.bus_plate || '',
     carrier: row.carrier || '',
@@ -118,20 +120,21 @@ router.post('/', adminMiddleware, tripValidators, async (req, res) => {
   try {
     const {
       routeId, date, time, price, seats,
-      departurePoint, arrivalPoint, busModel, busPlate, carrier,
+      departurePoint, arrivalPoint, arrivalTime, busModel, busPlate, carrier,
       amenities, intermediateStops,
     } = req.body
 
     const result = await db.execute({
       sql: `INSERT INTO trips
               (route_id, date, time, price, seats,
-               departure_point, arrival_point, bus_model, bus_plate, carrier,
+               departure_point, arrival_point, arrival_time, bus_model, bus_plate, carrier,
                amenities, intermediate_stops)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         routeId, date, time, price, seats,
         safeString(departurePoint),
         safeString(arrivalPoint),
+        safeString(arrivalTime),
         safeString(busModel),
         safeString(busPlate),
         safeString(carrier),
@@ -152,20 +155,21 @@ router.put('/:id', adminMiddleware, tripValidators, async (req, res) => {
   try {
     const {
       routeId, date, time, price, seats,
-      departurePoint, arrivalPoint, busModel, busPlate, carrier,
+      departurePoint, arrivalPoint, arrivalTime, busModel, busPlate, carrier,
       amenities, intermediateStops,
     } = req.body
 
     await db.execute({
       sql: `UPDATE trips SET
               route_id=?, date=?, time=?, price=?, seats=?,
-              departure_point=?, arrival_point=?, bus_model=?, bus_plate=?, carrier=?,
+              departure_point=?, arrival_point=?, arrival_time=, bus_model=?, bus_plate=?, carrier=?,
               amenities=?, intermediate_stops=?
             WHERE id=?`,
       args: [
         routeId, date, time, price, seats,
         safeString(departurePoint),
         safeString(arrivalPoint),
+        safeString(arrivalTime),
         safeString(busModel),
         safeString(busPlate),
         safeString(carrier),

@@ -23,7 +23,7 @@ const AMENITY_CATALOGUE = [
 const EMPTY_ROUTE_FORM = { from: '', to: '', distance: '', duration: '', stops: '' }
 const EMPTY_TRIP_FORM = {
   routeId: '', date: '', time: '', price: '', seats: '',
-  departurePoint: '', arrivalPoint: '', busModel: '', busPlate: '', carrier: '',
+  departurePoint: '', arrivalPoint: '', arrivalTime: '', busModel: '', busPlate: '', carrier: '',
   amenities: [], intermediateStops: [],
 }
 
@@ -301,6 +301,7 @@ function Admin() {
       seats: String(trip.seats),
       departurePoint: trip.departurePoint || '',
       arrivalPoint: trip.arrivalPoint || '',
+      arrivalTime: trip.arrivalTime || '',
       busModel: trip.busModel || '',
       busPlate: trip.busPlate || '',
       carrier: trip.carrier || '',
@@ -563,6 +564,11 @@ function Admin() {
                 <input type="time" {...addTripForm.register('time')} style={inputStyle} />
                 {addTripErrors.time && <span style={fieldErrorStyle}>{addTripErrors.time.message}</span>}
               </label>
+              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                Час прибуття
+                <input type="time" {...addTripForm.register('arrivalTime')} style={inputStyle} />
+                {addTripErrors.arrivalTime && <span style={fieldErrorStyle}>{addTripErrors.arrivalTime.message}</span>}
+              </label>
             </div>
             <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
               <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
@@ -772,6 +778,11 @@ function Admin() {
                                   Час
                                   <input type="time" {...editTripForm.register('time')} style={inputStyle} />
                                   {editTripErrors.time && <span style={fieldErrorStyle}>{editTripErrors.time.message}</span>}
+                                </label>
+                                <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                  Час прибуття
+                                  <input type="time" {...editTripForm.register('arrivalTime')} style={inputStyle} />
+                                  {editTripErrors.arrivalTime && <span style={fieldErrorStyle}>{editTripErrors.arrivalTime.message}</span>}
                                 </label>
                               </div>
                               <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>

@@ -136,7 +136,7 @@ const UKRAINE_CITIES = [
   'Київ', 'Харків', 'Дніпро', 'Одеса', 'Запоріжжя', 'Львів', 'Кривий Ріг',
   'Миколаїв', 'Вінниця', 'Херсон', 'Полтава', 'Чернігів', 'Черкаси',
   'Хмельницький', 'Житомир', 'Суми', 'Рівне', 'Івано-Франківськ', 'Тернопіль',
-  'Кропивницький', 'Луцьк', 'Ужгород', 'Чернівці', 'Кременчук'
+  'Кропивницький', 'Луцьк', 'Умань', 'Ужгород', 'Чернівці', 'Кременчук'
 ].sort((a, b) => a.localeCompare(b, 'uk'))
 
 function Schedule() {
@@ -360,7 +360,7 @@ function Schedule() {
                   {route?.from} {route?.stops?.length ? `→ ${route.stops.join(' → ')} →` : '→'} {route?.to}
                 </div>
                 <h2 style={{ fontSize: '1.3rem', margin: 0, lineHeight: 1.2, display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                  <span>{formatDate(trip.date)} • {trip.time}</span>
+                  <span>{formatDate(trip.date)} • {trip.time}{trip.arrivalTime ? ` — ${trip.arrivalTime}` : ''}</span>
                   {departed && (
                     <span style={{
                       fontSize: '0.7rem',

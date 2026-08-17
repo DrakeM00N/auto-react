@@ -106,6 +106,7 @@ export const tripSchema = z.object({
   // here so admin doesn't have to fill everything just to schedule a run.
   departurePoint: z.string().optional().default(''),
   arrivalPoint: z.string().optional().default(''),
+  arrivalTime: z.string().optional().default(''),
   busModel: z.string().optional().default(''),
   busPlate: z.string().optional().default(''),
   carrier: z.string().optional().default(''),

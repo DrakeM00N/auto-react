@@ -119,6 +119,7 @@ async function initDB() {
   await addColumnIfMissing('trips', 'carrier', 'TEXT')
   await addColumnIfMissing('trips', 'amenities', "TEXT DEFAULT '[]'")
   await addColumnIfMissing('trips', 'intermediate_stops', "TEXT DEFAULT '[]'")
+  await addColumnIfMissing('trips', 'arrival_time', 'TEXT')
 
   // Seed initial data if empty
   const routeCount = await db.execute('SELECT COUNT(*) as cnt FROM routes')

@@ -173,6 +173,8 @@ function buildTicketEmailHtml(ticket) {
   ? ticket.tripDate.split('-').reverse().join('-')
   : ''
   const tripTime = ticket?.tripTime || ''
+  const arrivalTime = ticket?.arrivalTime || ''
+  const timeLabel = arrivalTime ? `${tripTime} — ${arrivalTime}` : tripTime
   const passenger = ticket?.passengerName || '—'
   const phone = ticket?.passengerPhone || '—'
   const price = ticket?.tripPrice ? `${ticket.tripPrice} грн` : '—'
@@ -250,7 +252,7 @@ function buildTicketEmailHtml(ticket) {
                     </td>
                     <td width="50%" valign="top" style="padding-bottom:16px;">
                       <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Час</div>
-                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${tripTime}</div>
+                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${timeLabel}</div>
                     </td>
                   </tr>
                   <tr>
