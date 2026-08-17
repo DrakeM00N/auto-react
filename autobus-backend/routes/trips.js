@@ -14,7 +14,10 @@ const tripValidators = [
   // Extended trip metadata — all optional with safe defaults.
   body('departurePoint').optional({ nullable: true }).isString(),
   body('arrivalPoint').optional({ nullable: true }).isString(),
-  body('arrivalTime').optional({ nullable: true }).matches(/^([01]\d|2[0-3]):[0-5]\d$/).withMessage('arrivalTime must be HH:MM'),
+  body('arrivalTime').optional({ nullable: true }).custom(v => {
+    if (!v || v === '') return true
+    return /^([01]\d|2[0-3]):[0-5]\d$/.test(v)
+  }).withMessage('arrivalTime must be HH:MM'),
   body('busModel').optional({ nullable: true }).isString(),
   body('busPlate').optional({ nullable: true }).isString(),
   body('carrier').optional({ nullable: true }).isString(),
@@ -134,7 +137,7 @@ router.post('/', adminMiddleware, tripValidators, async (req, res) => {
         routeId, date, time, price, seats,
         safeString(departurePoint),
         safeString(arrivalPoint),
-        safeString(arrivalTime),
+        arrivalTime || null,
         safeString(busModel),
         safeString(busPlate),
         safeString(carrier),
@@ -169,7 +172,7 @@ router.put('/:id', adminMiddleware, tripValidators, async (req, res) => {
         routeId, date, time, price, seats,
         safeString(departurePoint),
         safeString(arrivalPoint),
-        safeString(arrivalTime),
+        arrivalTime || null,
         safeString(busModel),
         safeString(busPlate),
         safeString(carrier),
