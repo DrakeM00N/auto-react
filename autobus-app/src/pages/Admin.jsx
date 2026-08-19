@@ -776,14 +776,19 @@ function Admin() {
                               </label>
                               <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
                                 <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                                  Дата
+                                  Дата відправлення
                                   <input type="date" {...editTripForm.register('date')} style={inputStyle} />
                                   {editTripErrors.date && <span style={fieldErrorStyle}>{editTripErrors.date.message}</span>}
                                 </label>
                                 <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                                  Час
+                                  Час відправлення
                                   <input type="time" {...editTripForm.register('time')} style={inputStyle} />
                                   {editTripErrors.time && <span style={fieldErrorStyle}>{editTripErrors.time.message}</span>}
+                                </label>
+                                <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                                  Дата прибуття
+                                  <input type="date" {...editTripForm.register('arrivalDate')} style={inputStyle} />
+                                  {editTripErrors.arrivalDate && <span style={fieldErrorStyle}>{editTripErrors.arrivalDate.message}</span>}
                                 </label>
                                 <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                                   Час прибуття
