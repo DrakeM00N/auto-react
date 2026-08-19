@@ -360,7 +360,20 @@ function Schedule() {
                   {route?.from} {route?.stops?.length ? `→ ${route.stops.join(' → ')} →` : '→'} {route?.to}
                 </div>
                 <h2 style={{ fontSize: '1.3rem', margin: 0, lineHeight: 1.2, display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                  <span>{formatDate(trip.date)} • {trip.time}{trip.arrivalTime ? ` — ${trip.arrivalTime}` : ''}</span>
+                  <div style={{ display: 'flex', gap: '18px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{ minWidth: '160px' }}>
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text2)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Відправлення</div>
+                      <div style={{ fontWeight: 800, fontSize: '1.05rem' }}>{formatDate(trip.date)}</div>
+                      <div style={{ color: 'var(--text2)', marginTop: '4px', fontWeight: 700 }}>{trip.time}</div>
+                    </div>
+
+                    <div style={{ minWidth: '160px' }}>
+                      <div style={{ fontSize: '0.9rem', color: 'var(--text2)', marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Прибуття</div>
+                      <div style={{ fontWeight: 800, fontSize: '1.05rem' }}>{trip.arrivalDate ? formatDate(trip.arrivalDate) : formatDate(trip.date)}</div>
+                      <div style={{ color: 'var(--text2)', marginTop: '4px', fontWeight: 700 }}>{trip.arrivalTime || '—'}</div>
+                    </div>
+                  </div>
+
                   {departed && (
                     <span style={{
                       fontSize: '0.7rem',
