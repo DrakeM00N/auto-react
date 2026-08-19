@@ -22,7 +22,7 @@ const AMENITY_CATALOGUE = [
 
 const EMPTY_ROUTE_FORM = { from: '', to: '', distance: '', duration: '', stops: '' }
 const EMPTY_TRIP_FORM = {
-  routeId: '', date: '', time: '', price: '', seats: '',
+  routeId: '', date: '', arrivalDate: '', time: '', price: '', seats: '',
   departurePoint: '', arrivalPoint: '', arrivalTime: '', busModel: '', busPlate: '', carrier: '',
   amenities: [], intermediateStops: [],
 }
@@ -296,6 +296,7 @@ function Admin() {
     editTripForm.reset({
       routeId: String(trip.routeId),
       date: trip.date,
+      arrivalDate: trip.arrivalDate || '',
       time: trip.time,
       price: String(trip.price),
       seats: String(trip.seats),
@@ -555,14 +556,19 @@ function Admin() {
             </label>
             <div style={{ display: 'grid', gap: '12px', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))' }}>
               <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                Дата
+                Дата відправлення
                 <input type="date" {...addTripForm.register('date')} style={inputStyle} />
                 {addTripErrors.date && <span style={fieldErrorStyle}>{addTripErrors.date.message}</span>}
               </label>
               <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
-                Час
+                Час відправлення
                 <input type="time" {...addTripForm.register('time')} style={inputStyle} />
                 {addTripErrors.time && <span style={fieldErrorStyle}>{addTripErrors.time.message}</span>}
+              </label>
+              <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+                Дата прибуття
+                <input type="date" {...addTripForm.register('arrivalDate')} style={inputStyle} />
+                {addTripErrors.arrivalDate && <span style={fieldErrorStyle}>{addTripErrors.arrivalDate.message}</span>}
               </label>
               <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
                 Час прибуття

@@ -8,7 +8,10 @@ function TicketCard({ ticket }) {
   const base = import.meta.env.VITE_PUBLIC_URL || window.location.origin
   const ticketUrl = `${base}/ticket/${ticket.ticketCode}`
   const routeLine = [ticket.fromCity, ...(ticket.stops || []), ticket.toCity].join(' → ')
-
+  const departureDate = ticket.departureDate || ticket.tripDate
+  const departureTime = ticket.departureTime || ticket.tripTime
+  const arrivalDate = ticket.arrivalDate || ''
+  const arrivalTime = ticket.arrivalTime || ''
   const labelStyle = { fontSize: '0.75rem', color: 'var(--text2)', marginBottom: '4px' }
 
   return (
@@ -55,8 +58,10 @@ function TicketCard({ ticket }) {
       </div>
 
       <div style={{ padding: '20px 28px', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', borderBottom: '1px dashed var(--border)' }}>
-        <div><div style={labelStyle}>ДАТА</div><div style={{ fontWeight: 700 }}>{formatDate(ticket.tripDate)}</div></div>
-        <div><div style={labelStyle}>ЧАС</div><div style={{ fontWeight: 700 }}>{ticket.tripTime}</div></div>
+        <div><div style={labelStyle}>Дата відправлення</div><div style={{ fontWeight: 700 }}>{formatDate(departureDate)}</div></div>
+        <div><div style={labelStyle}>Час відправлення</div><div style={{ fontWeight: 700 }}>{departureTime}</div></div>
+        <div><div style={labelStyle}>Дата прибуття</div><div style={{ fontWeight: 700 }}>{arrivalDate ? formatDate(arrivalDate) : '—'}</div></div>
+        <div><div style={labelStyle}>Час прибуття</div><div style={{ fontWeight: 700 }}>{arrivalTime || '—'}</div></div>
         <div><div style={labelStyle}>ПАСАЖИР</div><div style={{ fontWeight: 700 }}>{ticket.passengerName}</div></div>
         <div><div style={labelStyle}>ТЕЛЕФОН</div><div style={{ fontWeight: 700 }}>{ticket.passengerPhone}</div></div>
       </div>

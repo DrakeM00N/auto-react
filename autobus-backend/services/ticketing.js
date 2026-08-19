@@ -41,8 +41,8 @@ async function uniqueTicketCode() {
 const TICKET_SQL = `
   SELECT b.id, b.ticket_code, b.trip_id,
          b.passenger_name, b.passenger_phone, b.boarding_point, b.alighting_point, b.created_at, b.status,
-         t.date AS trip_date, t.time AS trip_time, t.price AS trip_price,
-         t.departure_point, t.arrival_point, t.arrival_time,
+         t.date AS trip_date, t.time AS trip_time, t.arrival_date AS trip_arrival_date, t.arrival_time AS trip_arrival_time, t.price AS trip_price,
+         t.departure_point, t.arrival_point,
          r.from_city, r.to_city, r.stops, r.duration
   FROM bookings b
   JOIN trips t ON b.trip_id = t.id
@@ -62,10 +62,11 @@ function mapTicket(row) {
     alightingPoint: row.alighting_point,
     departurePoint: row.departure_point || '',  // ← адрес отправления рейса
     arrivalPoint: row.arrival_point || '',      // ← адрес прибытия рейса
-    arrivalTime: row.arrival_time || '',
+    departureDate: row.trip_date,
+    departureTime: row.trip_time,
+    arrivalDate: row.trip_arrival_date || '',
+    arrivalTime: row.trip_arrival_time || '',
     createdAt: row.created_at,
-    tripDate: row.trip_date,
-    tripTime: row.trip_time,
     tripPrice: row.trip_price,
     fromCity: row.from_city,
     toCity: row.to_city,

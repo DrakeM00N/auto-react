@@ -169,12 +169,10 @@ function buildTicketEmailHtml(ticket) {
   const toCity = ticket?.toCity || 'Призначення'
   const departureAddr = ticket?.departurePoint || ticket?.boardingPoint || '—'
   const arrivalAddr = ticket?.arrivalPoint || ticket?.alightingPoint || '—'
-  const tripDate = ticket?.tripDate
-  ? ticket.tripDate.split('-').reverse().join('-')
-  : ''
-  const tripTime = ticket?.tripTime || ''
+  const departureDate = ticket?.departureDate ? ticket.departureDate.split('-').reverse().join('-') : ''
+  const departureTime = ticket?.departureTime || ''
+  const arrivalDate = ticket?.arrivalDate ? ticket.arrivalDate.split('-').reverse().join('-') : ''
   const arrivalTime = ticket?.arrivalTime || ''
-  const timeLabel = arrivalTime ? `${tripTime} — ${arrivalTime}` : tripTime
   const passenger = ticket?.passengerName || '—'
   const phone = ticket?.passengerPhone || '—'
   const price = ticket?.tripPrice ? `${ticket.tripPrice} грн` : '—'
@@ -246,13 +244,23 @@ function buildTicketEmailHtml(ticket) {
               <td style="background:#1E1C16;padding:20px 28px;">
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
-                    <td width="50%" valign="top" style="padding-bottom:16px;">
-                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Дата</div>
-                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${tripDate}</div>
+                    <td width="50%" valign="top" style="padding-bottom:12px;">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Дата відправлення</div>
+                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${departureDate}</div>
                     </td>
-                    <td width="50%" valign="top" style="padding-bottom:16px;">
-                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Час</div>
-                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${timeLabel}</div>
+                    <td width="50%" valign="top" style="padding-bottom:12px;">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Час відправлення</div>
+                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${departureTime}</div>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="50%" valign="top" style="padding-bottom:12px;">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Дата прибуття</div>
+                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${arrivalDate || '—'}</div>
+                    </td>
+                    <td width="50%" valign="top" style="padding-bottom:12px;">
+                      <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Час прибуття</div>
+                      <div style="font-size:16px;font-weight:700;color:#FFFFFF;padding-top:4px;">${arrivalTime || '—'}</div>
                     </td>
                   </tr>
                   <tr>
