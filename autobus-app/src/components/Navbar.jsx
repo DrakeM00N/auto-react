@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { useTheme } from '../context/ThemeContext'
 import { useAuth } from '../context/AuthContext'
+import logo from '../assets/logo.png'
 
 function Navbar() {
   const { theme, toggleTheme } = useTheme()
@@ -28,8 +29,14 @@ function Navbar() {
 
   return (
     <nav className="navbar">
-      <Link to="/" className="navbar__logo" onClick={() => setMenuOpen(false)}>
-        Bus<span style={{ color: 'var(--text)' }}>Tour</span>
+      <Link
+        to="/"
+        className="navbar__logo"
+        onClick={() => setMenuOpen(false)}
+        style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+      >
+        <img src={logo} alt="BusToRIA" style={{ width: '32px', height: '32px' }} />
+        BusTo<span style={{ color: 'var(--text)' }}>RIA</span>
       </Link>
 
       {/* Desktop links — hidden under the mobile breakpoint via CSS */}

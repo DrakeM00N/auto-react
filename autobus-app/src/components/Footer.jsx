@@ -28,7 +28,7 @@ function Footer() {
             {/* Соцмережі */}
             <div style={{ display: 'flex', gap: '10px' }}>
               <a
-                href="https://www.instagram.com/bustour.bus?igsh=MWxyMTFsZTNobjhsdw=="
+                href="https://www.instagram.com/bustoria_bus/"
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
