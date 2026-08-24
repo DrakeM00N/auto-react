@@ -18,8 +18,10 @@ function Footer() {
 
           {/* Бренд */}
           <div>
-            <div style={{ fontFamily: 'Unbounded', fontSize: '1.2rem', fontWeight: 800, color: 'var(--accent)', marginBottom: '12px' }}>
-              BusToRIA
+            <div style={{ fontFamily: 'Unbounded', fontSize: '1.2rem', fontWeight: 800, marginBottom: '12px' }}>
+              <span style={{ color: 'var(--accent)' }}>Bus</span>
+              <span style={{ color: 'var(--text)' }}>To</span>
+              <span style={{ color: 'var(--accent)' }}>RIA</span>
             </div>
             <p style={{ color: 'var(--text2)', fontSize: '0.9rem', lineHeight: 1.7, margin: '0 0 16px' }}>
               Зручне бронювання автобусних квитків по всій Україні

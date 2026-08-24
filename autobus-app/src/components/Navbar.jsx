@@ -36,7 +36,11 @@ function Navbar() {
         style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
       >
         <img src={logo} alt="BusToRIA" style={{ width: '32px', height: '32px' }} />
-        BusTo<span style={{ color: 'var(--text)' }}>RIA</span>
+        <span>
+          <span style={{ color: 'var(--accent)' }}>Bus</span>
+          <span style={{ color: 'var(--text)' }}>To</span>
+          <span style={{ color: 'var(--accent)' }}>RIA</span>
+        </span>
       </Link>
 
       {/* Desktop links — hidden under the mobile breakpoint via CSS */}
