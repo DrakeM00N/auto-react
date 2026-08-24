@@ -21,7 +21,7 @@ const fieldErrorStyle = { color: '#842029', fontSize: '0.85rem', marginTop: '-4p
 function ResetPassword() {
   useDocumentMeta({
     title: 'Скидання пароля',
-    description: 'Введіть новий пароль для свого акаунта BusTour.',
+    description: 'Введіть новий пароль для свого акаунта BusToRIA.',
   })
   const { resetPassword } = useAuth()
   const navigate = useNavigate()

@@ -16,7 +16,7 @@ function setMeta(selector, attr, value) {
 
 export function useDocumentMeta({ title, description } = {}) {
   useEffect(() => {
-    const nextTitle = title ? `${title} — BusTour` : DEFAULT_TITLE
+    const nextTitle = title ? `${title} — BusToRIA` : DEFAULT_TITLE
     const nextDescription = description || DEFAULT_DESCRIPTION
 
     document.title = nextTitle

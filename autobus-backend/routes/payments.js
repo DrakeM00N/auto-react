@@ -70,7 +70,7 @@ router.post('/create',
     // Random suffix — orderReference is the only thing protecting the
     // unauthenticated /status endpoint from PII enumeration.
     const orderId = `order_${tripId}_${crypto.randomBytes(16).toString('hex')}`
-    const destination = `Квиток BusTour: ${boardingPoint || route.from_city} → ${alightingPoint || route.to_city}, ${trip.date} ${trip.time}`
+    const destination = `Квиток BusToRIA: ${boardingPoint || route.from_city} → ${alightingPoint || route.to_city}, ${trip.date} ${trip.time}`
     const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173')
       .split(',')[0].trim()
 

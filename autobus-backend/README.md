@@ -103,7 +103,7 @@ The flow uses transactional email through [Resend](https://resend.com):
   logs the reset link to stdout instead of trying to send. This lets
   you test the full flow without any external dependencies.
 - For first real-mail tests, sign up at resend.com, copy your API key
-  into `RESEND_API_KEY`, and use `EMAIL_FROM='BusTour <onboarding@resend.dev>'` —
+  into `RESEND_API_KEY`, and use `EMAIL_FROM='BusToRIA <onboarding@resend.dev>'` —
   Resend's sandbox sender delivers ONLY to the account-owner email,
   perfect for end-to-end testing without spamming.
 - **Before production:** verify your own domain in the Resend dashboard

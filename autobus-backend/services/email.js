@@ -7,7 +7,7 @@
 // the caller (routes/auth.js) is responsible for refusing to operate.
 //
 // EMAIL_FROM accepts the Resend format "Name <addr@domain>"; for the very
-// first dev test you can use 'BusTour <onboarding@resend.dev>' — Resend lets
+// first dev test you can use 'BusToRIA <onboarding@resend.dev>' — Resend lets
 // you send from that sandbox sender ONLY to the account-owner's email. For
 // production, verify your own domain in the Resend dashboard and switch
 // EMAIL_FROM to noreply@your-domain.
@@ -18,7 +18,7 @@ const { logger } = require('../logger')
 const log = logger('email')
 
 const apiKey = process.env.RESEND_API_KEY
-const fromAddress = process.env.EMAIL_FROM || 'BusTour <onboarding@resend.dev>'
+const fromAddress = process.env.EMAIL_FROM || 'BusToRIA <onboarding@resend.dev>'
 
 // Lazy-init the client so a missing key doesn't blow up at module load.
 let resendClient = null
@@ -41,7 +41,7 @@ function buildResetEmailHtml(resetLink) {
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="520" style="background:#FFFFFF;border-radius:16px;padding:32px;text-align:left;">
             <tr><td style="font-size:24px;font-weight:700;margin-bottom:16px;font-family:Georgia,serif;color:#1A1814;">Скидання пароля</td></tr>
             <tr><td style="padding-top:16px;font-size:15px;line-height:1.6;color:#333;">
-              Ви запросили скидання пароля для свого акаунта BusTour. Натисніть кнопку нижче, щоб задати новий пароль:
+              Ви запросили скидання пароля для свого акаунта BusToRIA. Натисніть кнопку нижче, щоб задати новий пароль:
             </td></tr>
             <tr><td style="padding-top:24px;" align="left">
               <a href="${resetLink}" style="display:inline-block;padding:14px 28px;background:#E8A020;color:#1A1814;text-decoration:none;border-radius:8px;font-weight:700;">
@@ -55,7 +55,7 @@ function buildResetEmailHtml(resetLink) {
             <tr><td style="padding-top:24px;font-size:13px;color:#777;line-height:1.6;">
               Посилання дійсне 1 годину. Якщо ви не запитували скидання пароля — просто проігноруйте цей лист.
             </td></tr>
-            <tr><td style="padding-top:32px;font-size:12px;color:#999;">— Команда BusTour</td></tr>
+            <tr><td style="padding-top:32px;font-size:12px;color:#999;">— Команда BusToRIA</td></tr>
           </table>
         </td>
       </tr>
@@ -76,7 +76,7 @@ async function sendPasswordResetEmail(toEmail, resetLink) {
     const { error } = await client.emails.send({
       from: fromAddress,
       to: toEmail,
-      subject: 'Скидання пароля BusTour',
+      subject: 'Скидання пароля BusToRIA',
       html: buildResetEmailHtml(resetLink),
     })
     if (error) {
@@ -112,7 +112,7 @@ function buildPasswordChangedEmailHtml(changedAtKyiv) {
           <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="520" style="background:#FFFFFF;border-radius:16px;padding:32px;text-align:left;">
             <tr><td style="font-size:24px;font-weight:700;margin-bottom:16px;font-family:Georgia,serif;color:#1A1814;">Ваш пароль було змінено</td></tr>
             <tr><td style="padding-top:16px;font-size:15px;line-height:1.6;color:#333;">
-              Пароль для вашого акаунта BusTour було успішно змінено.
+              Пароль для вашого акаунта BusToRIA було успішно змінено.
             </td></tr>
             <tr><td style="padding-top:16px;font-size:15px;line-height:1.6;color:#333;">
               Час зміни: <strong>${changedAtKyiv}</strong> (за київським часом).
@@ -121,7 +121,7 @@ function buildPasswordChangedEmailHtml(changedAtKyiv) {
               <strong>Якщо ви НЕ змінювали пароль</strong> — негайно зверніться до підтримки.
               Можливо, ваш акаунт під загрозою: змініть пароль через «Забули пароль?» та повідомте нас.
             </td></tr>
-            <tr><td style="padding-top:32px;font-size:12px;color:#999;">— Команда BusTour</td></tr>
+            <tr><td style="padding-top:32px;font-size:12px;color:#999;">— Команда BusToRIA</td></tr>
           </table>
         </td>
       </tr>
@@ -143,7 +143,7 @@ async function sendPasswordChangedEmail(toEmail) {
     const { error } = await client.emails.send({
       from: fromAddress,
       to: toEmail,
-      subject: 'Ваш пароль BusTour було змінено',
+      subject: 'Ваш пароль BusToRIA було змінено',
       html: buildPasswordChangedEmailHtml(changedAt),
     })
     if (error) {
@@ -159,7 +159,7 @@ async function sendPasswordChangedEmail(toEmail) {
 }
 
 function buildTicketQrCodeUrl(ticketCode) {
-  const encodedCode = encodeURIComponent(ticketCode || 'BusTour-ticket')
+  const encodedCode = encodeURIComponent(ticketCode || 'BusToRIA-ticket')
   return `https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodedCode}`
 }
 
@@ -192,7 +192,7 @@ function buildTicketEmailHtml(ticket) {
                   <tr>
                     <td>
                       <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:#7A4A00;font-weight:700;">Електронний квиток</div>
-                      <div style="font-size:26px;font-weight:900;color:#1A1814;font-family:Georgia,serif;">BusTour</div>
+                      <div style="font-size:26px;font-weight:900;color:#1A1814;font-family:Georgia,serif;">BusToRIA</div>
                     </td>
                     <td align="right">
                       <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#7A4A00;">№ квитка</div>
@@ -300,7 +300,7 @@ function buildTicketEmailHtml(ticket) {
             <tr>
               <td style="background:#141210;padding:16px 28px;border-radius:0 0 20px 20px;">
                 <div style="font-size:12px;color:#5A5040;text-align:center;">
-                  Покажіть QR-код водієві під час посадки — Команда BusTour
+                  Покажіть QR-код водієві під час посадки — Команда BusToRIA
                 </div>
               </td>
             </tr>
@@ -324,7 +324,7 @@ async function sendTicketEmail(toEmail, ticket) {
     const { error } = await client.emails.send({
       from: fromAddress,
       to: toEmail,
-      subject: 'Ваш квиток BusTour — посадка підтверджена',
+      subject: 'Ваш квиток BusToRIA — посадка підтверджена',
       html: buildTicketEmailHtml(ticket),
     })
     if (error) {

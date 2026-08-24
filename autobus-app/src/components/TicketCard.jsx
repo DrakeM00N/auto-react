@@ -26,7 +26,7 @@ function TicketCard({ ticket }) {
       <div style={{ background: 'var(--accent)', padding: '20px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div style={{ fontSize: '0.8rem', fontWeight: 600, color: '#1A1814', opacity: 0.7, marginBottom: '2px' }}>ЕЛЕКТРОННИЙ КВИТОК</div>
-          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1A1814', fontFamily: 'Unbounded, sans-serif' }}>BusTour</div>
+          <div style={{ fontSize: '1.4rem', fontWeight: 800, color: '#1A1814', fontFamily: 'Unbounded, sans-serif' }}>BusToRIA</div>
         </div>
         <div style={{ textAlign: 'right' }}>
           <div style={{ fontSize: '0.75rem', color: '#1A1814', opacity: 0.7 }}>№ квитка</div>

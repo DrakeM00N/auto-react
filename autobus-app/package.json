@@ -2,7 +2,7 @@
   "name": "autobus-app",
   "private": true,
   "version": "0.0.0",
-  "description": "React + Vite frontend for the BusTour bus-ticket booking app.",
+  "description": "React + Vite frontend for the BusToRIA bus-ticket booking app.",
   "type": "module",
   "engines": {
     "node": ">=20"

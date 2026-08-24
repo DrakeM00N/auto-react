@@ -34,7 +34,7 @@ const FAQ_ITEMS = [
 
 const BusIllustration = () => (
   <svg width="100%" viewBox="0 0 480 280" role="img" xmlns="http://www.w3.org/2000/svg" style={{ maxWidth: '480px' }}>
-    <title>Ілюстрація автобуса BusTour</title>
+    <title>Ілюстрація автобуса BusToRIA</title>
     <desc>Стилізований контурний автобус на дорозі</desc>
 
     <circle cx="40" cy="35" r="2" fill="#FFC93C" opacity="0.4"/>

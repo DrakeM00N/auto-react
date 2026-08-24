@@ -47,3 +47,4 @@ Thumbs.db
 # (keep lockfiles)
 .puppeteer-cache
 .local-chromium
+bustour-to-bustoria.diff
