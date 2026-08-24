@@ -59,38 +59,38 @@ const BusIllustration = () => (
     <rect x="430" y="210" width="50" height="3" rx="1.5" fill="#FFC93C" opacity="0.25"/>
 
     <g transform="translate(20, 80)">
-      <rect x="0" y="0" width="440" height="105" rx="14" fill="none" stroke="#FFC93C" strokeWidth="2"/>
-      <rect x="0" y="0" width="440" height="105" rx="14" fill="#FFC93C" opacity="0.04"/>
-      <rect x="0" y="68" width="440" height="37" rx="0" fill="#FFC93C" opacity="0.06"/>
-      <rect x="0" y="68" width="440" height="2.5" fill="#FFC93C" opacity="0.35"/>
-      <line x1="0" y1="34" x2="440" y2="34" stroke="#FFC93C" strokeWidth="1.5" opacity="0.25"/>
-      <rect x="14" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
-      <rect x="16" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-      <rect x="70" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
-      <rect x="72" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-      <rect x="126" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
-      <rect x="128" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-      <rect x="182" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
-      <rect x="184" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-      <rect x="238" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
-      <rect x="240" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-      <rect x="294" y="7" width="46" height="24" rx="5" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.55"/>
-      <rect x="296" y="9" width="42" height="20" rx="3" fill="#FFC93C" opacity="0.08"/>
-      <rect x="352" y="4" width="72" height="30" rx="6" fill="none" stroke="#FFC93C" strokeWidth="2" opacity="0.75"/>
-      <rect x="354" y="6" width="68" height="26" rx="4" fill="#FFC93C" opacity="0.12"/>
-      <rect x="426" y="40" width="14" height="24" rx="3" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.45"/>
-      <rect x="428" y="42" width="10" height="10" rx="2" fill="#FFC93C" opacity="0.18"/>
-      <rect x="0" y="40" width="10" height="24" rx="3" fill="#FFC93C" opacity="0.12"/>
-      <circle cx="68" cy="103" r="24" fill="none" stroke="#FFC93C" strokeWidth="2"/>
-      <circle cx="68" cy="103" r="13" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.45"/>
-      <circle cx="68" cy="103" r="5" fill="#FFC93C" opacity="0.35"/>
-      <circle cx="338" cy="103" r="24" fill="none" stroke="#FFC93C" strokeWidth="2"/>
-      <circle cx="338" cy="103" r="13" fill="none" stroke="#FFC93C" strokeWidth="1.5" opacity="0.45"/>
-      <circle cx="338" cy="103" r="5" fill="#FFC93C" opacity="0.35"/>
-      <line x1="14" y1="46" x2="14" y2="65" stroke="#FFC93C" strokeWidth="1" opacity="0.25"/>
-      <line x1="26" y1="46" x2="26" y2="65" stroke="#FFC93C" strokeWidth="1" opacity="0.25"/>
-      <line x1="420" y1="46" x2="420" y2="65" stroke="#FFC93C" strokeWidth="1" opacity="0.25"/>
-      <line x1="432" y1="46" x2="432" y2="65" stroke="#FFC93C" strokeWidth="1" opacity="0.25"/>
+      <rect x="0" y="0" width="440" height="105" rx="14" fill="none" stroke="#4ADE80" strokeWidth="2"/>
+      <rect x="0" y="0" width="440" height="105" rx="14" fill="#4ADE80" opacity="0.04"/>
+      <rect x="0" y="68" width="440" height="37" rx="0" fill="#4ADE80" opacity="0.06"/>
+      <rect x="0" y="68" width="440" height="2.5" fill="#4ADE80" opacity="0.35"/>
+      <line x1="0" y1="34" x2="440" y2="34" stroke="#4ADE80" strokeWidth="1.5" opacity="0.25"/>
+      <rect x="14" y="7" width="46" height="24" rx="5" fill="none" stroke="#4ADE80" strokeWidth="1.5" opacity="0.55"/>
+      <rect x="16" y="9" width="42" height="20" rx="3" fill="#4ADE80" opacity="0.08"/>
+      <rect x="70" y="7" width="46" height="24" rx="5" fill="none" stroke="#4ADE80" strokeWidth="1.5" opacity="0.55"/>
+      <rect x="72" y="9" width="42" height="20" rx="3" fill="#4ADE80" opacity="0.08"/>
+      <rect x="126" y="7" width="46" height="24" rx="5" fill="none" stroke="#4ADE80" strokeWidth="1.5" opacity="0.55"/>
+      <rect x="128" y="9" width="42" height="20" rx="3" fill="#4ADE80" opacity="0.08"/>
+      <rect x="182" y="7" width="46" height="24" rx="5" fill="none" stroke="#4ADE80" strokeWidth="1.5" opacity="0.55"/>
+      <rect x="184" y="9" width="42" height="20" rx="3" fill="#4ADE80" opacity="0.08"/>
+      <rect x="238" y="7" width="46" height="24" rx="5" fill="none" stroke="#4ADE80" strokeWidth="1.5" opacity="0.55"/>
+      <rect x="240" y="9" width="42" height="20" rx="3" fill="#4ADE80" opacity="0.08"/>
+      <rect x="294" y="7" width="46" height="24" rx="5" fill="none" stroke="#4ADE80" strokeWidth="1.5" opacity="0.55"/>
+      <rect x="296" y="9" width="42" height="20" rx="3" fill="#4ADE80" opacity="0.08"/>
+      <rect x="352" y="4" width="72" height="30" rx="6" fill="none" stroke="#4ADE80" strokeWidth="2" opacity="0.75"/>
+      <rect x="354" y="6" width="68" height="26" rx="4" fill="#4ADE80" opacity="0.12"/>
+      <rect x="426" y="40" width="14" height="24" rx="3" fill="none" stroke="#4ADE80" strokeWidth="1.5" opacity="0.45"/>
+      <rect x="428" y="42" width="10" height="10" rx="2" fill="#4ADE80" opacity="0.18"/>
+      <rect x="0" y="40" width="10" height="24" rx="3" fill="#4ADE80" opacity="0.12"/>
+      <circle cx="68" cy="103" r="24" fill="none" stroke="#4ADE80" strokeWidth="2"/>
+      <circle cx="68" cy="103" r="13" fill="none" stroke="#4ADE80" strokeWidth="1.5" opacity="0.45"/>
+      <circle cx="68" cy="103" r="5" fill="#4ADE80" opacity="0.35"/>
+      <circle cx="338" cy="103" r="24" fill="none" stroke="#4ADE80" strokeWidth="2"/>
+      <circle cx="338" cy="103" r="13" fill="none" stroke="#4ADE80" strokeWidth="1.5" opacity="0.45"/>
+      <circle cx="338" cy="103" r="5" fill="#4ADE80" opacity="0.35"/>
+      <line x1="14" y1="46" x2="14" y2="65" stroke="#4ADE80" strokeWidth="1" opacity="0.25"/>
+      <line x1="26" y1="46" x2="26" y2="65" stroke="#4ADE80" strokeWidth="1" opacity="0.25"/>
+      <line x1="420" y1="46" x2="420" y2="65" stroke="#4ADE80" strokeWidth="1" opacity="0.25"/>
+      <line x1="432" y1="46" x2="432" y2="65" stroke="#4ADE80" strokeWidth="1" opacity="0.25"/>
     </g>
 
     <circle cx="80" cy="240" r="3" fill="#FFC93C" opacity="0.15"/>

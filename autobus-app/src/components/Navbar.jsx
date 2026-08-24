@@ -37,9 +37,9 @@ function Navbar() {
       >
         <img src={logo} alt="BusToRIA" style={{ width: '32px', height: '32px' }} />
         <span>
-          <span style={{ color: 'var(--accent)' }}>Bus</span>
+          <span style={{ color: '#3DA70F' }}>Bus</span>
           <span style={{ color: 'var(--text)' }}>To</span>
-          <span style={{ color: 'var(--accent)' }}>RIA</span>
+          <span style={{ color: '#3DA70F' }}>RIA</span>
         </span>
       </Link>
 
