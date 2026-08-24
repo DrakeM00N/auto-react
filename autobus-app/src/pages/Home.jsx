@@ -163,7 +163,7 @@ function Home() {
         <div className="hero-grid">
           <div>
             <p className="hero__eyebrow" style={{
-              color: 'var(--accent)', fontFamily: 'Unbounded',
+              color: '#3DA70F', fontFamily: 'Unbounded',
               fontSize: '0.75rem', letterSpacing: '0.15em',
               textTransform: 'uppercase', marginBottom: '16px',
             }}>
@@ -175,7 +175,7 @@ function Home() {
               fontWeight: 700, lineHeight: 1.15, marginBottom: '24px',
             }}>
               Автобусні рейси<br />
-              <span style={{ color: 'var(--accent)' }}>швидко та зручно</span>
+              <span style={{ color: '#3DA70F' }}>швидко та зручно</span>
             </h1>
             <p className="hero__subtitle" style={{
               color: 'var(--text2)', fontSize: '1.1rem',

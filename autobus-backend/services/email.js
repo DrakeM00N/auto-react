@@ -187,7 +187,7 @@ function buildTicketEmailHtml(ticket) {
 
             <!-- Заголовок -->
             <tr>
-              <td style="background:#E8A020;padding:20px 28px;">
+              <td style="background:#3DA70F;padding:20px 28px;">
                 <table role="presentation" cellpadding="0" cellspacing="0" border="0" width="100%">
                   <tr>
                     <td>
@@ -215,7 +215,7 @@ function buildTicketEmailHtml(ticket) {
                     </td>
                     <td width="16%" align="center" valign="middle" style="padding-top:16px;">
                       <div style="font-size:20px;">🚌</div>
-                      <div style="border-top:2px dashed #E8A020;margin:6px 0;"></div>
+                      <div style="border-top:2px dashed #3DA70F;margin:6px 0;"></div>
                       <div style="font-size:11px;color:#8A7A50;">${ticket?.duration || ''}</div>
                     </td>
                     <td width="42%" valign="top" align="right">
@@ -288,8 +288,8 @@ function buildTicketEmailHtml(ticket) {
                     </td>
                     <td width="60%" valign="middle" align="right">
                       <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Вартість квитка</div>
-                      <div style="font-size:32px;font-weight:900;color:#E8A020;padding-top:6px;">${price}</div>
-                      <div style="margin-top:14px;display:inline-block;background:#E8A020;color:#1A1814;font-size:13px;font-weight:800;padding:10px 22px;border-radius:8px;letter-spacing:0.05em;">✓ ОПЛАЧЕНО</div>
+                      <div style="font-size:32px;font-weight:900;color:#3DA70F;padding-top:6px;">${price}</div>
+                      <div style="margin-top:14px;display:inline-block;background:#3DA70F;color:#1A1814;font-size:13px;font-weight:800;padding:10px 22px;border-radius:8px;letter-spacing:0.05em;">✓ ОПЛАЧЕНО</div>
                     </td>
                   </tr>
                 </table>
