@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { useForm, useWatch } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useData } from '../context/DataContext'
 import { track } from '../lib/analytics'
@@ -36,7 +36,6 @@ function Booking() {
   const {
     register,
     handleSubmit,
-    control,
     setValue,
     formState: { errors, isSubmitting },
   } = useForm({
@@ -51,9 +50,13 @@ function Booking() {
     },
   })
 
-  // useWatch (vs. the form's watch()) is the React-Compiler-friendly variant —
-  // it subscribes to a single field without breaking memoization.
-  const boardingPoint = useWatch({ control, name: 'boardingPoint' })
+  // Точки посадки/висадки фіксовані маршрутом (from/to), користувач їх не обирає.
+  useEffect(() => {
+    if (selectedRoute) {
+      setValue('boardingPoint', selectedRoute.from, { shouldValidate: true })
+      setValue('alightingPoint', selectedRoute.to, { shouldValidate: true })
+    }
+  }, [selectedRoute, setValue])
 
   // Funnel: the visitor reached the booking page with a valid trip
   useEffect(() => {
@@ -65,18 +68,6 @@ function Booking() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTrip?.id])
-
-  const allPoints = useMemo(() => {
-    if (!selectedRoute) return []
-    const stopsCities = selectedRoute.stops || []
-    return [selectedRoute.from, ...stopsCities, selectedRoute.to]
-  }, [selectedRoute])
-
-  const alightingOptions = useMemo(() => {
-    if (!boardingPoint) return []
-    const idx = allPoints.indexOf(boardingPoint)
-    return allPoints.slice(idx + 1)
-  }, [boardingPoint, allPoints])
 
   const onSubmit = async (values) => {
     if (departed) {
@@ -188,33 +179,18 @@ function Booking() {
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: 'grid', gap: '18px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-              <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
-                Зупинка посадки
-                <select
-                  {...register('boardingPoint', {
-                    // Resetting the dependent field on boarding change keeps
-                    // the option list and current value in sync.
-                    onChange: () => setValue('alightingPoint', '', { shouldValidate: false }),
-                  })}
-                  style={inputStyle}
-                >
-                  <option value="">Оберіть зупинку</option>
-                  {allPoints.slice(0, -1).map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
-                {errors.boardingPoint && <span style={fieldErrorStyle}>{errors.boardingPoint.message}</span>}
-              </label>
-              <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
-                Зупинка висадки
-                <select
-                  {...register('alightingPoint')}
-                  style={{ ...inputStyle, opacity: boardingPoint ? 1 : 0.5 }}
-                  disabled={!boardingPoint}
-                >
-                  <option value="">Оберіть зупинку</option>
-                  {alightingOptions.map(p => <option key={p} value={p}>{p}</option>)}
-                </select>
-                {errors.alightingPoint && <span style={fieldErrorStyle}>{errors.alightingPoint.message}</span>}
-              </label>
+              <div style={{ display: 'grid', gap: '8px' }}>
+                <span style={{ color: 'var(--text2)' }}>Зупинка посадки</span>
+                <div style={{ ...inputStyle, display: 'flex', alignItems: 'center', fontWeight: 600 }}>
+                  {selectedRoute?.from}
+                </div>
+              </div>
+              <div style={{ display: 'grid', gap: '8px' }}>
+                <span style={{ color: 'var(--text2)' }}>Зупинка висадки</span>
+                <div style={{ ...inputStyle, display: 'flex', alignItems: 'center', fontWeight: 600 }}>
+                  {selectedRoute?.to}
+                </div>
+              </div>
             </div>
 
             <div style={{ display: 'grid', gap: '12px' }}>
