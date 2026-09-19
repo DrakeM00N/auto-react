@@ -123,3 +123,31 @@ export const tripSchema = z.object({
     .optional()
     .default([]),
 })
+
+// ---------- admin: promo code ----------
+
+export const promoSchema = z.object({
+  code: z
+    .string()
+    .trim()
+    .min(1, 'Введіть промокод')
+    .regex(/^\S+$/, 'Промокод не може містити пробілів')
+    .transform(value => value.toUpperCase()),
+  discountPercent: z.coerce
+    .number({ message: 'Вкажіть знижку' })
+    .min(1, 'Знижка має бути не меншою за 1%')
+    .max(100, 'Знижка не може перевищувати 100%'),
+  maxUses: z
+    .union([
+      z.literal(''),
+      z.coerce
+        .number({ message: 'Кількість використань має бути числом' })
+        .int('Кількість використань має бути цілим числом')
+        .min(1, 'Кількість використань має бути не меншою за 1'),
+    ])
+    .transform(value => value === '' ? null : value),
+  expiresAt: z
+    .string()
+    .refine(value => !value || !Number.isNaN(Date.parse(value)), 'Вкажіть коректну дату')
+    .transform(value => value || null),
+})

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -6,7 +6,8 @@ import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
 import { formatDate, isDeparted } from '../lib/format'
 import Button from '../components/Button'
-import { routeSchema, tripSchema } from '../lib/schemas'
+import { apiRequest } from '../lib/api'
+import { promoSchema, routeSchema, tripSchema } from '../lib/schemas'
 
 // Fixed amenity catalogue. Used by the admin checkboxes — Schedule.jsx
 // just renders whatever amenities the backend returns, so it doesn't
@@ -26,6 +27,7 @@ const EMPTY_TRIP_FORM = {
   departurePoint: '', arrivalPoint: '', arrivalTime: '', busModel: '', busPlate: '', carrier: '',
   amenities: [], intermediateStops: [],
 }
+const EMPTY_PROMO_FORM = { code: '', discountPercent: '', maxUses: '', expiresAt: '' }
 
 // How many trips/routes to show per page in their respective tables.
 const TRIPS_PER_PAGE = 25
@@ -205,6 +207,8 @@ function Admin() {
   const [editingRouteId, setEditingRouteId] = useState(null)
   const [editingTripId, setEditingTripId] = useState(null)
   const [status, setStatus] = useState(null)
+  const [promoCodes, setPromoCodes] = useState([])
+  const [promoLoading, setPromoLoading] = useState(false)
 
   // Search + pagination state for the "Управління маршрутами" table.
   const [routeSearch, setRouteSearch] = useState('')
@@ -239,6 +243,28 @@ function Admin() {
     resolver: zodResolver(tripSchema),
     defaultValues: EMPTY_TRIP_FORM,
   })
+  const addPromoForm = useForm({
+    resolver: zodResolver(promoSchema),
+    defaultValues: EMPTY_PROMO_FORM,
+  })
+
+  const fetchPromoCodes = useCallback(async () => {
+    setPromoLoading(true)
+    try {
+      const data = await apiRequest('GET', '/promo')
+      setPromoCodes(Array.isArray(data) ? data : [])
+    } catch (err) {
+      setStatus({ type: 'error', message: 'Не вдалось завантажити промокоди: ' + err.message })
+    } finally {
+      setPromoLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (currentUser?.role !== 'admin') return undefined
+    const timer = setTimeout(() => fetchPromoCodes(), 0)
+    return () => clearTimeout(timer)
+  }, [currentUser?.role, fetchPromoCodes])
 
   // Проверка роли
   if (!currentUser || currentUser.role !== 'admin') {
@@ -263,6 +289,42 @@ function Admin() {
       setStatus({ type: 'success', message: 'Рейс додано' })
     } catch (err) {
       setStatus({ type: 'error', message: 'Не вдалось додати рейс: ' + err.message })
+    }
+  }
+
+  const onAddPromo = async (values) => {
+    try {
+      await apiRequest('POST', '/promo', {
+        code: values.code,
+        discountPercent: values.discountPercent,
+        maxUses: values.maxUses,
+        expiresAt: values.expiresAt,
+      })
+      addPromoForm.reset(EMPTY_PROMO_FORM)
+      await fetchPromoCodes()
+      setStatus({ type: 'success', message: 'Промокод додано' })
+    } catch (err) {
+      setStatus({ type: 'error', message: 'Не вдалось додати промокод: ' + err.message })
+    }
+  }
+
+  const handleTogglePromo = async (promo) => {
+    try {
+      await apiRequest('PATCH', `/promo/${promo.id}`, { active: !promo.active })
+      await fetchPromoCodes()
+      setStatus({ type: 'success', message: promo.active ? 'Промокод деактивовано' : 'Промокод активовано' })
+    } catch (err) {
+      setStatus({ type: 'error', message: 'Не вдалось змінити статус промокоду: ' + err.message })
+    }
+  }
+
+  const handleDeletePromo = async (promoId) => {
+    try {
+      await apiRequest('DELETE', `/promo/${promoId}`)
+      await fetchPromoCodes()
+      setStatus({ type: 'success', message: 'Промокод видалено' })
+    } catch (err) {
+      setStatus({ type: 'error', message: 'Не вдалось видалити промокод: ' + err.message })
     }
   }
 
@@ -404,6 +466,7 @@ function Admin() {
   const editRouteErrors = editRouteForm.formState.errors
   const addTripErrors = addTripForm.formState.errors
   const editTripErrors = editTripForm.formState.errors
+  const addPromoErrors = addPromoForm.formState.errors
 
   // Compact table cell style used throughout "Управління рейсами".
   const thStyle = {
@@ -604,6 +667,43 @@ function Admin() {
           </form>
         </section>
 
+        {/* Додавання промокоду */}
+        <section style={{ padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
+          <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Додати промокод</h2>
+          <form onSubmit={addPromoForm.handleSubmit(onAddPromo)} noValidate style={{ display: 'grid', gap: '12px' }}>
+            <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+              Код
+              <input {...addPromoForm.register('code')} placeholder="Наприклад: BUS10" style={inputStyle} />
+              {addPromoErrors.code && <span style={fieldErrorStyle}>{addPromoErrors.code.message}</span>}
+            </label>
+            <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+              Знижка (%)
+              <input type="number" min="1" max="100" {...addPromoForm.register('discountPercent')} placeholder="10" style={inputStyle} />
+              {addPromoErrors.discountPercent && <span style={fieldErrorStyle}>{addPromoErrors.discountPercent.message}</span>}
+            </label>
+            <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+              Максимальна кількість використань
+              <input type="number" min="1" {...addPromoForm.register('maxUses')} placeholder="Необмежено" style={inputStyle} />
+              {addPromoErrors.maxUses && <span style={fieldErrorStyle}>{addPromoErrors.maxUses.message}</span>}
+            </label>
+            <label style={{ display: 'grid', gap: '6px', minWidth: 0 }}>
+              Термін дії
+              <input type="date" {...addPromoForm.register('expiresAt')} style={inputStyle} />
+              {addPromoErrors.expiresAt && <span style={fieldErrorStyle}>{addPromoErrors.expiresAt.message}</span>}
+            </label>
+            <Button type="submit" loading={addPromoForm.formState.isSubmitting} style={{
+              padding: '12px',
+              borderRadius: '8px',
+              border: 'none',
+              background: 'var(--accent)',
+              color: '#1A1814',
+              fontWeight: 600,
+            }}>
+              Додати промокод
+            </Button>
+          </form>
+        </section>
+
       </div>
 
       {/* ------------------------------------------------------------------ */}
@@ -715,6 +815,95 @@ function Admin() {
               onChange={setRoutePage}
             />
           </>
+        )}
+      </section>
+
+      {/* Управління промокодами */}
+      <section style={{ marginTop: '40px', padding: '24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
+        <h2 style={{ fontSize: '1.4rem', marginBottom: '16px' }}>Промокоди ({promoCodes.length})</h2>
+        {promoLoading && promoCodes.length === 0 ? (
+          <p>Завантаження промокодів…</p>
+        ) : promoCodes.length === 0 ? (
+          <p>Немає промокодів.</p>
+        ) : (
+          <div style={{ overflowX: 'auto' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.92rem' }}>
+              <thead>
+                <tr>
+                  <th style={thStyle}>Код</th>
+                  <th style={thStyle}>Знижка</th>
+                  <th style={thStyle}>Статус</th>
+                  <th style={thStyle}>Використано</th>
+                  <th style={thStyle}>Термін дії</th>
+                  <th style={{ ...thStyle, textAlign: 'right' }}>Дії</th>
+                </tr>
+              </thead>
+              <tbody>
+                {promoCodes.map(promo => (
+                  <tr key={promo.id}>
+                    <td style={{ ...tdStyle, fontWeight: 600 }}>{promo.code}</td>
+                    <td style={tdStyle}>{promo.discountPercent}%</td>
+                    <td style={tdStyle}>
+                      <span style={{
+                        fontSize: '0.7rem',
+                        letterSpacing: '0.08em',
+                        textTransform: 'uppercase',
+                        padding: '3px 8px',
+                        borderRadius: '999px',
+                        background: promo.active ? '#E8F6EE' : 'var(--border)',
+                        color: promo.active ? '#1B6B31' : 'var(--text2)',
+                        fontWeight: 700,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {promo.active ? 'Активний' : 'Вимкнено'}
+                      </span>
+                    </td>
+                    <td style={tdStyle}>
+                      {promo.usedCount} / {promo.maxUses ?? 'необмежено'}
+                    </td>
+                    <td style={{ ...tdStyle, whiteSpace: 'nowrap' }}>
+                      {promo.expiresAt ? formatDate(promo.expiresAt) : '—'}
+                    </td>
+                    <td style={{ ...tdStyle, textAlign: 'right', whiteSpace: 'nowrap' }}>
+                      <button
+                        type="button"
+                        onClick={() => handleTogglePromo(promo)}
+                        disabled={promoLoading}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '10px',
+                          border: 'none',
+                          background: 'var(--bg3)',
+                          color: 'var(--text)',
+                          cursor: promoLoading ? 'not-allowed' : 'pointer',
+                          marginRight: '8px',
+                          opacity: promoLoading ? 0.65 : 1,
+                        }}
+                      >
+                        {promo.active ? 'Деактивувати' : 'Активувати'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDeletePromo(promo.id)}
+                        disabled={promoLoading}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '10px',
+                          border: 'none',
+                          background: '#e74c3c',
+                          color: '#fff',
+                          cursor: promoLoading ? 'not-allowed' : 'pointer',
+                          opacity: promoLoading ? 0.65 : 1,
+                        }}
+                      >
+                        Видалити
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </section>
 
