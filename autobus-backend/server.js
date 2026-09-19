@@ -53,6 +53,17 @@ const analyticsLimiter = rateLimit({
 
 app.use('/api/analytics/track', analyticsLimiter)
 
+// Rate limiting for the public promo-code validation endpoint — prevents
+// brute-forcing promo codes by trying many values per minute.
+const promoLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 20, // limit each IP to 20 attempts per minute
+  standardHeaders: true,
+  legacyHeaders: false,
+})
+
+app.use('/api/promo/validate', promoLimiter)
+
 // Маршрути API
 app.use('/api/auth', require('./routes/auth'))
 app.use('/api/routes', require('./routes/routes'))
@@ -61,6 +72,7 @@ app.use('/api/bookings', require('./routes/bookings'))
 app.use('/api/users', require('./routes/users'))
 app.use('/api/payments', require('./routes/payments'))
 app.use('/api/tickets', require('./routes/tickets'))
+app.use('/api/promo', require('./routes/promo'))
 app.use('/api/analytics', require('./routes/analytics'))
 
 // Перевірка що сервер живий

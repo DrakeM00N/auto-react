@@ -79,7 +79,15 @@ function TicketCard({ ticket }) {
       <div style={{ padding: '20px 28px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
         <div>
           <div style={labelStyle}>ВАРТІСТЬ КВИТКА</div>
-          <div style={{ fontSize: '2rem', fontWeight: 800, color: '#3DA70F' }}>{ticket.tripPrice} грн</div>
+          {ticket.promoCode && ticket.originalPrice != null && ticket.originalPrice !== ticket.tripPrice ? (
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px', flexWrap: 'wrap' }}>
+              <div style={{ fontSize: '2rem', fontWeight: 800, color: '#3DA70F' }}>{ticket.tripPrice} грн</div>
+              <div style={{ fontSize: '1.1rem', color: 'var(--text2)', textDecoration: 'line-through' }}>{ticket.originalPrice} грн</div>
+              <div style={{ fontSize: '0.8rem', color: 'var(--text2)' }}>промокод {ticket.promoCode}</div>
+            </div>
+          ) : (
+            <div style={{ fontSize: '2rem', fontWeight: 800, color: '#3DA70F' }}>{ticket.tripPrice} грн</div>
+          )}
         </div>
         <div style={{ background: '#3DA70F', color: '#1A1814', padding: '8px 16px', borderRadius: '12px', fontWeight: 700, fontSize: '0.9rem' }}>
           ✓ ОПЛАЧЕНО

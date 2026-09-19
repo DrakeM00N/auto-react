@@ -96,6 +96,16 @@ async function initDB() {
     )`,
     `CREATE INDEX IF NOT EXISTS idx_events_name_time ON events(name, created_at)`,
     `CREATE INDEX IF NOT EXISTS idx_events_session ON events(session_id)`,
+    `CREATE TABLE IF NOT EXISTS promo_codes (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      code TEXT NOT NULL UNIQUE,
+      discount_percent REAL NOT NULL,
+      active INTEGER NOT NULL DEFAULT 1,
+      max_uses INTEGER,
+      used_count INTEGER NOT NULL DEFAULT 0,
+      expires_at TEXT,
+      created_at TEXT DEFAULT (datetime('now'))
+    )`,
   ])
 
   // Migrations for databases created before the monobank ticketing system.
@@ -121,6 +131,14 @@ async function initDB() {
   await addColumnIfMissing('trips', 'intermediate_stops', "TEXT DEFAULT '[]'")
   await addColumnIfMissing('trips', 'arrival_date', 'TEXT')
   await addColumnIfMissing('trips', 'arrival_time', 'TEXT')
+
+  // Promo codes: pending_bookings tracks what was applied at checkout time,
+  // bookings keeps the same for the final record (receipts, admin stats).
+  await addColumnIfMissing('pending_bookings', 'promo_code', 'TEXT')
+  await addColumnIfMissing('pending_bookings', 'original_price', 'REAL')
+  await addColumnIfMissing('pending_bookings', 'final_price', 'REAL')
+  await addColumnIfMissing('bookings', 'promo_code', 'TEXT')
+  await addColumnIfMissing('bookings', 'final_price', 'REAL')
 
   // Seed initial data if empty
   const routeCount = await db.execute('SELECT COUNT(*) as cnt FROM routes')

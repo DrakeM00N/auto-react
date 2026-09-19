@@ -32,6 +32,10 @@ function Booking() {
   const freeSeats = selectedTrip ? selectedTrip.seats - (selectedTrip.bookedCount || 0) : 0
   const departed = selectedTrip ? isDeparted(selectedTrip) : false
   const [agreed, setAgreed] = useState(false)
+  const [promoInput, setPromoInput] = useState('')
+  const [promoState, setPromoState] = useState(null) // { code, discountPercent, originalPrice, discountedPrice } | null
+  const [promoError, setPromoError] = useState(null)
+  const [promoChecking, setPromoChecking] = useState(false)
 
   const {
     register,
@@ -69,6 +73,32 @@ function Booking() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedTrip?.id])
 
+  // Скидка перевіряється на бекенді — тут лише показуємо результат, реальний
+  // перерахунок суми відбувається ще раз (незалежно) у /api/payments/create.
+  const handleApplyPromo = async () => {
+    const code = promoInput.trim()
+    if (!code) return
+    setPromoChecking(true)
+    setPromoError(null)
+    try {
+      const result = await apiRequest('POST', '/promo/validate', { code, tripId })
+      setPromoState(result)
+    } catch (e) {
+      setPromoState(null)
+      setPromoError(e.message)
+    } finally {
+      setPromoChecking(false)
+    }
+  }
+
+  const handleRemovePromo = () => {
+    setPromoState(null)
+    setPromoError(null)
+    setPromoInput('')
+  }
+
+  const displayedPrice = promoState ? promoState.discountedPrice : selectedTrip?.price
+
   const onSubmit = async (values) => {
     if (departed) {
       setServerError('Цей рейс уже відправлено.')
@@ -92,6 +122,7 @@ function Booking() {
         contactEmail: values.contactEmail,
         boardingPoint: values.boardingPoint,
         alightingPoint: values.alightingPoint,
+        promoCode: promoState ? promoState.code : undefined,
       })
       sessionStorage.setItem('paymentOrderId', result.orderId)
 
@@ -168,7 +199,17 @@ function Booking() {
               <div>
                 <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: '8px', color: 'var(--accent)' }}>{selectedRoute?.from} → {selectedRoute?.to}</div>
                 <div style={{ fontSize: '1.3rem', marginBottom: '6px' }}>{formatDate(selectedTrip.date)} • {selectedTrip.time}</div>
-                <div style={{ color: 'var(--text2)' }}>Ціна: <strong>{selectedTrip.price} грн</strong></div>
+                <div style={{ color: 'var(--text2)' }}>
+                  Ціна:{' '}
+                  {promoState ? (
+                    <>
+                      <strong style={{ color: '#3DA70F' }}>{displayedPrice} грн</strong>{' '}
+                      <span style={{ textDecoration: 'line-through', opacity: 0.7 }}>{selectedTrip.price} грн</span>
+                    </>
+                  ) : (
+                    <strong>{selectedTrip.price} грн</strong>
+                  )}
+                </div>
               </div>
               <div style={{ textAlign: 'right', minWidth: '170px' }}>
                 <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>Вільних місць</div>
@@ -191,6 +232,54 @@ function Booking() {
                   {selectedRoute?.to}
                 </div>
               </div>
+            </div>
+
+            <div style={{ display: 'grid', gap: '8px' }}>
+              <span style={{ color: 'var(--text2)' }}>Промокод</span>
+              {promoState ? (
+                <div style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px',
+                  padding: '14px 16px', borderRadius: '14px', border: '1px solid #3DA70F', background: 'var(--bg)',
+                }}>
+                  <span>
+                    ✓ Промокод <strong>{promoState.code}</strong> застосовано — знижка {promoState.discountPercent}%
+                  </span>
+                  <button
+                    type="button"
+                    onClick={handleRemovePromo}
+                    style={{ background: 'none', border: 'none', color: 'var(--text2)', textDecoration: 'underline', cursor: 'pointer' }}
+                  >
+                    Прибрати
+                  </button>
+                </div>
+              ) : (
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  <input
+                    value={promoInput}
+                    onChange={e => setPromoInput(e.target.value)}
+                    placeholder="Введіть код"
+                    style={{ ...inputStyle, flex: 1 }}
+                  />
+                  <button
+                    type="button"
+                    onClick={handleApplyPromo}
+                    disabled={!promoInput.trim() || promoChecking}
+                    style={{
+                      padding: '0 22px',
+                      borderRadius: '14px',
+                      border: 'none',
+                      background: !promoInput.trim() || promoChecking ? 'var(--border)' : 'var(--accent)',
+                      color: '#1A1814',
+                      fontWeight: 700,
+                      cursor: !promoInput.trim() || promoChecking ? 'not-allowed' : 'pointer',
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {promoChecking ? 'Перевірка…' : 'Застосувати'}
+                  </button>
+                </div>
+              )}
+              {promoError && <span style={fieldErrorStyle}>{promoError}</span>}
             </div>
 
             <div style={{ display: 'grid', gap: '12px' }}>

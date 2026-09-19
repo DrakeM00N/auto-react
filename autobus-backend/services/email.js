@@ -176,6 +176,13 @@ function buildTicketEmailHtml(ticket) {
   const passenger = ticket?.passengerName || '—'
   const phone = ticket?.passengerPhone || '—'
   const price = ticket?.tripPrice ? `${ticket.tripPrice} грн` : '—'
+  const hasDiscount = ticket?.promoCode && ticket?.originalPrice != null && ticket.originalPrice !== ticket.tripPrice
+  const originalPriceHtml = hasDiscount
+    ? `<div style="font-size:15px;color:#8A7A50;text-decoration:line-through;padding-top:2px;">${ticket.originalPrice} грн</div>`
+    : ''
+  const promoHtml = hasDiscount
+    ? `<div style="font-size:12px;color:#8A7A50;padding-top:2px;">промокод ${ticket.promoCode}</div>`
+    : ''
 
   return `<!doctype html>
 <html lang="uk">
@@ -289,6 +296,8 @@ function buildTicketEmailHtml(ticket) {
                     <td width="60%" valign="middle" align="right">
                       <div style="font-size:11px;text-transform:uppercase;letter-spacing:0.08em;color:#8A7A50;font-weight:700;">Вартість квитка</div>
                       <div style="font-size:32px;font-weight:900;color:#3DA70F;padding-top:6px;">${price}</div>
+                      ${originalPriceHtml}
+                      ${promoHtml}
                       <div style="margin-top:14px;display:inline-block;background:#3DA70F;color:#1A1814;font-size:13px;font-weight:800;padding:10px 22px;border-radius:8px;letter-spacing:0.05em;">✓ ОПЛАЧЕНО</div>
                     </td>
                   </tr>

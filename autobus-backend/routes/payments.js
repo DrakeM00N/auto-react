@@ -10,6 +10,7 @@ const {
   buildWebhookReply,
 } = require('../services/wayforpay')
 const { issueTicket } = require('../services/ticketing')
+const { validatePromo } = require('../services/promo')
 const { logger } = require('../logger')
 
 const router = express.Router()
@@ -38,6 +39,7 @@ router.post('/create',
     body('contactEmail').optional({ nullable: true }).isEmail().withMessage('Contact email is invalid'),
     body('boardingPoint').optional({ nullable: true }).isString(),
     body('alightingPoint').optional({ nullable: true }).isString(),
+    body('promoCode').optional({ nullable: true }).isString(),
   ],
   async (req, res) => {
   try {
@@ -53,6 +55,7 @@ router.post('/create',
     const contactEmail = safe(req.body.contactEmail).toLowerCase()
     const boardingPoint = safe(req.body.boardingPoint)
     const alightingPoint = safe(req.body.alightingPoint)
+    const promoCodeInput = safe(req.body.promoCode)
 
     const tripRes = await db.execute({ sql: 'SELECT * FROM trips WHERE id = ?', args: [tripId] })
     const trip = tripRes.rows[0]
@@ -62,6 +65,19 @@ router.post('/create',
     const occupied = await getOccupiedSeats(tripId)
     if (occupied >= trip.seats) {
       return res.status(400).json({ error: 'Місць немає' })
+    }
+
+    // Ціна, яку бачив користувач на фронтенді, ніколи не приймається як є —
+    // код промокоду перевіряється тут повторно, і саме ця сума йде у WayForPay.
+    let finalPrice = trip.price
+    let appliedPromoCode = null
+    if (promoCodeInput) {
+      const promoResult = await validatePromo(promoCodeInput, trip.price)
+      if (!promoResult.valid) {
+        return res.status(400).json({ error: promoResult.error })
+      }
+      finalPrice = promoResult.discountedPrice
+      appliedPromoCode = promoResult.code
     }
 
     const routeRes = await db.execute({ sql: 'SELECT * FROM routes WHERE id = ?', args: [trip.route_id] })
@@ -75,7 +91,7 @@ router.post('/create',
       .split(',')[0].trim()
 
     const invoice = createInvoice({
-      amountUah: trip.price,
+      amountUah: finalPrice,
       reference: orderId,
       destination,
       redirectUrl: `${frontendUrl}/booking/success?order_id=${encodeURIComponent(orderId)}`,
@@ -87,8 +103,8 @@ router.post('/create',
 
     await db.execute({
       sql: `INSERT INTO pending_bookings
-              (order_id, invoice_id, trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point, contact_email)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+              (order_id, invoice_id, trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point, contact_email, promo_code, original_price, final_price)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         orderId,
         invoice.invoiceId,
@@ -99,6 +115,9 @@ router.post('/create',
         boardingPoint,
         alightingPoint,
         contactEmail || null,
+        appliedPromoCode,
+        trip.price,
+        finalPrice,
       ],
     })
 

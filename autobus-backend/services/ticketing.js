@@ -3,6 +3,7 @@ const { db } = require('../db')
 const { requestInvoiceStatus } = require('./wayforpay')
 const { logger } = require('../logger')
 const { sendTicketEmail } = require('./email')
+const { incrementPromoUsage } = require('./promo')
 
 const log = logger('ticketing')
 
@@ -41,6 +42,7 @@ async function uniqueTicketCode() {
 const TICKET_SQL = `
   SELECT b.id, b.ticket_code, b.trip_id,
          b.passenger_name, b.passenger_phone, b.boarding_point, b.alighting_point, b.created_at, b.status,
+         b.promo_code, b.final_price,
          t.date AS trip_date, t.time AS trip_time, t.arrival_date AS trip_arrival_date, t.arrival_time AS trip_arrival_time, t.price AS trip_price,
          t.departure_point, t.arrival_point,
          r.from_city, r.to_city, r.stops, r.duration
@@ -67,7 +69,9 @@ function mapTicket(row) {
     arrivalDate: row.trip_arrival_date || '',
     arrivalTime: row.trip_arrival_time || '',
     createdAt: row.created_at,
-    tripPrice: row.trip_price,
+    tripPrice: row.final_price != null ? row.final_price : row.trip_price,
+    originalPrice: row.trip_price,
+    promoCode: row.promo_code || null,
     fromCity: row.from_city,
     toCity: row.to_city,
     stops,
@@ -141,8 +145,8 @@ async function issueTicket(orderId, webhookStatus = null) {
 
     const inserted = await tx.execute({
       sql: `INSERT INTO bookings
-              (trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point, ticket_code)
-            VALUES (?, ?, ?, ?, ?, ?, ?)`,
+              (trip_id, user_id, passenger_name, passenger_phone, boarding_point, alighting_point, ticket_code, promo_code, final_price)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       args: [
         pending.trip_id,
         pending.user_id,
@@ -151,6 +155,8 @@ async function issueTicket(orderId, webhookStatus = null) {
         pending.boarding_point,
         pending.alighting_point,
         ticketCode,
+        pending.promo_code,
+        pending.final_price,
       ],
     })
     bookingId = Number(inserted.lastInsertRowid)
@@ -164,6 +170,16 @@ async function issueTicket(orderId, webhookStatus = null) {
   } catch (e) {
     try { await tx.rollback() } catch { /* transaction already finalized */ }
     throw e
+  }
+
+  // Один раз за успішну видачу — гілка "already issued" на початку функції
+  // не дає цьому виконатись повторно для того самого замовлення.
+  if (pending.promo_code) {
+    try {
+      await incrementPromoUsage(pending.promo_code)
+    } catch (e) {
+      log.error('Failed to increment promo usage for order', orderId, '-', e.message)
+    }
   }
 
   const ticket = await loadTicketByBookingId(bookingId)
