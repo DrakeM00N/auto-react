@@ -5,6 +5,7 @@ import puppeteer from 'puppeteer'
 import http from 'node:http'
 import fs from 'node:fs'
 import path from 'node:path'
+import process from 'node:process'
 import { promisify } from 'node:util'
 
 // Реальные публичные маршруты из App.jsx — только то, что имеет смысл
@@ -15,6 +16,7 @@ const ROUTES = [
   '/schedule',
   '/about',
   '/oferta',
+  '/privacy',
 ]
 
 const PORT = process.env.PRERENDER_PORT || 4173
@@ -65,6 +67,15 @@ const listen = promisify(server.listen).bind(server)
 const close = promisify(server.close).bind(server)
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
+function writeSitemap() {
+  const origin = process.env.SITE_URL || 'https://bustour.com.ua'
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
+    `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
+    ROUTES.map(route => `  <url><loc>${origin}${route}</loc></url>`).join('\n') +
+    '\n</urlset>\n'
+  fs.writeFileSync(path.join(DIST_DIR, 'sitemap.xml'), xml, 'utf8')
+}
+
 ;(async () => {
   try {
     await listen(PORT)
@@ -113,7 +124,8 @@ const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
       }
     }
 
-   await browser.close()
+    await browser.close()
+    writeSitemap()
     await close()
     console.log('🎉 Prerendering completed successfully.')
   } catch (err) {

@@ -75,7 +75,7 @@ function Footer() {
                 { to: '/schedule', label: 'Купити квиток' },
                 { to: '/about', label: 'Про нас' },
                 { to: '/oferta', label: 'Публічна оферта' },
-                { to: '/oferta', label: 'Політика конфіденційності' },
+                { to: '/privacy', label: 'Політика конфіденційності' },
               ].map((link, i) => (
                 <Link key={`${link.to}-${i}`} to={link.to} style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem' }}>
                   {link.label}

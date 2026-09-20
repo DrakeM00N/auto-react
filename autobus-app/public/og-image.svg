@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B0F1A"/>
+      <stop offset="1" stop-color="#1C2438"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <circle cx="1010" cy="120" r="220" fill="#E8A020" opacity=".12"/>
+  <rect x="105" y="155" width="990" height="320" rx="38" fill="#131929" stroke="#E8A020" stroke-width="3"/>
+  <text x="165" y="285" fill="#E8A020" font-family="Arial, sans-serif" font-size="76" font-weight="700">BusToRIA</text>
+  <text x="165" y="365" fill="#F0EDE6" font-family="Arial, sans-serif" font-size="42">Автобусні квитки онлайн</text>
+  <text x="165" y="425" fill="#9CA3B0" font-family="Arial, sans-serif" font-size="28">Подорожуйте Україною зручно</text>
+  <path d="M875 360h120l35 35v48H820v-48z" fill="none" stroke="#4ADE80" stroke-width="5"/>
+  <circle cx="865" cy="450" r="19" fill="none" stroke="#4ADE80" stroke-width="5"/>
+  <circle cx="985" cy="450" r="19" fill="none" stroke="#4ADE80" stroke-width="5"/>
+</svg>
