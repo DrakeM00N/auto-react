@@ -2,7 +2,7 @@ export const SITE = {
   name: 'BusToRIA',
   domain: 'https://bustour.com.ua',
   description: 'Автобусні квитки онлайн по Україні: актуальний розклад, зручне бронювання та електронний квиток.',
-  image: '/og-image.svg',
+  image: '/og-image.png',
   phone: '+38 (050) 057-06-56',
   email: 'bustour.ukraine@gmail.com',
   legalName: 'ФОП Єльнікова Лілія Олександрівна',
