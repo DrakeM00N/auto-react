@@ -11,6 +11,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
+    "test": "node --test src/lib/format.test.js",
     "preview": "vite preview",
     "postbuild": "node prerender.js"
   },
