@@ -19,6 +19,12 @@ const ROUTES = [
   '/privacy',
 ]
 
+const FALLBACK_ROUTE_PATHS = [
+  '/routes/kremenchuk-kyiv',
+  '/routes/kremenchuk-kharkiv',
+  '/routes/kremenchuk-lviv',
+]
+
 const PORT = process.env.PRERENDER_PORT || 4173
 const DIST_DIR = path.resolve(process.cwd(), 'dist')
 
@@ -67,6 +73,31 @@ const listen = promisify(server.listen).bind(server)
 const close = promisify(server.close).bind(server)
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms))
 
+async function addRoutePages() {
+  const apiBase = process.env.VITE_API_URL || 'http://localhost:3001/api'
+  try {
+    const response = await fetch(`${apiBase}/routes`)
+    if (!response.ok) throw new Error(`API responded with ${response.status}`)
+    const routes = await response.json()
+    const transliterate = value => String(value || '')
+      .toLowerCase()
+      .replace(/є/g, 'ye').replace(/ж/g, 'zh').replace(/х/g, 'kh').replace(/ц/g, 'ts')
+      .replace(/ч/g, 'ch').replace(/ш/g, 'sh').replace(/щ/g, 'shch').replace(/ю/g, 'yu')
+      .replace(/я/g, 'ya').replace(/і/g, 'i').replace(/ї/g, 'yi').replace(/й/g, 'y')
+      .replace(/г/g, 'h').replace(/ґ/g, 'g').replace(/ь/g, '')
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
+    for (const route of routes) {
+      const pathName = `/routes/${transliterate(route.from)}-${transliterate(route.to)}`
+      if (!ROUTES.includes(pathName)) ROUTES.push(pathName)
+    }
+  } catch (error) {
+    console.warn(`⚠️ Could not load route URLs for prerender: ${error.message}`)
+    FALLBACK_ROUTE_PATHS.forEach(pathName => {
+      if (!ROUTES.includes(pathName)) ROUTES.push(pathName)
+    })
+  }
+}
+
 function writeSitemap() {
   const origin = process.env.SITE_URL || 'https://bustour.com.ua'
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
@@ -78,6 +109,7 @@ function writeSitemap() {
 
 ;(async () => {
   try {
+    await addRoutePages()
     await listen(PORT)
     const address = server.address()
     const port = typeof address === 'string' ? address : address.port

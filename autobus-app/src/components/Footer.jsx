@@ -84,6 +84,21 @@ function Footer() {
             </div>
           </div>
 
+          <div>
+            <div style={{ fontWeight: 700, marginBottom: '14px', fontSize: '0.95rem' }}>Популярні напрямки</div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {[
+                { to: '/routes/kremenchuk-kyiv', label: 'Кременчук — Київ' },
+                { to: '/routes/kremenchuk-kharkiv', label: 'Кременчук — Харків' },
+                { to: '/routes/kremenchuk-lviv', label: 'Кременчук — Львів' },
+              ].map(link => (
+                <Link key={link.to} to={link.to} style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
+                  {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
           {/* Контакти */}
           <div>
             <div style={{ fontWeight: 700, marginBottom: '14px', fontSize: '0.95rem' }}>Контакти</div>
