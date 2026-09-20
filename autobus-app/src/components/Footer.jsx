@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import UkraineMap from './UkraineMap'
+import { SITE } from '../config/site'
 
 function Footer() {
   return (
@@ -104,7 +105,7 @@ function Footer() {
             <div style={{ fontWeight: 700, marginBottom: '14px', fontSize: '0.95rem' }}>Контакти</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               <a href="tel:+380500570656" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                📱 +38 (050) 057-06-56
+                📱 {SITE.phone}
               </a>
               <a href="tel:+380979075738" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 📱 +38 (097) 907-57-38
@@ -112,9 +113,18 @@ function Footer() {
               <a href="tel:+380634859399" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
                 📱 +38 (063) 485-93-99
               </a>
-              <a href="mailto:bustour.ukraine@gmail.com" style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                ✉️ bustour.ukraine@gmail.com
+              <a href={`mailto:${SITE.email}`} style={{ color: 'var(--text2)', textDecoration: 'none', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                ✉️ {SITE.email}
               </a>
+            </div>
+
+            <div>
+              <div style={{ fontWeight: 700, marginBottom: '14px', fontSize: '0.95rem' }}>Реквізити</div>
+              <div style={{ display: 'grid', gap: '7px', color: 'var(--text2)', fontSize: '0.85rem', lineHeight: 1.5 }}>
+                <div>Юр. особа / ФОП: {SITE.legalName} <span title="Перевірте реквізити перед публікацією">TODO</span></div>
+                <div>ЄДРПОУ: {SITE.edrpou} <span title="Перевірте реквізити перед публікацією">TODO</span></div>
+                <div>Адреса: {SITE.address} <span title="Перевірте реквізити перед публікацією">TODO</span></div>
+              </div>
             </div>
           </div>
 
@@ -135,7 +145,7 @@ function Footer() {
         {/* Нижня лінія */}
         <div style={{ borderTop: '1px solid var(--border)', paddingTop: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
           <div style={{ color: 'var(--text2)', fontSize: '0.85rem' }}>
-            © {new Date().getFullYear()} BusToRIA. Всі права захищено.
+            © {new Date().getFullYear()} {SITE.name}. Всі права захищено.
           </div>
           <div style={{ color: 'var(--text2)', fontSize: '0.85rem' }}>
             Зроблено в Україні 🇺🇦

@@ -6,6 +6,7 @@ import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 import RouteTracker from './components/RouteTracker'
 import ServerErrorBanner from './components/ServerErrorBanner'
+import OrganizationSchema from './components/OrganizationSchema'
 
 // Eagerly loaded — these are on the landing-page path or in the nav.
 import Home from './pages/Home'
@@ -39,6 +40,7 @@ function App() {
   return (
     <BrowserRouter>
       <RouteTracker />
+      <OrganizationSchema />
       <Navbar />
       <ServerErrorBanner />
       <main>
