@@ -17,7 +17,7 @@ async function addColumnIfMissing(table, column, type) {
   }
 }
 
-async function initDB() {
+async function initDB({ seed = true } = {}) {
   await db.batch([
     `CREATE TABLE IF NOT EXISTS users (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -166,6 +166,11 @@ async function initDB() {
   await addColumnIfMissing('pending_bookings', 'final_price', 'REAL')
   await addColumnIfMissing('bookings', 'promo_code', 'TEXT')
   await addColumnIfMissing('bookings', 'final_price', 'REAL')
+
+  if (!seed) {
+    log.info('Database schema ready (seed skipped)')
+    return
+  }
 
   // Seed initial data if empty
   const routeCount = await db.execute('SELECT COUNT(*) as cnt FROM routes')

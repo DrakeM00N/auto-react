@@ -1,0 +1,22 @@
+{
+  "from": "Кременчук",
+  "to": "Київ",
+  "schedules": [
+    {
+      "days": ["mon", "wed", "fri"],
+      "departure": "07:00",
+      "seats": 40,
+      "price": 350,
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Кременчук", "address": "Автостанція", "offsetMin": 0 },
+        { "name": "Полтава", "address": "Автовокзал", "offsetMin": 120 },
+        { "name": "Київ", "address": "Центральний автовокзал", "offsetMin": 360 }
+      ],
+      "exceptions": [
+        { "date": "2026-12-25", "action": "cancel" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "from": "Кременчук",
+  "to": "Львів",
+  "schedules": [
+    {
+      "days": ["tue", "thu", "sat"],
+      "departure": "20:30",
+      "seats": 40,
+      "price": 550,
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Кременчук", "address": "Автостанція", "offsetMin": 0 },
+        { "name": "Кропивницький", "address": "Автовокзал", "offsetMin": 180 },
+        { "name": "Львів", "address": "Автовокзал", "offsetMin": 600 }
+      ],
+      "exceptions": []
+    }
+  ]
+}
