@@ -21,6 +21,30 @@ const inputStyle = {
 
 const fieldErrorStyle = { color: '#842029', fontSize: '0.85rem', marginTop: '-4px' }
 
+function StopsTimeline({ stops }) {
+  if (!Array.isArray(stops) || stops.length === 0) return null
+
+  return (
+    <section style={{ padding: '20px 24px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)' }}>
+      <h2 style={{ fontFamily: 'Unbounded', fontSize: '1rem', marginBottom: '16px' }}>Детальний маршрут</h2>
+      <div style={{ display: 'grid', gap: '10px' }}>
+        {stops.map((stop, index) => (
+          <div key={`${stop.city}-${stop.date}-${stop.time}-${index}`} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '16px', padding: '10px 0', borderBottom: index === stops.length - 1 ? 'none' : '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', minWidth: 0 }}>
+              <span aria-hidden="true" style={{ color: 'var(--accent)', fontSize: '0.8rem' }}>{index === 0 ? '●' : index === stops.length - 1 ? '■' : '○'}</span>
+              <span style={{ overflowWrap: 'anywhere' }}>{stop.city}</span>
+            </div>
+            <div style={{ color: 'var(--text2)', textAlign: 'right', whiteSpace: 'nowrap', fontSize: '0.9rem' }}>
+              <div style={{ color: 'var(--text)', fontWeight: 600 }}>{stop.time}</div>
+              <div>{formatDate(stop.date)}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+  )
+}
+
 function Booking() {
   const { trips, routes } = useData()
   const [searchParams] = useSearchParams()
@@ -185,6 +209,7 @@ function Booking() {
             <div style={{ fontSize: '1.3rem', marginBottom: '6px' }}>{formatDate(selectedTrip.date)} • {selectedTrip.time}</div>
             <div style={{ color: 'var(--text2)' }}>Ціна: <strong>{selectedTrip.price} грн</strong></div>
           </article>
+          <StopsTimeline stops={selectedTrip.stopsTimeline} />
           <div role="alert" style={{ padding: '20px', borderRadius: '14px', background: '#FDECEA', border: '1px solid #F5C6CB', color: '#842029', fontWeight: 600 }}>
             ⚠️ Цей рейс уже відправлено. Бронювання неможливе.
           </div>
@@ -217,6 +242,7 @@ function Booking() {
               </div>
             </div>
           </article>
+          <StopsTimeline stops={selectedTrip.stopsTimeline} />
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: 'grid', gap: '18px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
