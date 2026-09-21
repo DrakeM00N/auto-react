@@ -158,6 +158,8 @@ async function initDB({ seed = true } = {}) {
   await addColumnIfMissing('trips', 'arrival_time', 'TEXT')
   await addColumnIfMissing('trips', 'schedule_id', 'INTEGER')
   await addColumnIfMissing('trips', 'stops_timeline', 'TEXT')
+  await db.execute(`CREATE UNIQUE INDEX IF NOT EXISTS idx_trips_schedule_date
+    ON trips(schedule_id, date) WHERE schedule_id IS NOT NULL`)
 
   // Promo codes: pending_bookings tracks what was applied at checkout time,
   // bookings keeps the same for the final record (receipts, admin stats).
