@@ -90,6 +90,7 @@ function mapTripRow(row) {
     carrier: row.carrier || '',
     amenities: safeParseJson(row.amenities, []),
     intermediateStops: safeParseJson(row.intermediate_stops, []),
+    stopsTimeline: safeParseJson(row.stops_timeline, []),
   }
 }
 

@@ -25,6 +25,7 @@ function mapTrip(raw) {
     carrier: raw.carrier || '',
     amenities: Array.isArray(raw.amenities) ? raw.amenities : [],
     intermediateStops: Array.isArray(raw.intermediateStops) ? raw.intermediateStops : [],
+    stopsTimeline: Array.isArray(raw.stopsTimeline) ? raw.stopsTimeline : [],
   }
 }
 
