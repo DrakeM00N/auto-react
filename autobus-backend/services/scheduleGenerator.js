@@ -51,6 +51,49 @@ function parseJson(raw, fallback) {
   }
 }
 
+async function syncGeneratedTrips(schedule, stops) {
+  const existingTrips = await db.execute({
+    sql: 'SELECT id, date FROM trips WHERE schedule_id = ?',
+    args: [schedule.id],
+  })
+  const amenities = parseJson(schedule.amenities, [])
+
+  for (const trip of existingTrips.rows) {
+    const tripDate = new Date(`${trip.date}T00:00:00Z`)
+    const { timeline, arrivalDate, arrivalTime } = calculateTimeline(
+      tripDate,
+      schedule.departure_time,
+      stops,
+    )
+    const intermediateStops = stops.map((stop, index) => ({
+      name: stop.name || stop.city,
+      address: stop.address || '',
+      time: timeline[index].time,
+    }))
+
+    await db.execute({
+      sql: `UPDATE trips
+        SET arrival_date = ?, arrival_time = ?,
+          departure_point = ?, arrival_point = ?, bus_model = ?, carrier = ?,
+          amenities = ?, intermediate_stops = ?, stops_timeline = ?
+        WHERE id = ? AND schedule_id = ?`,
+      args: [
+        arrivalDate,
+        arrivalTime,
+        schedule.departure_point || null,
+        schedule.arrival_point || null,
+        schedule.bus_model || null,
+        schedule.carrier || null,
+        JSON.stringify(amenities),
+        JSON.stringify(intermediateStops),
+        JSON.stringify(timeline),
+        trip.id,
+        schedule.id,
+      ],
+    })
+  }
+}
+
 async function generateUpcomingTrips(daysAhead = 60) {
   if (!Number.isInteger(daysAhead) || daysAhead < 0) {
     throw new Error('daysAhead must be a non-negative integer')
@@ -75,6 +118,7 @@ async function generateUpcomingTrips(daysAhead = 60) {
     const days = parseJson(schedule.days_of_week, [])
     const stops = parseJson(schedule.stops, [])
     if (!Array.isArray(days) || !Array.isArray(stops) || stops.length === 0) continue
+    await syncGeneratedTrips(schedule, stops)
     const latestResult = await db.execute({
       sql: 'SELECT MAX(date) AS latest_date FROM trips WHERE schedule_id = ?',
       args: [schedule.id],
