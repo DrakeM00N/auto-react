@@ -37,6 +37,14 @@ function normalizeDate(value, fieldName) {
   return value
 }
 
+function normalizeActive(value) {
+  if (value === undefined) return 1
+  if (typeof value !== 'boolean') {
+    throw new Error('active must be a boolean when provided')
+  }
+  return value ? 1 : 0
+}
+
 function normalizeStops(schedule, from, to) {
   if (!Array.isArray(schedule.stops) || schedule.stops.length === 0) {
     throw new Error('stops must be a non-empty array')
@@ -84,7 +92,7 @@ async function upsertSchedule(routeId, schedule, from, to) {
   const departureTime = normalizeTime(schedule.departure)
   const seats = Number(schedule.seats)
   const price = Number(schedule.price)
-  const active = schedule.active !== false ? 1 : 0
+  const active = normalizeActive(schedule.active)
   const amenities = Array.isArray(schedule.amenities) ? schedule.amenities : []
   const allowedAmenities = new Set(['Кондиціонер', 'Wi-Fi', 'Туалет', 'Розетки USB', 'Клімат-контроль', 'Місце для багажу'])
   if (amenities.some(amenity => !allowedAmenities.has(amenity))) {
