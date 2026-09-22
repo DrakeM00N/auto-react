@@ -50,7 +50,11 @@ function normalizeStops(schedule, from, to) {
     throw new Error('stops must be a non-empty array')
   }
   const stops = [
-    { name: from, address: '', offsetMin: 0 },
+    {
+      name: from,
+      address: String(schedule.stops[0].address || '').trim(),
+      offsetMin: Number(schedule.stops[0].offsetMin),
+    },
     ...schedule.stops.slice(1, -1).map(stop => ({
       name: String(stop.name || stop.city || '').trim(),
       address: String(stop.address || '').trim(),
