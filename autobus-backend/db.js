@@ -113,6 +113,11 @@ async function initDB({ seed = true } = {}) {
       departure_time TEXT NOT NULL,
       seats INTEGER NOT NULL,
       price REAL NOT NULL,
+      departure_point TEXT,
+      arrival_point TEXT,
+      bus_model TEXT,
+      carrier TEXT,
+      amenities TEXT NOT NULL DEFAULT '[]',
       stops TEXT NOT NULL DEFAULT '[]',
       valid_from TEXT,
       valid_until TEXT,
@@ -158,6 +163,11 @@ async function initDB({ seed = true } = {}) {
   await addColumnIfMissing('trips', 'arrival_time', 'TEXT')
   await addColumnIfMissing('trips', 'schedule_id', 'INTEGER')
   await addColumnIfMissing('trips', 'stops_timeline', 'TEXT')
+  await addColumnIfMissing('route_schedules', 'departure_point', 'TEXT')
+  await addColumnIfMissing('route_schedules', 'arrival_point', 'TEXT')
+  await addColumnIfMissing('route_schedules', 'bus_model', 'TEXT')
+  await addColumnIfMissing('route_schedules', 'carrier', 'TEXT')
+  await addColumnIfMissing('route_schedules', 'amenities', "TEXT DEFAULT '[]'")
   await db.execute(`CREATE UNIQUE INDEX IF NOT EXISTS idx_trips_schedule_date
     ON trips(schedule_id, date) WHERE schedule_id IS NOT NULL`)
 

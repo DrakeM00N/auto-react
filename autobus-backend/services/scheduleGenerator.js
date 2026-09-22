@@ -33,7 +33,7 @@ function calculateTimeline(date, departureTime, stops) {
     const minuteOfDay = totalMinutes % MINUTES_PER_DAY
     const time = `${String(Math.floor(minuteOfDay / 60)).padStart(2, '0')}:${String(minuteOfDay % 60).padStart(2, '0')}`
     return {
-      city: stop.city,
+      city: stop.name || stop.city,
       time,
       date: formatDate(addDays(date, dayOffset)),
     }
@@ -57,7 +57,8 @@ async function generateUpcomingTrips(daysAhead = 60) {
   }
 
   const schedulesResult = await db.execute(`
-    SELECT id, route_id, days_of_week, departure_time, seats, price, stops, valid_from, valid_until
+    SELECT id, route_id, days_of_week, departure_time, seats, price, departure_point,
+      arrival_point, bus_model, carrier, amenities, stops, valid_from, valid_until
     FROM route_schedules
     WHERE active = 1
   `)
@@ -67,16 +68,22 @@ async function generateUpcomingTrips(daysAhead = 60) {
     WHERE action = 'cancel'
   `)
   const cancelled = new Set(exceptionsResult.rows.map(row => `${row.schedule_id}:${row.date}`))
-  const startDate = todayInKyiv()
+  const horizonDate = addDays(todayInKyiv(), daysAhead)
   let created = 0
 
   for (const schedule of schedulesResult.rows) {
     const days = parseJson(schedule.days_of_week, [])
     const stops = parseJson(schedule.stops, [])
     if (!Array.isArray(days) || !Array.isArray(stops) || stops.length === 0) continue
+    const latestResult = await db.execute({
+      sql: 'SELECT MAX(date) AS latest_date FROM trips WHERE schedule_id = ?',
+      args: [schedule.id],
+    })
+    const latestDate = latestResult.rows[0]?.latest_date
+    const startDate = latestDate ? addDays(new Date(`${latestDate}T00:00:00Z`), 1) : todayInKyiv()
+    if (startDate > horizonDate) continue
 
-    for (let offset = 0; offset <= daysAhead; offset += 1) {
-      const date = addDays(startDate, offset)
+    for (let date = startDate; date <= horizonDate; date = addDays(date, 1)) {
       const dateString = formatDate(date)
       const weekday = DAY_NAMES[date.getUTCDay()]
       if (!days.includes(weekday)) continue
@@ -91,10 +98,18 @@ async function generateUpcomingTrips(daysAhead = 60) {
       if (existing.rows.length > 0) continue
 
       const { timeline, arrivalDate, arrivalTime } = calculateTimeline(date, schedule.departure_time, stops)
+      const intermediateStops = stops.map((stop, index) => ({
+        name: stop.name || stop.city,
+        address: stop.address || '',
+        time: timeline[index].time,
+      }))
+      const amenities = parseJson(schedule.amenities, [])
       await db.execute({
         sql: `INSERT INTO trips
-          (route_id, date, time, price, seats, arrival_date, arrival_time, schedule_id, stops_timeline)
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+          (route_id, date, time, price, seats, arrival_date, arrival_time,
+           departure_point, arrival_point, bus_model, carrier, amenities,
+           intermediate_stops, schedule_id, stops_timeline)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         args: [
           schedule.route_id,
           dateString,
@@ -103,6 +118,12 @@ async function generateUpcomingTrips(daysAhead = 60) {
           schedule.seats,
           arrivalDate,
           arrivalTime,
+          schedule.departure_point || null,
+          schedule.arrival_point || null,
+          schedule.bus_model || null,
+          schedule.carrier || null,
+          JSON.stringify(amenities),
+          JSON.stringify(intermediateStops),
           schedule.id,
           JSON.stringify(timeline),
         ],

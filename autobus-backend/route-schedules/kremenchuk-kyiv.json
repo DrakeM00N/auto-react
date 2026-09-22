@@ -7,6 +7,11 @@
       "departure": "07:00",
       "seats": 40,
       "price": 350,
+      "departurePoint": "Кременчук, Автостанція",
+      "arrivalPoint": "Київ, Центральний автовокзал",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
       "validFrom": "2026-10-01",
       "validUntil": null,
       "stops": [

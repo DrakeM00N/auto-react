@@ -42,15 +42,16 @@ function normalizeStops(schedule, from, to) {
     throw new Error('stops must be a non-empty array')
   }
   const stops = [
-    { city: from, offsetMin: 0 },
+    { name: from, address: '', offsetMin: 0 },
     ...schedule.stops.slice(1, -1).map(stop => ({
-      city: String(stop.name || stop.city || '').trim(),
+      name: String(stop.name || stop.city || '').trim(),
+      address: String(stop.address || '').trim(),
       offsetMin: Number(stop.offsetMin),
     })),
-    { city: to, offsetMin: Number(schedule.stops.at(-1).offsetMin) },
+    { name: to, address: String(schedule.stops.at(-1).address || '').trim(), offsetMin: Number(schedule.stops.at(-1).offsetMin) },
   ]
-  if (stops.some(stop => !stop.city || !Number.isInteger(stop.offsetMin) || stop.offsetMin < 0)) {
-    throw new Error('each stop must have a city/name and non-negative integer offsetMin')
+  if (stops.some(stop => !stop.name || !Number.isInteger(stop.offsetMin) || stop.offsetMin < 0)) {
+    throw new Error('each stop must have a name and non-negative integer offsetMin')
   }
   if (stops.at(-1).offsetMin <= 0) {
     throw new Error('the final stop offsetMin must be greater than zero')
@@ -83,6 +84,12 @@ async function upsertSchedule(routeId, schedule, from, to) {
   const departureTime = normalizeTime(schedule.departure)
   const seats = Number(schedule.seats)
   const price = Number(schedule.price)
+  const active = schedule.active !== false ? 1 : 0
+  const amenities = Array.isArray(schedule.amenities) ? schedule.amenities : []
+  const allowedAmenities = new Set(['Кондиціонер', 'Wi-Fi', 'Туалет', 'Розетки USB', 'Клімат-контроль', 'Місце для багажу'])
+  if (amenities.some(amenity => !allowedAmenities.has(amenity))) {
+    throw new Error('amenities contains a value outside AMENITY_CATALOGUE')
+  }
   if (!Number.isInteger(seats) || seats < 1) throw new Error('seats must be a positive integer')
   if (!Number.isFinite(price) || price <= 0) throw new Error('price must be positive')
   const stops = normalizeStops(schedule, from, to)
@@ -99,16 +106,26 @@ async function upsertSchedule(routeId, schedule, from, to) {
     scheduleId = Number(existing.rows[0].id)
     await db.execute({
       sql: `UPDATE route_schedules
-        SET seats = ?, price = ?, stops = ?, valid_from = ?, valid_until = ?, active = 1
+        SET seats = ?, price = ?, departure_point = ?, arrival_point = ?, bus_model = ?,
+          carrier = ?, amenities = ?, stops = ?, valid_from = ?, valid_until = ?, active = ?
         WHERE id = ?`,
-      args: [seats, price, JSON.stringify(stops), validFrom, validUntil, scheduleId],
+      args: [
+        seats, price, schedule.departurePoint || null, schedule.arrivalPoint || null,
+        schedule.busModel || null, schedule.carrier || null, JSON.stringify(amenities),
+        JSON.stringify(stops), validFrom, validUntil, active, scheduleId,
+      ],
     })
   } else {
     const created = await db.execute({
       sql: `INSERT INTO route_schedules
-        (route_id, days_of_week, departure_time, seats, price, stops, valid_from, valid_until)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
-      args: [routeId, daysJson, departureTime, seats, price, JSON.stringify(stops), validFrom, validUntil],
+        (route_id, days_of_week, departure_time, seats, price, departure_point, arrival_point,
+         bus_model, carrier, amenities, stops, valid_from, valid_until, active)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      args: [
+        routeId, daysJson, departureTime, seats, price, schedule.departurePoint || null,
+        schedule.arrivalPoint || null, schedule.busModel || null, schedule.carrier || null,
+        JSON.stringify(amenities), JSON.stringify(stops), validFrom, validUntil, active,
+      ],
     })
     scheduleId = Number(created.lastInsertRowid)
   }

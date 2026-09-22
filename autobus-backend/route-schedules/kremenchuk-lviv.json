@@ -7,6 +7,12 @@
       "departure": "20:30",
       "seats": 40,
       "price": 550,
+      "active": true,
+      "departurePoint": "Кременчук, Автостанція",
+      "arrivalPoint": "Львів, Автовокзал",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Wi-Fi"],
       "validFrom": "2026-10-01",
       "validUntil": null,
       "stops": [

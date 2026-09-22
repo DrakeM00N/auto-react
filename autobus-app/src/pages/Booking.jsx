@@ -209,7 +209,7 @@ function Booking() {
             <div style={{ fontSize: '1.3rem', marginBottom: '6px' }}>{formatDate(selectedTrip.date)} • {selectedTrip.time}</div>
             <div style={{ color: 'var(--text2)' }}>Ціна: <strong>{selectedTrip.price} грн</strong></div>
           </article>
-          <StopsTimeline stops={selectedTrip.stopsTimeline} />
+          <StopsTimeline stops={selectedTrip.intermediateStops} />
           <div role="alert" style={{ padding: '20px', borderRadius: '14px', background: '#FDECEA', border: '1px solid #F5C6CB', color: '#842029', fontWeight: 600 }}>
             ⚠️ Цей рейс уже відправлено. Бронювання неможливе.
           </div>
@@ -242,7 +242,7 @@ function Booking() {
               </div>
             </div>
           </article>
-          <StopsTimeline stops={selectedTrip.stopsTimeline} />
+          <StopsTimeline stops={selectedTrip.intermediateStops} />
 
           <form onSubmit={handleSubmit(onSubmit)} noValidate style={{ display: 'grid', gap: '18px' }}>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
