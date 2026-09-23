@@ -1,0 +1,25 @@
+{
+  "from": "Вінниця",
+  "to": "Львів",
+  "schedules": [
+    {
+      "days": ["mon", "wed", "thu", "fri", "sun"],
+      "departure": "23:50",
+      "seats": 20,
+      "price": 1000,
+      "active": true,
+      "departurePoint": "Вінниця (АЗС \"БРСМ\"), вулиця Хмельницьке шосе, 114-І",
+      "arrivalPoint": "Львів, вулиця Стрийська, 109",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 0 },
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 340 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

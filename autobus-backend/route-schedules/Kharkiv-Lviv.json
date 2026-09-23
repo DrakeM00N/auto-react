@@ -1,0 +1,32 @@
+{
+  "from": "Харків",
+  "to": "Львів",
+  "schedules": [
+    {
+      "days": ["mon", "wed", "thu", "fri", "sun"],
+      "departure": "12:00",
+      "seats": 40,
+      "price": 2800,
+      "active": true,
+      "departurePoint": "Харків, вулиця Євгена Котляра, 15а",
+      "arrivalPoint": "Львів, вулиця Стрийська, 109",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Харків", "address": "вулиця Євгена Котляра, 15а", "offsetMin": 0 },
+        { "name": "Полтава (АЗС \"АТЛ\")", "address": "вулиця Харківське шосе, 2", "offsetMin": 105 },
+        { "name": "Кременчук А/С \"Привокзальна\"", "address": "вулиця Халаменюка, 7", "offsetMin": 225 },
+        { "name": "Кропивницький Автовокзал", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 390 },
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 570 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 705 },
+        { "name": "Хмельницький (АЗС \"WOG\")", "address": "вулиця Вінницька, 2/2", "offsetMin": 840 },
+        { "name": "Тернопіль (АЗС \"ОККО\")", "address": "вулиця Збаразьке кільце, 1", "offsetMin": 900 },
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 1020 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

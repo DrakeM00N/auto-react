@@ -1,0 +1,27 @@
+{
+  "from": "Умань",
+  "to": "Львів",
+  "schedules": [
+    {
+      "days": ["mon", "wed", "thu", "fri", "sun"],
+      "departure": "21:20",
+      "seats": 10,
+      "price": 1000,
+      "active": true,
+      "departurePoint": "Умань, вулиця Київська, 1",
+      "arrivalPoint": "Львів, вулиця Стрийська, 109",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 0 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 155 },
+        { "name": "Хмельницький (АЗС \"WOG\")", "address": "вулиця Вінницька, 2/2", "offsetMin": 280 },
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 480 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

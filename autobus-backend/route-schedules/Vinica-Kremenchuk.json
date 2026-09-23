@@ -1,0 +1,25 @@
+{
+  "from": "Вінниця",
+  "to": "Кременчук",
+  "schedules": [
+    {
+      "days": ["mon", "wed", "fri", "sat", "sun"],
+      "departure": "23:35",
+      "seats": 10,
+      "price": 1550,
+      "active": true,
+      "departurePoint": "Вінниця, Автовокзал \"Центральний\", вул. Київська 8",
+      "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Вінниця Автовокзал \"Центральний\"", "address": "вул. Київська 8", "offsetMin": 0 },
+        { "name": "Кременчук ТЦ \"Амстор\"", "address": "вул. Халаменюка 7", "offsetMin": 415 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

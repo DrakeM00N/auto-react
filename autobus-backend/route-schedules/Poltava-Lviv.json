@@ -3,10 +3,11 @@
   "to": "Львів",
   "schedules": [
     {
-      "days": ["mon", "wed", "thu", "fri", "sat"],
+      "days": ["mon", "wed", "thu", "fri", "sun"],
       "departure": "14:00",
       "seats": 40,
       "price": 2500,
+      "active": true,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Львів, вулиця Стрийська, 109",
       "busModel": "Mercedes-Benz",
@@ -16,17 +17,15 @@
       "validUntil": null,
       "stops": [
         { "name": "Полтава", "address": "вулиця Великотирнівська, 7", "offsetMin": 0 },
-        { "name": "Кременчук", "address": "вулиця Халаменюка, 7", "offsetMin": 105 },
+        { "name": "Кременчук А/С \"Привокзальна\"", "address": "вулиця Халаменюка, 7", "offsetMin": 105 },
         { "name": "Кропивницький Автовокзал", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 270 },
         { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 450 },
-        { "name": "Вінниця", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 585 },
-        { "name": "Хмельницький", "address": "вулиця Вінницька, 2/2", "offsetMin": 690 },
-        { "name": "Тернопіль", "address": "вулиця Збаразьке кільце, 1", "offsetMin": 780 },
-        { "name": "Львів", "address": "Львів, вулиця Стрийська, 109", "offsetMin": 900 }
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 585 },
+        { "name": "Хмельницький (АЗС \"WOG\")", "address": "вулиця Вінницька, 2/2", "offsetMin": 690 },
+        { "name": "Тернопіль (АЗС \"ОККО\")", "address": "вулиця Збаразьке кільце, 1", "offsetMin": 780 },
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 900 }
       ],
-      "exceptions": [
-        { "date": "2026-12-25", "action": "cancel" }
-      ]
+      "exceptions": []
     }
   ]
 }

@@ -1,0 +1,26 @@
+{
+  "from": "Умань",
+  "to": "Харків",
+  "schedules": [
+    {
+      "days": ["mon", "wed", "fri", "sat", "sun"],
+      "departure": "01:45",
+      "seats": 10,
+      "price": 1450,
+      "active": true,
+      "departurePoint": "Умань (АЗС \"WOG\"), а/д Стрий-Знам'янка",
+      "arrivalPoint": "Харків, маг. Чемпіон взуття, вул. Євгена Котляра 11",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Умань (АЗС \"WOG\")", "address": "а/д Стрий-Знам'янка", "offsetMin": 0 },
+        { "name": "Кременчук А/С \"Привокзальна\"", "address": "вулиця Халаменюка, 7", "offsetMin": 285 },
+        { "name": "Харків", "address": "маг. Чемпіон взуття, вул. Євгена Котляра 11", "offsetMin": 540 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

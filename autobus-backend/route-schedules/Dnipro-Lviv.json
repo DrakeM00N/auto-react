@@ -1,0 +1,31 @@
+{
+  "from": "Дніпро",
+  "to": "Львів",
+  "schedules": [
+    {
+      "days": ["mon", "wed", "thu", "fri", "sun"],
+      "departure": "12:45",
+      "seats": 40,
+      "price": 2500,
+      "active": true,
+      "departurePoint": "Дніпро, вулиця 128-ї Бригади Тероборони, 10",
+      "arrivalPoint": "Львів, вулиця Стрийська, 109",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Дніпро", "address": "вулиця 128-ї Бригади Тероборони, 10", "offsetMin": 0 },
+        { "name": "Кременчук А/С \"Привокзальна\"", "address": "вулиця Халаменюка, 7", "offsetMin": 180 },
+        { "name": "Кропивницький Автовокзал", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 345 },
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 525 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 660 },
+        { "name": "Хмельницький (АЗС \"WOG\")", "address": "вулиця Вінницька, 2/2", "offsetMin": 795 },
+        { "name": "Тернопіль (АЗС \"ОККО\")", "address": "вулиця Збаразьке кільце, 1", "offsetMin": 855 },
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 975 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

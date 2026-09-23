@@ -1,0 +1,28 @@
+{
+  "from": "Харків",
+  "to": "Вінниця",
+  "schedules": [
+    {
+      "days": ["mon", "wed", "thu", "fri", "sun"],
+      "departure": "11:55",
+      "seats": 15,
+      "price": 1850,
+      "active": true,
+      "departurePoint": "Харків, вул. Євгенія Котляра 11, маг. Чемпіон взуття",
+      "arrivalPoint": "Вінниця, АЗС ВОГ, Хмельницьке шосе, 114-І",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Харків", "address": "вул. Євгенія Котляра 11, маг. Чемпіон взуття", "offsetMin": 0 },
+        { "name": "Кременчук", "address": "вулиця Халаменюка, 7", "offsetMin": 225 },
+        { "name": "Кропивницький", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 395 },
+        { "name": "Умань", "address": "вулиця Київська, 1", "offsetMin": 575 },
+        { "name": "Вінниця АЗС ВОГ", "address": "Хмельницьке шосе, 114-І", "offsetMin": 710 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

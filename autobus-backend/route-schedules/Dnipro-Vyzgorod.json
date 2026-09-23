@@ -1,0 +1,30 @@
+{
+  "from": "Дніпро",
+  "to": "Ужгород",
+  "schedules": [
+    {
+      "days": ["mon", "wed", "thu", "fri", "sun"],
+      "departure": "13:00",
+      "seats": 10,
+      "price": 3400,
+      "active": true,
+      "departurePoint": "Дніпро, вулиця 128-ї Бригади Тероборони, 10",
+      "arrivalPoint": "Ужгород, Залізничний вокзал, Станційна 9",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Дніпро", "address": "вулиця 128-ї Бригади Тероборони, 10", "offsetMin": 0 },
+        { "name": "Кременчук А/С \"Привокзальна\"", "address": "вулиця Халаменюка, 7", "offsetMin": 165 },
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 510 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 645 },
+        { "name": "Тернопіль (АЗС \"ОККО\")", "address": "вулиця Збаразьке кільце, 1", "offsetMin": 840 },
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 1100 },
+        { "name": "Ужгород Залізничний вокзал", "address": "Станційна 9", "offsetMin": 1320 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

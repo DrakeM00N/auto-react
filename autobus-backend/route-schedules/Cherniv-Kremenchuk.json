@@ -1,0 +1,29 @@
+{
+  "from": "Чернівці",
+  "to": "Кременчук",
+  "schedules": [
+    {
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "departure": "18:00",
+      "seats": 40,
+      "price": 2000,
+      "active": true,
+      "departurePoint": "Чернівці Автовокзал вул. Головна 219",
+      "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Чернівці Автовокзал", "address": "вул. Головна 219", "offsetMin": 0 },
+        { "name": "Кам'янець-Подільський Автовокзал", "address": "вулиця Князів Коріатовичів, 19, Хмельницька область", "offsetMin": 120 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 345 },
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 480 },
+        { "name": "Автовокзал Черкаси 2", "address": "вулиця Володимира Ложешнікова, 7", "offsetMin": 630 },
+        { "name": "Кременчук ТЦ \"Амстор\"", "address": "вул. Халаменюка 7", "offsetMin": 750 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

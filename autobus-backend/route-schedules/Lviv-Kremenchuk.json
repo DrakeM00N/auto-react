@@ -1,0 +1,30 @@
+{
+  "from": "Львів",
+  "to": "Кременчук",
+  "schedules": [
+    {
+      "days": ["mon", "wed", "fri", "sat", "sun"],
+      "departure": "18:00",
+      "seats": 40,
+      "price": 2100,
+      "active": true,
+      "departurePoint": "Львів, вулиця Стрийська, 109",
+      "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 0 },
+        { "name": "Тернопіль (АЗС \"ОККО\")", "address": "вулиця Збаразьке кільце, 1", "offsetMin": 120 },
+        { "name": "Хмельницький (АЗС \"WOG\")", "address": "вулиця Вінницька, 2/2", "offsetMin": 225 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 345 },
+        { "name": "Умань (АЗС \"WOG\")", "address": "вулиця Київська, 1", "offsetMin": 480 },
+        { "name": "Кропивницький Автовокзал", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 630 },
+        { "name": "Кременчук ТЦ \"Амстор\"", "address": "вул. Халаменюка 7", "offsetMin": 750 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

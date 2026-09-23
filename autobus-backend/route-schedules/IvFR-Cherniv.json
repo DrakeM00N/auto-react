@@ -1,0 +1,25 @@
+{
+  "from": "Івано-Франківськ",
+  "to": "Чернівці",
+  "schedules": [
+    {
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "departure": "14:00",
+      "seats": 40,
+      "price": 400,
+      "active": true,
+      "departurePoint": "Івано-Франківськ вул. Горбачевського, 14а",
+      "arrivalPoint": "Чернівці Автовокзал вул. Головна 219",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Івано-Франківськ", "address": "вул. Горбачевського, 14а", "offsetMin": 0 },
+        { "name": "Чернівці Автовокзал", "address": "вул. Головна 219", "offsetMin": 180 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

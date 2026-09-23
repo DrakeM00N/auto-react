@@ -1,0 +1,28 @@
+{
+  "from": "Запоріжжя",
+  "to": "Львів",
+  "schedules": [
+    {
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "departure": "11:20",
+      "seats": 10,
+      "price": 2600,
+      "active": true,
+      "departurePoint": "Запоріжжя, Проспект Соборний, 218а (МакДональдс)",
+      "arrivalPoint": "Львів, вулиця Стрийська, 109",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Запоріжжя", "address": "Проспект Соборний, 218а (МакДональдс)", "offsetMin": 0 },
+        { "name": "Кременчук А/С \"Привокзальна\"", "address": "вулиця Халаменюка, 7", "offsetMin": 265 },
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 610 },
+        { "name": "Тернопіль", "address": "вулиця Збаразьке кільце, 1", "offsetMin": 940 },
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 1080 }
+      ],
+      "exceptions": []
+    }
+  ]
+}
