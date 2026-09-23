@@ -52,9 +52,12 @@ function parseJson(raw, fallback) {
 }
 
 async function syncGeneratedTrips(schedule, stops) {
+  // Only future trips whose departure time still matches the schedule:
+  // past trips stay untouched, and trips the admin moved to another time are skipped.
+  const today = formatDate(todayInKyiv())
   const existingTrips = await db.execute({
-    sql: 'SELECT id, date FROM trips WHERE schedule_id = ?',
-    args: [schedule.id],
+    sql: 'SELECT id, date FROM trips WHERE schedule_id = ? AND date >= ? AND time = ?',
+    args: [schedule.id, today, schedule.departure_time],
   })
   const amenities = parseJson(schedule.amenities, [])
 
@@ -74,7 +77,7 @@ async function syncGeneratedTrips(schedule, stops) {
     await db.execute({
       sql: `UPDATE trips
         SET arrival_date = ?, arrival_time = ?,
-          departure_point = ?, arrival_point = ?, bus_model = ?, carrier = ?,
+          departure_point = ?, arrival_point = ?, carrier = ?,
           amenities = ?, intermediate_stops = ?, stops_timeline = ?
         WHERE id = ? AND schedule_id = ?`,
       args: [
@@ -82,7 +85,6 @@ async function syncGeneratedTrips(schedule, stops) {
         arrivalTime,
         schedule.departure_point || null,
         schedule.arrival_point || null,
-        schedule.bus_model || null,
         schedule.carrier || null,
         JSON.stringify(amenities),
         JSON.stringify(intermediateStops),
