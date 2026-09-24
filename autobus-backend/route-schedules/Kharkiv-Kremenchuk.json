@@ -8,15 +8,15 @@
       "seats": 15,
       "price": 700,
       "active": true,
-      "departurePoint": "Харків, вул. Євгенія Котляра 11, маг. Чемпіон взуття",
+      "departurePoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
       "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
       "busModel": "Mercedes-Benz",
       "carrier": "BusToRIA",
-      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
       "validFrom": "2026-10-01",
       "validUntil": null,
       "stops": [
-        { "name": "Харків", "address": "вул. Євгенія Котляра 11, маг. Чемпіон взуття", "offsetMin": 0 },
+        { "name": "Харків", "address": "вул. Євгена Котляра 11, маг. Чемпіон взуття", "offsetMin": 0 },
         { "name": "Кременчук ТЦ \"Амстор\"", "address": "вул. Халаменюка 7", "offsetMin": 240 }
       ],
       "exceptions": []

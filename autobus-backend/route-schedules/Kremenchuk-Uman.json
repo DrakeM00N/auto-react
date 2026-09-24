@@ -3,7 +3,7 @@
   "to": "Умань",
   "schedules": [
     {
-      "days": ["mon", "wed", "thu", "fri", "sun"],
+      "days": ["mon", "thu", "fri", "sun"],
       "departure": "16:00",
       "seats": 10,
       "price": 700,
@@ -12,7 +12,7 @@
       "arrivalPoint": "Умань, вулиця Київська, 1",
       "busModel": "Mercedes-Benz",
       "carrier": "BusToRIA",
-      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
       "validFrom": "2026-10-01",
       "validUntil": null,
       "stops": [

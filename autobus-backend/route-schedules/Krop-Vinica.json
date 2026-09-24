@@ -3,7 +3,7 @@
   "to": "Вінниця",
   "schedules": [
     {
-      "days": ["mon", "wed", "thu", "fri", "sun"],
+      "days": ["mon", "thu", "fri", "sun"],
       "departure": "18:30",
       "seats": 10,
       "price": 900,
@@ -18,7 +18,7 @@
       "stops": [
         { "name": "Кропивницький", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 0 },
         { "name": "Умань", "address": "вулиця Київська, 1", "offsetMin": 180 },
-        { "name": "Вінниця АЗС \"БРСМ\"", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 320 }
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 320 }
       ],
       "exceptions": []
     }

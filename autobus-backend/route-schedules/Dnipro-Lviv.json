@@ -3,7 +3,7 @@
   "to": "Львів",
   "schedules": [
     {
-      "days": ["mon", "wed", "thu", "fri", "sun"],
+      "days": ["mon", "thu", "fri", "sun"],
       "departure": "12:45",
       "seats": 40,
       "price": 2500,
@@ -12,7 +12,7 @@
       "arrivalPoint": "Львів, вулиця Стрийська, 109",
       "busModel": "Mercedes-Benz",
       "carrier": "BusToRIA",
-      "amenities": ["Кондиціонер", "Розетки USB", "Місце для багажу"],
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
       "validFrom": "2026-10-01",
       "validUntil": null,
       "stops": [

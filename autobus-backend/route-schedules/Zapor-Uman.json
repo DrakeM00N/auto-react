@@ -3,7 +3,7 @@
   "to": "Умань",
   "schedules": [
     {
-      "days": ["mon", "wed", "thu", "fri", "sun"],
+      "days": ["mon", "thu", "fri", "sun"],
       "departure": "11:20",
       "seats": 10,
       "price": 1200,
