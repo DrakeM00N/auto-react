@@ -1,0 +1,27 @@
+{
+  "from": "Хмельницький",
+  "to": "Кременчук",
+  "schedules": [
+    {
+      "days": ["mon", "fri", "sat", "sun"],
+      "departure": "21:45",
+      "seats": 10,
+      "price": 1500,
+      "active": true,
+      "departurePoint": "Хмельницький (АЗС \"WOG\"), вулиця Вінницька, 2/2",
+      "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Хмельницький (АЗС \"WOG\")", "address": "вулиця Вінницька, 2/2", "offsetMin": 0 },
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 255 },
+        { "name": "Кропивницький Автовокзал", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 420 },
+        { "name": "Кременчук ТЦ \"Амстор\"", "address": "вул. Халаменюка 7", "offsetMin": 525 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

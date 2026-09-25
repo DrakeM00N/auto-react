@@ -1,0 +1,27 @@
+{
+  "from": "Львів",
+  "to": "Кропивницький",
+  "schedules": [
+    {
+      "days": ["mon", "fri", "sat", "sun"],
+      "departure": "18:00",
+      "seats": 10,
+      "price": 1700,
+      "active": true,
+      "departurePoint": "Львів, вулиця Стрийська, 109 (автовокзал)",
+      "arrivalPoint": "Кропивницький, вулиця Олександрівське шосе, 1",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Львів", "address": "вулиця Стрийська, 109 (автовокзал)", "offsetMin": 0 },
+        { "name": "Хмельницький (АЗС \"WOG\")", "address": "вулиця Вінницька, 2/2", "offsetMin": 225 },
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 480 },
+        { "name": "Кропивницький Автовокзал", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 645 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

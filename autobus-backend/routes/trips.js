@@ -90,6 +90,7 @@ function mapTripRow(row) {
     carrier: row.carrier || '',
     amenities: safeParseJson(row.amenities, []),
     intermediateStops: safeParseJson(row.intermediate_stops, []),
+    stopsTimeline: safeParseJson(row.stops_timeline, []),
   }
 }
 
@@ -102,6 +103,7 @@ const SELECT_TRIP_WITH_COUNT = `
 // GET /api/trips
 router.get('/', async (req, res) => {
   try {
+    res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=60')
     const tripsRes = await db.execute({
       sql: `${SELECT_TRIP_WITH_COUNT} GROUP BY t.id ORDER BY t.date, t.time`,
     })

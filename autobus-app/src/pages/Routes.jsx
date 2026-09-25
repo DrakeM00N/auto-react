@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useData } from '../context/DataContext'
 import { todayLocalISO } from '../lib/format'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
+import { routePath } from '../lib/routeSlug'
 
 const UKRAINE_CITIES = [
   'Київ', 'Харків', 'Дніпро', 'Одеса', 'Запоріжжя', 'Львів', 'Кривий Ріг',
@@ -159,17 +160,17 @@ function RoutesPage() {
               }}
             >
               <div style={{ minWidth: '240px', flex: '1 1 260px' }}>
-                <div style={{ fontSize: '1.3rem', color: 'var(--accent)', fontWeight: 700, marginBottom: '10px' }}>
+                <Link to={routePath(route)} style={{ display: 'block', fontSize: '1.3rem', color: 'var(--accent)', fontWeight: 700, marginBottom: '10px' }}>
                   {route.from} {route.stops?.length ? `→ ${route.stops.join(' → ')} →` : '→'} {route.to}
-                </div>
+                </Link>
                 <h2 style={{ fontSize: '1.4rem', margin: 0, lineHeight: 1.2 }}>{route.distance}</h2>
                 <p style={{ margin: '12px 0 0', color: 'var(--text2)' }}>Тривалість поїздки: {route.duration}</p>
               </div>
 
               <div style={{ display: 'grid', gap: '12px', alignItems: 'center' }}>
                 <span style={{ color: 'var(--text2)' }}>Маршрут №{route.id}</span>
-                <Link to="/schedule" className="trip-card__cta" style={{ padding: '12px 20px', borderRadius: '12px', fontSize: '1rem' }}>
-                  Переглянути рейси
+                <Link to={routePath(route)} className="trip-card__cta" style={{ padding: '12px 20px', borderRadius: '12px', fontSize: '1rem' }}>
+                  Переглянути маршрут
                   <svg className="trip-card__cta-arrow" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />

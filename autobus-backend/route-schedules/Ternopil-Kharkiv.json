@@ -1,0 +1,28 @@
+{
+  "from": "Тернопіль",
+  "to": "Харків",
+  "schedules": [
+    {
+      "days": ["mon", "fri", "sat", "sun"],
+      "departure": "20:10",
+      "seats": 10,
+      "price": 2400,
+      "active": true,
+      "departurePoint": "Тернопіль, вулиця Збаразьке кільце, 1 (АЗС \"ОККО\")",
+      "arrivalPoint": "Харків, маг. Чемпіон взуття, вулиця Євгена Котляра, 15в",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Тернопіль (АЗС \"ОККО\")", "address": "вулиця Збаразьке кільце, 1", "offsetMin": 0 },
+        { "name": "Умань (АЗС \"WOG\")", "address": "а/д Стрий-Знам'янка", "offsetMin": 350 },
+        { "name": "Кропивницький Автовокзал", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 515 },
+        { "name": "Кременчук", "address": "вулиця Халаменюка, 7", "offsetMin": 620 },
+        { "name": "Харків", "address": "маг. Чемпіон взуття, вулиця Євгена Котляра, 15в", "offsetMin": 890 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

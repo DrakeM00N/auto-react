@@ -1,0 +1,27 @@
+{
+  "from": "Львів",
+  "to": "Олександрія",
+  "schedules": [
+    {
+      "days": ["mon", "fri", "sat", "sun"],
+      "departure": "18:00",
+      "seats": 10,
+      "price": 1800,
+      "active": true,
+      "departurePoint": "Львів, вулиця Стрийська, 109",
+      "arrivalPoint": "Олександрія, Соборний проспект, 5 (магазин МаркетОпт)",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 0 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 340 },
+        { "name": "Кропивницький Автовокзал", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 620 },
+        { "name": "Олександрія", "address": "Соборний проспект, 5 (магазин МаркетОпт)", "offsetMin": 660 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "from": "Кременчук",
+  "to": "Умань",
+  "schedules": [
+    {
+      "days": ["wed", "thu", "fri", "sun"],
+      "departure": "16:00",
+      "seats": 10,
+      "price": 700,
+      "active": true,
+      "departurePoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
+      "arrivalPoint": "Умань, вулиця Київська, 1",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Кременчук ТЦ \"Амстор\"", "address": "вул. Халаменюка 7", "offsetMin": 0 },
+        { "name": "Кропивницький Автовокзал", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 150 },
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 330 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

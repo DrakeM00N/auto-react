@@ -1,0 +1,27 @@
+{
+  "from": "Тернопіль",
+  "to": "Кременчук",
+  "schedules": [
+    {
+      "days": ["mon", "fri", "sat", "sun"],
+      "departure": "20:00",
+      "seats": 10,
+      "price": 1500,
+      "active": true,
+      "departurePoint": "Тернопіль (АЗС \"ОККО\"), Збаразьке кільце, 1",
+      "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Тернопіль (АЗС \"ОККО\")", "address": "вулиця Збаразьке кільце, 1", "offsetMin": 0 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 220 },
+        { "name": "Кропивницький Автовокзал", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 525 },
+        { "name": "Кременчук ТЦ \"Амстор\"", "address": "вул. Халаменюка 7", "offsetMin": 630 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+{
+  "from": "Черкаси",
+  "to": "Чернівці",
+  "schedules": [
+    {
+      "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
+      "departure": "18:50",
+      "seats": 10,
+      "price": 1800,
+      "active": true,
+      "departurePoint": "Черкаси, Автовокзал Черкаси 2, вулиця Володимира Ложешнікова, 7",
+      "arrivalPoint": "Чернівці, Автовокзал, вул. Головна 219",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Розетки USB", "Клімат-контроль", "Місце для багажу"],
+      "validFrom":  "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Черкаси", "address": "Автовокзал Черкаси 2, вулиця Володимира Ложешнікова, 7", "offsetMin": 0 },
+        { "name": "Умань", "address": "вулиця Київська, 1", "offsetMin": 175 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 305 },
+        { "name": "Хмельницький", "address": "вулиця Вінницька, 2/2", "offsetMin": 475 },
+        { "name": "Чернівці", "address": "Автовокзал, вул. Головна 219", "offsetMin": 640 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

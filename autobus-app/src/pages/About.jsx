@@ -1,4 +1,5 @@
 import { useDocumentMeta } from '../lib/useDocumentMeta'
+import { SITE } from '../config/site'
 
 const sectionStyle = {
   padding: '24px',
@@ -61,8 +62,8 @@ function About() {
           <div style={{ display: 'grid', gap: '8px', color: 'var(--text2)', lineHeight: 1.7 }}>
             <div>
               Email:{' '}
-              <a href="mailto:bustour.ukraine@gmail.com" style={{ color: 'var(--accent)' }}>
-                bustour.ukraine@gmail.com
+              <a href={`mailto:${SITE.email}`} style={{ color: 'var(--accent)' }}>
+                {SITE.email}
               </a>
             </div>
             <div>
@@ -77,9 +78,9 @@ function About() {
         <section style={sectionStyle}>
           <h2 style={sectionTitleStyle}>Юридична інформація</h2>
           <div style={{ display: 'grid', gap: '8px', color: 'var(--text2)', lineHeight: 1.7 }}>
-            <div>ФЛП: Єльнікова Лілія Олександрівна</div>
-            <div>ЄДРПОУ: 3548506027</div>
-            <div>Адреса: Україна, Заводське, Полтавська область</div>
+            <div>{SITE.legalName}</div>
+            <div>ЄДРПОУ: {SITE.edrpou}</div>
+            <div>Адреса: {SITE.address}</div>
           </div>
         </section>
 

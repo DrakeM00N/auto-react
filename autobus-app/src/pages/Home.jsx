@@ -1,9 +1,11 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useData } from '../context/DataContext'
-import { formatDate, isDeparted } from '../lib/format'
+import { formatDate } from '../lib/format'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import { useCountUp } from '../lib/useCountUp'
+import { getUpcomingTrips } from '../lib/format'
+import { routePath } from '../lib/routeSlug'
 
 const FAQ_ITEMS = [
   {
@@ -148,7 +150,7 @@ function Home() {
   })
 
   const { routes, trips, loading } = useData()
-  const upcomingTrips = trips.filter(t => !isDeparted(t)).slice(0, 3)
+  const upcomingTrips = getUpcomingTrips(trips).slice(0, 3)
   const citiesCovered = new Set(routes.flatMap(r => [r.from, r.to])).size
 
   return (
@@ -221,7 +223,7 @@ function Home() {
               <div style={{ height: '80px', background: 'var(--bg3)', borderRadius: '12px' }} />
               <div style={{ height: '80px', background: 'var(--bg3)', borderRadius: '12px' }} />
             </>
-          ) : upcomingTrips.map(trip => {
+          ) : upcomingTrips.length ? upcomingTrips.map(trip => {
             const route = routes.find(r => r.id === trip.routeId)
             const freeSeats = trip.seats - (trip.bookedCount || 0)
             return (
@@ -232,7 +234,7 @@ function Home() {
               }}>
                 <div>
                   <div style={{ fontWeight: 600, fontSize: '1.05rem', marginBottom: '4px' }}>
-                    {route?.from} → {route?.to}
+                    <Link to={route ? routePath(route) : '/routes'}>{route?.from} → {route?.to}</Link>
                   </div>
                   <div style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
                     {formatDate(trip.date)} • відправлення о {trip.time}
@@ -253,12 +255,25 @@ function Home() {
                 </div>
               </div>
             )
-          })}
+          }) : (
+            <p style={{ color: 'var(--text2)' }}>Найближчих рейсів поки немає. Перевірте розклад пізніше.</p>
+          )}
         </div>
         <div style={{ textAlign: 'center', marginTop: '32px' }}>
           <Link to="/schedule" style={{ color: 'var(--accent)', fontWeight: 500, borderBottom: '1px solid var(--accent)', paddingBottom: '2px', textDecoration: 'none' }}>
             Переглянути всі рейси →
           </Link>
+        </div>
+      </section>
+
+      <section style={{ padding: '0 2rem 60px', maxWidth: '900px', margin: '0 auto' }}>
+        <h2 style={{ fontFamily: 'Unbounded', fontSize: '1.4rem', marginBottom: '20px' }}>Популярні маршрути</h2>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+          {routes.slice(0, 6).map(route => (
+            <Link key={route.id} to={routePath(route)} style={{ color: 'var(--accent)', border: '1px solid var(--border2)', borderRadius: '999px', padding: '9px 14px' }}>
+              {route.from} — {route.to}
+            </Link>
+          ))}
         </div>
       </section>
 

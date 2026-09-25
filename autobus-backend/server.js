@@ -12,6 +12,7 @@ const cors = require('cors')
 const rateLimit = require('express-rate-limit')
 const { initDB } = require('./db')
 const { logger } = require('./logger')
+const { generateUpcomingTrips } = require('./services/scheduleGenerator')
 
 const log = logger('server')
 
@@ -74,13 +75,22 @@ app.use('/api/payments', require('./routes/payments'))
 app.use('/api/tickets', require('./routes/tickets'))
 app.use('/api/promo', require('./routes/promo'))
 app.use('/api/analytics', require('./routes/analytics'))
+app.use('/api/admin/schedules', require('./routes/schedules'))
 
 // Перевірка що сервер живий
 app.get('/api/health', (req, res) => res.json({ ok: true }))
 
 const PORT = process.env.PORT || 3001
 
-initDB().then(() => {
+initDB().then(async () => {
+  const generated = await generateUpcomingTrips()
+  log.info(`Generated ${generated} upcoming scheduled trips`)
+  setInterval(() => {
+    generateUpcomingTrips()
+      .then(count => log.info(`Generated ${count} upcoming scheduled trips`))
+      .catch(error => log.error('Scheduled trip generation failed:', error.message))
+  }, 24 * 60 * 60 * 1000).unref()
+
   app.listen(PORT, () => {
     log.info(`Server listening on http://localhost:${PORT}`)
     log.info(`API base: http://localhost:${PORT}/api`)

@@ -1,0 +1,28 @@
+{
+  "from": "Кропивницький",
+  "to": "Львів",
+  "schedules": [
+    {
+      "days": ["wed", "thu", "fri", "sun"],
+      "departure": "18:30",
+      "seats": 10,
+      "price": 1700,
+      "active": true,
+      "departurePoint": "Кропивницький, вул. Романа Шухевича 50 (автовокзал)",
+      "arrivalPoint": "Львів, вулиця Стрийська, 109",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Кропивницький Автовокзал", "address": "вул. Романа Шухевича 50", "offsetMin": 0 },
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 180 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 325 },
+        { "name": "Тернопіль", "address": "вулиця Збаразьке кільце, 1", "offsetMin": 510 },
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 660 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

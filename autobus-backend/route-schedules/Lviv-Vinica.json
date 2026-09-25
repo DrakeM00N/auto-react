@@ -1,0 +1,25 @@
+{
+  "from": "Львів",
+  "to": "Вінниця",
+  "schedules": [
+    {
+      "days": ["mon", "fri", "sat", "sun"],
+      "departure": "18:00",
+      "seats": 30,
+      "price": 1000,
+      "active": true,
+      "departurePoint": "Львів, вулиця Стрийська, 109",
+      "arrivalPoint": "Вінниця, Автовокзал \"Центральний\", вул. Київська 8",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 0 },
+        { "name": "Вінниця Автовокзал \"Центральний\"", "address": "вул. Київська 8", "offsetMin": 330 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

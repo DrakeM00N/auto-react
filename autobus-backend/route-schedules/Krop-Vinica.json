@@ -1,0 +1,26 @@
+{
+  "from": "Кропивницький",
+  "to": "Вінниця",
+  "schedules": [
+    {
+      "days": ["wed", "thu", "fri", "sun"],
+      "departure": "18:30",
+      "seats": 10,
+      "price": 900,
+      "active": true,
+      "departurePoint": "Кропивницький, вулиця Олександрівське шосе, 1",
+      "arrivalPoint": "Вінниця, АЗС \"БРСМ\", вулиця Хмельницьке шосе, 114-І",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Кропивницький", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 0 },
+        { "name": "Умань", "address": "вулиця Київська, 1", "offsetMin": 180 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 320 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

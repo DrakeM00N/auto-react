@@ -1,0 +1,29 @@
+{
+  "from": "Кременчук",
+  "to": "Ужгород",
+  "schedules": [
+    {
+      "days": ["wed", "thu", "fri", "sun"],
+      "departure": "16:00",
+      "seats": 10,
+      "price": 2900,
+      "active": true,
+      "departurePoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
+      "arrivalPoint": "Ужгород, Залізничний вокзал, Станційна 9",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Кременчук ТЦ \"Амстор\"", "address": "вул. Халаменюка 7", "offsetMin": 0 },
+        { "name": "Кропивницький Автовокзал", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 150 },
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 330 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 470 },
+        { "name": "Львів", "address": "вулиця Стрийська, 109", "offsetMin": 860 },
+        { "name": "Ужгород Залізничний вокзал", "address": "Станційна 9", "offsetMin": 1560 }
+      ],
+      "exceptions": []
+    }
+  ]
+}
