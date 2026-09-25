@@ -124,9 +124,11 @@ function Footer() {
             <div style={{ fontWeight: 700, marginBottom: '14px', fontSize: '0.95rem' }}>Популярні напрямки</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
               {[
-                { to: '/routes/kremenchuk-kyiv', label: 'Кременчук — Київ' },
+                { to: '/routes/Ternopil-Kremenchuk', label: 'Кременчук — Тернопіль' },
                 { to: '/routes/kremenchuk-kharkiv', label: 'Кременчук — Харків' },
-                { to: '/routes/kremenchuk-lviv', label: 'Кременчук — Львів' },
+                { to: '/routes/Kremenchuk-lviv', label: 'Кременчук — Львів' },
+                { to: '/routes/Lviv-Vinica', label: 'Львів — Вінниця' },
+                { to: '/routes/Zapor-Cherniv', label: 'Запоріжжя — Чернівці' },
               ].map(link => (
                 <Link key={link.to} to={link.to} style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
                   {link.label}
@@ -156,9 +158,9 @@ function Footer() {
             <div>
               <div style={{ fontWeight: 700, marginBottom: '14px', fontSize: '0.95rem' }}>Реквізити</div>
               <div style={{ display: 'grid', gap: '7px', color: 'var(--text2)', fontSize: '0.85rem', lineHeight: 1.5 }}>
-                <div>Юр. особа / ФОП: {SITE.legalName} <span title="Перевірте реквізити перед публікацією">TODO</span></div>
-                <div>ЄДРПОУ: {SITE.edrpou} <span title="Перевірте реквізити перед публікацією">TODO</span></div>
-                <div>Адреса: {SITE.address} <span title="Перевірте реквізити перед публікацією">TODO</span></div>
+                <div>Юр. особа / ФОП: {SITE.legalName}</div>
+                <div>ЄДРПОУ: {SITE.edrpou}</div>
+                <div>Адреса: {SITE.address}</div>
               </div>
             </div>
           </div>
