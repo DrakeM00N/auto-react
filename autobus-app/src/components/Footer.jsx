@@ -3,6 +3,30 @@ import UkraineMap from './UkraineMap'
 import { SITE } from '../config/site'
 
 function Footer() {
+  const socialIconStyle = {
+    width: '38px',
+    height: '38px',
+    borderRadius: '50%',
+    border: '1px solid var(--border)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    color: 'var(--text2)',
+    transition: 'background 0.2s, color 0.2s, border-color 0.2s',
+  }
+
+  const handleSocialEnter = (e) => {
+    e.currentTarget.style.background = 'var(--accent)'
+    e.currentTarget.style.color = '#fff'
+    e.currentTarget.style.borderColor = 'var(--accent)'
+  }
+
+  const handleSocialLeave = (e) => {
+    e.currentTarget.style.background = 'transparent'
+    e.currentTarget.style.color = 'var(--text2)'
+    e.currentTarget.style.borderColor = 'var(--border)'
+  }
+
   return (
     <footer style={{
       position: 'relative',
@@ -35,32 +59,43 @@ function Footer() {
                 target="_blank"
                 rel="noopener noreferrer"
                 aria-label="Instagram"
-                style={{
-                  width: '38px',
-                  height: '38px',
-                  borderRadius: '50%',
-                  border: '1px solid var(--border)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: 'var(--text2)',
-                  transition: 'background 0.2s, color 0.2s, border-color 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'var(--accent)'
-                  e.currentTarget.style.color = '#fff'
-                  e.currentTarget.style.borderColor = 'var(--accent)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent'
-                  e.currentTarget.style.color = 'var(--text2)'
-                  e.currentTarget.style.borderColor = 'var(--border)'
-                }}
+                style={socialIconStyle}
+                onMouseEnter={handleSocialEnter}
+                onMouseLeave={handleSocialLeave}
               >
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <rect x="2" y="2" width="20" height="20" rx="5" stroke="currentColor" strokeWidth="2"/>
                   <circle cx="12" cy="12" r="5" stroke="currentColor" strokeWidth="2"/>
                   <circle cx="17.5" cy="6.5" r="1.2" fill="currentColor"/>
+                </svg>
+              </a>
+
+              <a
+                href="https://www.facebook.com/people/%D0%92%D1%96%D0%BA%D1%82%D0%BE%D1%80-%D0%9B%D0%B8%D0%BC%D0%B0%D0%BD%D0%B5%D1%86%D1%8C/61591237206412/?rdid=IHPhQ8EaKQ6NFt9Q&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1HNvNf9e1C%2F"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Facebook"
+                style={socialIconStyle}
+                onMouseEnter={handleSocialEnter}
+                onMouseLeave={handleSocialLeave}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M15 8.5h2V5.5h-2c-2.2 0-3.5 1.5-3.5 3.5v2H9.5v3H11.5V21h3v-7h2l0.5-3h-2.5V9c0-0.5 0.2-0.5 0.5-0.5Z" fill="currentColor"/>
+                </svg>
+              </a>
+
+              <a
+                href="viber://chat?number=%2B380500570656"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Viber"
+                style={socialIconStyle}
+                onMouseEnter={handleSocialEnter}
+                onMouseLeave={handleSocialLeave}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M12 3C7 3 3.5 6.2 3.5 10.3c0 2.4 1.2 4.5 3.2 5.9-0.1 0.9-0.4 2.3-1.2 3.4 1.4-0.2 2.9-0.9 3.9-1.6 0.8 0.2 1.7 0.3 2.6 0.3 5 0 8.5-3.2 8.5-7.3S17 3 12 3Z" stroke="currentColor" strokeWidth="1.6"/>
+                  <path d="M8.7 9.2c0.3 2.6 2.4 4.6 5 4.9" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round"/>
                 </svg>
               </a>
             </div>
