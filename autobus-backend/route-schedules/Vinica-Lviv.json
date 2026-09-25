@@ -3,7 +3,7 @@
   "to": "Львів",
   "schedules": [
     {
-      "days": ["mon", "thu", "fri", "sun"],
+      "days": ["wed", "thu", "fri", "sun"],
       "departure": "23:50",
       "seats": 20,
       "price": 1000,

@@ -3,7 +3,7 @@
   "to": "Ужгород",
   "schedules": [
     {
-      "days": ["mon", "thu", "fri", "sun"],
+      "days": ["wed", "thu", "fri", "sun"],
       "departure": "12:00",
       "seats": 10,
       "price": 3100,

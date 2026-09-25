@@ -3,7 +3,7 @@
   "to": "Вінниця",
   "schedules": [
     {
-      "days": ["mon", "thu", "fri", "sun"],
+      "days": ["wed", "thu", "fri", "sun"],
       "departure": "11:55",
       "seats": 15,
       "price": 1850,
