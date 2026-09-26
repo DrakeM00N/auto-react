@@ -1,8 +1,25 @@
 import { Link } from 'react-router-dom'
 import UkraineMap from './UkraineMap'
 import { SITE } from '../config/site'
+import { useData } from '../context/DataContext'
+import { routePath } from '../lib/routeSlug'
+
+const POPULAR_DIRECTIONS = [
+  ['Кременчук', 'Тернопіль'],
+  ['Кременчук', 'Харків'],
+  ['Кременчук', 'Львів'],
+  ['Львів', 'Вінниця'],
+  ['Запоріжжя', 'Чернівці'],
+]
 
 function Footer() {
+  const { routes } = useData()
+  const popularRoutes = POPULAR_DIRECTIONS
+    .map(([from, to]) => routes.find(route =>
+      (route.from === from && route.to === to) || (route.from === to && route.to === from),
+    ))
+    .filter(Boolean)
+
   const socialIconStyle = {
     width: '38px',
     height: '38px',
@@ -123,17 +140,15 @@ function Footer() {
           <div>
             <div style={{ fontWeight: 700, marginBottom: '14px', fontSize: '0.95rem' }}>Популярні напрямки</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {[
-                { to: '/routes/Ternopil-Kremenchuk', label: 'Кременчук — Тернопіль' },
-                { to: '/routes/kremenchuk-kharkiv', label: 'Кременчук — Харків' },
-                { to: '/routes/Kremenchuk-lviv', label: 'Кременчук — Львів' },
-                { to: '/routes/Lviv-Vinica', label: 'Львів — Вінниця' },
-                { to: '/routes/Zapor-Cherniv', label: 'Запоріжжя — Чернівці' },
-              ].map(link => (
-                <Link key={link.to} to={link.to} style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
-                  {link.label}
+              {popularRoutes.length ? popularRoutes.map(route => (
+                <Link key={route.id} to={routePath(route)} style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
+                  {route.from} — {route.to}
                 </Link>
-              ))}
+              )) : (
+                <Link to="/routes" style={{ color: 'var(--text2)', fontSize: '0.9rem' }}>
+                  Усі маршрути
+                </Link>
+              )}
             </div>
           </div>
 
