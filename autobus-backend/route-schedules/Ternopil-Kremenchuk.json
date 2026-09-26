@@ -6,7 +6,7 @@
       "days": ["mon", "fri", "sat", "sun"],
       "departure": "20:00",
       "seats": 10,
-      "price": 1500,
+      "price": 1700,
       "active": true,
       "departurePoint": "Тернопіль (АЗС \"ОККО\"), Збаразьке кільце, 1",
       "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
