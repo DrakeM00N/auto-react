@@ -75,7 +75,7 @@ function createInvoice({ amountUah, reference, destination, redirectUrl, webHook
   void redirectUrl
   if (webHookUrl) fields.serviceUrl = webHookUrl
 
-  // Keep parity with the prior monobank shape so callers don't care which gateway is wired.
+  // Keep a stable invoice shape for payment route callers.
   return { invoiceId: reference, pageUrl: HPP_URL, formUrl: HPP_URL, fields }
 }
 

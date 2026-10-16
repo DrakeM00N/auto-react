@@ -13,6 +13,7 @@ const rateLimit = require('express-rate-limit')
 const { initDB } = require('./db')
 const { logger } = require('./logger')
 const { generateUpcomingTrips } = require('./services/scheduleGenerator')
+const webhookBodyParser = require('./middleware/wayforpayWebhookBody')
 
 const log = logger('server')
 
@@ -20,12 +21,15 @@ const app = express()
 
 app.set('trust proxy', 1)
 
+// WayForPay callbacks may arrive as JSON, form data, plain text, or without a
+// Content-Type. Parse this endpoint before CORS and the global body parsers.
+app.use('/api/payments/webhook', ...webhookBodyParser)
+
 // FRONTEND_URL may be a comma-separated list (e.g. localhost + LAN IP for phone testing).
 const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173')
   .split(',').map(o => o.trim()).filter(Boolean)
 app.use(cors({ origin: allowedOrigins, credentials: true }))
-// Raw body is captured in case a future webhook needs signature verification
-// over the exact bytes; WayForPay signs JSON fields, so it doesn't need it.
+// The webhook's raw body was captured by its route-specific parser above.
 app.use(express.json({ verify: (req, res, buf) => { req.rawBody = buf } }))
 // WayForPay form-submits the customer's browser to returnUrl as
 // application/x-www-form-urlencoded — the /api/payments/return bounce needs this.

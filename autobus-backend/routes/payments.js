@@ -139,14 +139,22 @@ router.post('/create',
 router.post('/webhook', async (req, res) => {
   try {
     const payload = req.body || {}
+    const contentType = req.get('content-type') || '(missing)'
+    const safeKeys = Object.keys(payload).filter(key => !/signature|secret|token/i.test(key))
+    log.info(
+      `webhook: content-type=${contentType}, body-type=${typeof req.body}, keys=${JSON.stringify(safeKeys)}`,
+    )
+
     if (!verifyWebhookSignature(payload)) {
       log.warn('webhook: invalid signature for order', payload.orderReference)
       return res.status(400).send('Invalid signature')
     }
 
-    if (payload.orderReference) {
-      log.info(`webhook: order ${payload.orderReference} status ${payload.transactionStatus || 'unknown'} reason ${payload.reasonCode || 'n/a'}`)
-      await issueTicket(payload.orderReference, payload.transactionStatus)
+    log.info(`webhook: order ${payload.orderReference || 'undefined'} status ${payload.transactionStatus || 'unknown'} reason ${payload.reasonCode || 'n/a'}`)
+    const result = await issueTicket(payload.orderReference, payload.transactionStatus)
+    if (result.state === 'not_found') {
+      log.error(`webhook: no pending booking found for order_id ${payload.orderReference || 'undefined'}`)
+      return res.status(404).send('Order not found')
     }
 
     // WayForPay keeps retrying until it receives a properly-signed accept.
