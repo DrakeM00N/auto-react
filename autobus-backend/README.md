@@ -173,6 +173,13 @@ Note: bookings are created only by a confirmed payment (see Payments), not by a 
 #### Tickets
 - `GET /api/tickets/:code` - Public ticket lookup/verification by ticket code
 
+#### Payment recovery scripts
+Run these from `autobus-backend` after configuring the same database and WayForPay environment variables as the server:
+
+- `node scripts/auditPayments.js` - Read-only status audit for pending orders without tickets.
+- `node scripts/recoverOrder.js <order_id> <trip_id> <passenger_name> <passenger_phone> <contact_email> <final_price> [--boarding-point <value>] [--alighting-point <value>] [--dry-run]` - Recover an order; dry-run checks WayForPay without inserting.
+- `node scripts/resendTicketEmail.js <ticket_code|booking_id> [email]` - Resend a ticket email, defaulting to the stored contact email.
+
 #### Health Check
 - `GET /api/health` - Check if the server is running
 
@@ -202,6 +209,8 @@ autobus-backend/
 ├── package.json     # npm dependencies and scripts
 ├── package-lock.json
 ├── server.js        # Entry point for the Express application
+├── middleware/      # Request parsing and authentication middleware
+├── scripts/         # Payment audit and recovery utilities
 ├── routes/          # API route definitions
 │   ├── auth.js
 │   ├── bookings.js
@@ -224,7 +233,7 @@ autobus-backend/
 
 ### Testing
 
-Currently, there are no automated tests. To add testing, consider using a framework like Jest or Mocha.
+Run the backend tests with `npm test`. The webhook tests cover signed callbacks with JSON, URL-encoded, plain-text, and missing content types.
 
 ### Contributing
 

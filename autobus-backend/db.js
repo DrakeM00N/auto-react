@@ -138,7 +138,7 @@ async function initDB({ seed = true } = {}) {
       ON schedule_exceptions(schedule_id, date)`,
   ])
 
-  // Migrations for databases created before the monobank ticketing system.
+  // Migrations for databases created before the WayForPay ticketing system.
   // CREATE TABLE IF NOT EXISTS does not add new columns to existing tables,
   // so we patch them in explicitly. Safe to run on a fresh DB too — the
   // helper is a no-op when the column is already present.
@@ -215,15 +215,24 @@ async function initDB({ seed = true } = {}) {
     }
   }
 
-  // Purge expired/used rows on startup, then every hour. pending_bookings
-  // older than a day without a real booking_id are dead — the user either
-  // never paid or LiqPay never called back. password_resets that are used
-  // or expired serve no purpose.
+  // Purge expired/used rows on startup, then every hour. Keep unissued orders
+  // for 30 days so delayed payment callbacks/status checks can still recover
+  // passenger details. password_resets that are used or expired serve no purpose.
   async function cleanup() {
     try {
+      const expiredPending = await db.execute(
+        `SELECT order_id FROM pending_bookings
+         WHERE booking_id IS NULL AND created_at < datetime('now', '-30 days')`,
+      )
+      if (expiredPending.rows.length) {
+        log.warn(
+          `Cleanup deleting ${expiredPending.rows.length} expired pending bookings:`,
+          expiredPending.rows.map(row => row.order_id),
+        )
+      }
       await db.batch([
         `DELETE FROM password_resets WHERE used = 1 OR expires_at < datetime('now')`,
-        `DELETE FROM pending_bookings WHERE booking_id IS NULL AND created_at < datetime('now', '-1 day')`,
+        `DELETE FROM pending_bookings WHERE booking_id IS NULL AND created_at < datetime('now', '-30 days')`,
       ])
     } catch (e) {
       log.error('Cleanup task failed:', e.message)
