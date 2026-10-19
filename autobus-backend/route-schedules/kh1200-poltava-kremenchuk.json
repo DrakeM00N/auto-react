@@ -1,0 +1,41 @@
+{
+  "from": "Полтава",
+  "to": "Кременчук",
+  "schedules": [
+    {
+      "days": [
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "14:10",
+      "seats": 30,
+      "price": 500,
+      "active": true,
+      "departurePoint": "Полтава, вулиця Великотирнівська, 7",
+      "arrivalPoint": "Кременчук А/С \"Привокзальна\", вулиця Халаменюка, 7",
+      "busModel": "Mercedes",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-10-20",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Полтава",
+          "address": "вулиця Великотирнівська, 7",
+          "offsetMin": 0
+        },
+        {
+          "name": "Кременчук А/С \"Привокзальна\"",
+          "address": "вулиця Халаменюка, 7",
+          "offsetMin": 100
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}
