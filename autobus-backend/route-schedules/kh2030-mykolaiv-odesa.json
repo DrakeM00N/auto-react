@@ -1,0 +1,45 @@
+{
+  "from": "Миколаїв",
+  "to": "Одеса",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "04:00",
+      "seats": 30,
+      "price": 500,
+      "active": true,
+      "departurePoint": "Миколаїв А/С \"Оріон\", Малко-Тирнівська, 96",
+      "arrivalPoint": "Одеса А/С \"Старосінна\", вулиця Старосінна площа, 1А",
+      "busModel": "Mercedes",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-10-20",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Миколаїв А/С \"Оріон\"",
+          "address": "Малко-Тирнівська, 96",
+          "offsetMin": 0
+        },
+        {
+          "name": "Одеса А/С \"Старосінна\"",
+          "address": "вулиця Старосінна площа, 1А",
+          "offsetMin": 180
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}
