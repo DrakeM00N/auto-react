@@ -7,7 +7,7 @@
       "departure": "01:40",
       "seats": 10,
       "price": 700,
-      "active": true,
+      "active": false,
       "departurePoint": "Умань (АЗС \"WOG\"), а/д Стрий-Знам'янка",
       "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
       "busModel": "Mercedes-Benz",

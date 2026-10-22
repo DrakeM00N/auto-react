@@ -7,7 +7,7 @@
       "departure": "23:45",
       "seats": 10,
       "price": 900,
-      "active": true,
+      "active": false,
       "departurePoint": "Вінниця, Автовокзал \"Центральний\", вул. Київська 8",
       "arrivalPoint": "Кропивницький, вулиця Олександрівське шосе, 1",
       "busModel": "Mercedes-Benz",

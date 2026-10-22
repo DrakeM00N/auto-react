@@ -7,7 +7,7 @@
       "departure": "01:45",
       "seats": 10,
       "price": 1450,
-      "active": true,
+      "active": false,
       "departurePoint": "Умань (АЗС \"WOG\"), а/д Стрий-Знам'янка",
       "arrivalPoint": "Харків, маг. Чемпіон взуття, вул. Євгена Котляра 11",
       "busModel": "Mercedes-Benz",
