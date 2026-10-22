@@ -3,17 +3,17 @@
   "to": "Харків",
   "schedules": [
     {
-      "days": ["mon", "fri", "sat", "sun"],
+      "days": ["tue", "fri", "sat", "sun"],
       "departure": "20:10",
       "seats": 10,
       "price": 2400,
-      "active": false,
+      "active": true,
       "departurePoint": "Тернопіль, вулиця Збаразьке кільце, 1 (АЗС \"ОККО\")",
       "arrivalPoint": "Харків, маг. Чемпіон взуття, вулиця Євгена Котляра, 15в",
       "busModel": "Mercedes-Benz",
       "carrier": "BusToRIA",
       "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
-      "validFrom": "2026-10-01",
+      "validFrom": "2026-10-27",
       "validUntil": null,
       "stops": [
         { "name": "Тернопіль (АЗС \"ОККО\")", "address": "вулиця Збаразьке кільце, 1", "offsetMin": 0 },

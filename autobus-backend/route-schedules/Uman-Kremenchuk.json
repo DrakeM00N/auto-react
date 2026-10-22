@@ -3,17 +3,17 @@
   "to": "Кременчук",
   "schedules": [
     {
-      "days": ["mon", "fri", "sat", "sun"],
+      "days": ["mon", "wed", "sat", "sun"],
       "departure": "01:40",
       "seats": 10,
       "price": 700,
-      "active": false,
+      "active": true,
       "departurePoint": "Умань (АЗС \"WOG\"), а/д Стрий-Знам'янка",
       "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
       "busModel": "Mercedes-Benz",
       "carrier": "BusToRIA",
       "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
-      "validFrom": "2026-10-01",
+      "validFrom": "2026-10-26",
       "validUntil": null,
       "stops": [
         { "name": "Умань (АЗС \"WOG\")", "address": "а/д Стрий-Знам'янка", "offsetMin": 0 },
