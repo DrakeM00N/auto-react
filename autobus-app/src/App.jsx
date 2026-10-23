@@ -6,6 +6,7 @@ import Footer from './components/Footer'
 import ProtectedRoute from './components/ProtectedRoute'
 import RouteTracker from './components/RouteTracker'
 import ServerErrorBanner from './components/ServerErrorBanner'
+import OrganizationSchema from './components/OrganizationSchema'
 
 // Eagerly loaded — these are on the landing-page path or in the nav.
 import Home from './pages/Home'
@@ -15,6 +16,8 @@ import Login from './pages/Login'
 import Register from './pages/Register'
 import About from './pages/About'
 import Oferta from './pages/Oferta'
+import Privacy from './pages/Privacy'
+import RouteDetails from './pages/RouteDetails'
 import BookingSuccess from './pages/BookingSuccess'
 
 // Lazy-loaded — visitors who never reach booking, the admin pages, or a
@@ -37,6 +40,7 @@ function App() {
   return (
     <BrowserRouter>
       <RouteTracker />
+      <OrganizationSchema />
       <Navbar />
       <ServerErrorBanner />
       <main>
@@ -44,9 +48,11 @@ function App() {
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/routes" element={<RoutesPage />} />
+            <Route path="/routes/:slug" element={<RouteDetails />} />
             <Route path="/schedule" element={<Schedule />} />
             <Route path="/about" element={<About />} />
             <Route path="/oferta" element={<Oferta />} />
+            <Route path="/privacy" element={<Privacy />} />
             <Route path="/booking" element={<Booking />} />
             <Route path="/booking/success" element={<BookingSuccess />} />
             <Route path="/ticket/:code" element={<Ticket />} />

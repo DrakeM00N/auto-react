@@ -1,0 +1,50 @@
+{
+  "from": "Миколаїв",
+  "to": "Кременчук",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "20:50",
+      "seats": 30,
+      "price": 1100,
+      "active": true,
+      "departurePoint": "Миколаїв А/С \"Оріон\", Малко-Тирнівська, 96",
+      "arrivalPoint": "Кременчук А/С \"Привокзальна\", вулиця Халаменюка, 7",
+      "busModel": "Mercedes",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-10-20",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Миколаїв А/С \"Оріон\"",
+          "address": "Малко-Тирнівська, 96",
+          "offsetMin": 0
+        },
+        {
+          "name": "Кропивницький Автовокзал",
+          "address": "вулиця Олександрівське шосе, 1",
+          "offsetMin": 150
+        },
+        {
+          "name": "Кременчук А/С \"Привокзальна\"",
+          "address": "вулиця Халаменюка, 7",
+          "offsetMin": 280
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

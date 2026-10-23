@@ -1,0 +1,45 @@
+{
+  "from": "Кременчук",
+  "to": "Кропивницький",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "08:40",
+      "seats": 30,
+      "price": 500,
+      "active": true,
+      "departurePoint": "Кременчук А/С \"Привокзальна\", вулиця Халаменюка, 7",
+      "arrivalPoint": "Кропивницький Автовокзал, вулиця Олександрівське шосе, 1",
+      "busModel": "Mercedes",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-10-20",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Кременчук А/С \"Привокзальна\"",
+          "address": "вулиця Халаменюка, 7",
+          "offsetMin": 0
+        },
+        {
+          "name": "Кропивницький Автовокзал",
+          "address": "вулиця Олександрівське шосе, 1",
+          "offsetMin": 125
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

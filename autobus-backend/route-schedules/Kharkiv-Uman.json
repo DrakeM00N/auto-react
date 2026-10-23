@@ -1,0 +1,27 @@
+{
+  "from": "Харків",
+  "to": "Умань",
+  "schedules": [
+    {
+      "days": ["wed", "thu", "fri", "sun"],
+      "departure": "12:00",
+      "seats": 10,
+      "price": 1500,
+      "active": true,
+      "departurePoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
+      "arrivalPoint": "Умань, автовокзал, вул. Київська",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Розетки USB", "Клімат-контроль", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Харків", "address": "вул. Євгена Котляра 11, маг. Чемпіон взуття", "offsetMin": 0 },
+        { "name": "Кременчук", "address": "вулиця Халаменюка, 7", "offsetMin": 220 },
+        { "name": "Кропивницький", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 390 },
+        { "name": "Умань", "address": "автовокзал, вул. Київська", "offsetMin": 570 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

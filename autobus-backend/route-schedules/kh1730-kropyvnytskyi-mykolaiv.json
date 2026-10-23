@@ -1,0 +1,45 @@
+{
+  "from": "Кропивницький",
+  "to": "Миколаїв",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "00:30",
+      "seats": 30,
+      "price": 700,
+      "active": true,
+      "departurePoint": "Кропивницький Автовокзал, вулиця Олександрівське шосе, 1",
+      "arrivalPoint": "Миколаїв А/С \"Оріон\", Малко-Тирнівська, 96",
+      "busModel": "Mercedes",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-10-20",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Кропивницький Автовокзал",
+          "address": "вулиця Олександрівське шосе, 1",
+          "offsetMin": 0
+        },
+        {
+          "name": "Миколаїв А/С \"Оріон\"",
+          "address": "Малко-Тирнівська, 96",
+          "offsetMin": 170
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

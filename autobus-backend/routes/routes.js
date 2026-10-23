@@ -37,6 +37,7 @@ function parseRoute(row) {
 // GET /api/routes
 router.get('/', async (req, res) => {
   try {
+    res.set('Cache-Control', 'public, max-age=300, stale-while-revalidate=60')
     const result = await db.execute('SELECT * FROM routes ORDER BY id')
     res.json(result.rows.map(parseRoute))
   } catch (e) {

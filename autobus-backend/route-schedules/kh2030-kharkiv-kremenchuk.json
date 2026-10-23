@@ -1,0 +1,50 @@
+{
+  "from": "Харків",
+  "to": "Кременчук",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "20:30",
+      "seats": 30,
+      "price": 900,
+      "active": true,
+      "departurePoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
+      "arrivalPoint": "Кременчук А/С \"Привокзальна\", вулиця Халаменюка, 7",
+      "busModel": "Mercedes",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-10-20",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Харків",
+          "address": "вул. Євгена Котляра 11, маг. Чемпіон взуття",
+          "offsetMin": 0
+        },
+        {
+          "name": "Полтава",
+          "address": "вулиця Великотирнівська, 7",
+          "offsetMin": 110
+        },
+        {
+          "name": "Кременчук А/С \"Привокзальна\"",
+          "address": "вулиця Халаменюка, 7",
+          "offsetMin": 200
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

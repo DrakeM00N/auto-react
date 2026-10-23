@@ -106,6 +106,36 @@ async function initDB({ seed = true } = {}) {
       expires_at TEXT,
       created_at TEXT DEFAULT (datetime('now'))
     )`,
+    `CREATE TABLE IF NOT EXISTS route_schedules (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      route_id INTEGER NOT NULL,
+      days_of_week TEXT NOT NULL,
+      departure_time TEXT NOT NULL,
+      seats INTEGER NOT NULL,
+      price REAL NOT NULL,
+      departure_point TEXT,
+      arrival_point TEXT,
+      bus_model TEXT,
+      carrier TEXT,
+      amenities TEXT NOT NULL DEFAULT '[]',
+      stops TEXT NOT NULL DEFAULT '[]',
+      valid_from TEXT,
+      valid_until TEXT,
+      active INTEGER NOT NULL DEFAULT 1,
+      created_at TEXT DEFAULT (datetime('now')),
+      FOREIGN KEY (route_id) REFERENCES routes(id) ON DELETE CASCADE
+    )`,
+    `CREATE TABLE IF NOT EXISTS schedule_exceptions (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      schedule_id INTEGER NOT NULL,
+      date TEXT NOT NULL,
+      action TEXT NOT NULL,
+      FOREIGN KEY (schedule_id) REFERENCES route_schedules(id) ON DELETE CASCADE
+    )`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_route_schedules_identity
+      ON route_schedules(route_id, departure_time, days_of_week)`,
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_schedule_exceptions_identity
+      ON schedule_exceptions(schedule_id, date)`,
   ])
 
   // Migrations for databases created before the WayForPay ticketing system.
@@ -131,6 +161,15 @@ async function initDB({ seed = true } = {}) {
   await addColumnIfMissing('trips', 'intermediate_stops', "TEXT DEFAULT '[]'")
   await addColumnIfMissing('trips', 'arrival_date', 'TEXT')
   await addColumnIfMissing('trips', 'arrival_time', 'TEXT')
+  await addColumnIfMissing('trips', 'schedule_id', 'INTEGER')
+  await addColumnIfMissing('trips', 'stops_timeline', 'TEXT')
+  await addColumnIfMissing('route_schedules', 'departure_point', 'TEXT')
+  await addColumnIfMissing('route_schedules', 'arrival_point', 'TEXT')
+  await addColumnIfMissing('route_schedules', 'bus_model', 'TEXT')
+  await addColumnIfMissing('route_schedules', 'carrier', 'TEXT')
+  await addColumnIfMissing('route_schedules', 'amenities', "TEXT DEFAULT '[]'")
+  await db.execute(`CREATE UNIQUE INDEX IF NOT EXISTS idx_trips_schedule_date
+    ON trips(schedule_id, date) WHERE schedule_id IS NOT NULL`)
 
   // Promo codes: pending_bookings tracks what was applied at checkout time,
   // bookings keeps the same for the final record (receipts, admin stats).

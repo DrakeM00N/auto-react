@@ -1,0 +1,27 @@
+{
+  "from": "Кременчук",
+  "to": "Вінниця",
+  "schedules": [
+    {
+      "days": ["wed", "thu", "fri", "sun"],
+      "departure": "16:00",
+      "seats": 10,
+      "price": 1300,
+      "active": true,
+      "departurePoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
+      "arrivalPoint": "Вінниця (АЗС \"БРСМ\"), вулиця Хмельницьке шосе, 114-І",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Кременчук ТЦ \"Амстор\"", "address": "вул. Халаменюка 7", "offsetMin": 0 },
+        { "name": "Кропивницький", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 150 },
+        { "name": "Умань", "address": "вулиця Київська, 1", "offsetMin": 330 },
+        { "name": "Вінниця (АЗС \"БРСМ\")", "address": "вулиця Хмельницьке шосе, 114-І", "offsetMin": 475 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

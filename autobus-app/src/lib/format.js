@@ -27,14 +27,14 @@ export function formatDate(iso) {
 
 // Components of "now" as seen in Kyiv. Intl handles DST automatically — no
 // manual ±2/±3 offsets — so this works year-round for any caller TZ.
-function nowInKyivParts() {
+function nowInKyivParts(now = new Date()) {
   const fmt = new Intl.DateTimeFormat('en-GB', {
     timeZone: KYIV_TZ,
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit',
     hourCycle: 'h23',
   })
-  const parts = Object.fromEntries(fmt.formatToParts(new Date()).map(p => [p.type, p.value]))
+  const parts = Object.fromEntries(fmt.formatToParts(now).map(p => [p.type, p.value]))
   return {
     year: parts.year,
     month: parts.month,
@@ -49,12 +49,22 @@ function nowInKyivParts() {
 // instant. Comparison is done on the canonical 'YYYYMMDDHHmm' string so we
 // never construct a Date in the caller's local TZ.
 export function isDeparted(trip) {
+  return isDepartedAt(trip, new Date())
+}
+
+export function isDepartedAt(trip, now) {
   if (!trip || typeof trip.date !== 'string' || typeof trip.time !== 'string') return false
   const dateM = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trip.date)
   const timeM = /^(\d{2}):(\d{2})$/.exec(trip.time)
   if (!dateM || !timeM) return false
   const tripKey = `${dateM[1]}${dateM[2]}${dateM[3]}${timeM[1]}${timeM[2]}`
-  const n = nowInKyivParts()
+  const n = nowInKyivParts(now)
   const nowKey = `${n.year}${n.month}${n.day}${n.hour}${n.minute}`
   return nowKey >= tripKey
+}
+
+export function getUpcomingTrips(trips, now = new Date()) {
+  return (Array.isArray(trips) ? trips : [])
+    .filter(trip => !isDepartedAt(trip, now))
+    .sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`))
 }

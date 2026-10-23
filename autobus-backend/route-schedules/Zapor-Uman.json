@@ -1,0 +1,26 @@
+{
+  "from": "Запоріжжя",
+  "to": "Умань",
+  "schedules": [
+    {
+      "days": ["wed", "thu", "fri", "sun"],
+      "departure": "11:20",
+      "seats": 10,
+      "price": 1200,
+      "active": true,
+      "departurePoint": "Запоріжжя, Проспект Соборний, 218а (МакДональдс)",
+      "arrivalPoint": "Умань, Автовокзал, вулиця Київська, 1",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Розетки USB", "Клімат-контроль", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Запоріжжя", "address": "Проспект Соборний, 218а (МакДональдс)", "offsetMin": 0 },
+        { "name": "Кременчук А/С \"Привокзальна\"", "address": "вулиця Халаменюка, 7", "offsetMin": 265 },
+        { "name": "Умань Автовокзал", "address": "вулиця Київська, 1", "offsetMin": 610 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

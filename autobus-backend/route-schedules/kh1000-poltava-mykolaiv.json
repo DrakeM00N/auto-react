@@ -1,0 +1,55 @@
+{
+  "from": "Полтава",
+  "to": "Миколаїв",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "11:55",
+      "seats": 30,
+      "price": 1200,
+      "active": true,
+      "departurePoint": "Полтава, вулиця Великотирнівська, 7",
+      "arrivalPoint": "Миколаїв А/С \"Оріон\", Малко-Тирнівська, 96",
+      "busModel": "Mercedes",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-10-20",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Полтава",
+          "address": "вулиця Великотирнівська, 7",
+          "offsetMin": 0
+        },
+        {
+          "name": "Кременчук А/С \"Привокзальна\"",
+          "address": "вулиця Халаменюка, 7",
+          "offsetMin": 95
+        },
+        {
+          "name": "Кропивницький Автовокзал",
+          "address": "вулиця Олександрівське шосе, 1",
+          "offsetMin": 225
+        },
+        {
+          "name": "Миколаїв А/С \"Оріон\"",
+          "address": "Малко-Тирнівська, 96",
+          "offsetMin": 365
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

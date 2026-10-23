@@ -1,0 +1,27 @@
+{
+  "from": "Кропивницький",
+  "to": "Харків",
+  "schedules": [
+    {
+      "days": ["mon", "fri", "sat", "sun"],
+      "departure": "04:30",
+      "seats": 20,
+      "price": 1200,
+      "active": true,
+      "departurePoint": "Кропивницький, вулиця Олександрівське шосе, 1",
+      "arrivalPoint": "Харків, вулиця Євгена Котляра, 15в",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": ["Клімат-контроль", "Розетки USB", "Місце для багажу"],
+      "validFrom": "2026-10-01",
+      "validUntil": null,
+      "stops": [
+        { "name": "Кропивницький", "address": "вулиця Олександрівське шосе, 1", "offsetMin": 0 },
+        { "name": "Кременчук А/С \"Привокзальна\"", "address": "вулиця Халаменюка, 7", "offsetMin": 120 },
+        { "name": "Полтава (АЗС \"АТЛ\")", "address": "вулиця Харківське шосе, 2", "offsetMin": 270 },
+        { "name": "Харків", "address": "вулиця Євгена Котляра, 15в", "offsetMin": 390 }
+      ],
+      "exceptions": []
+    }
+  ]
+}

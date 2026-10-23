@@ -1,0 +1,45 @@
+{
+  "from": "Полтава",
+  "to": "Харків",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "14:30",
+      "seats": 30,
+      "price": 500,
+      "active": true,
+      "departurePoint": "Полтава, вулиця Великотирнівська, 7",
+      "arrivalPoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
+      "busModel": "Mercedes",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-10-20",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Полтава",
+          "address": "вулиця Великотирнівська, 7",
+          "offsetMin": 0
+        },
+        {
+          "name": "Харків",
+          "address": "вул. Євгена Котляра 11, маг. Чемпіон взуття",
+          "offsetMin": 120
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

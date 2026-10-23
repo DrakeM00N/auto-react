@@ -1,0 +1,50 @@
+{
+  "from": "Кропивницький",
+  "to": "Полтава",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "23:20",
+      "seats": 30,
+      "price": 900,
+      "active": true,
+      "departurePoint": "Кропивницький Автовокзал, вулиця Олександрівське шосе, 1",
+      "arrivalPoint": "Полтава, вулиця Великотирнівська, 7",
+      "busModel": "Mercedes",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-10-20",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Кропивницький Автовокзал",
+          "address": "вулиця Олександрівське шосе, 1",
+          "offsetMin": 0
+        },
+        {
+          "name": "Кременчук А/С \"Привокзальна\"",
+          "address": "вулиця Халаменюка, 7",
+          "offsetMin": 130
+        },
+        {
+          "name": "Полтава",
+          "address": "вулиця Великотирнівська, 7",
+          "offsetMin": 220
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}
