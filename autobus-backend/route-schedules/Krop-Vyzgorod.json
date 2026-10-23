@@ -7,7 +7,7 @@
       "departure": "18:30",
       "seats": 20,
       "price": 2300,
-      "active": true,
+      "active": false,
       "departurePoint": "Кропивницький, вул. Романа Шухевича",
       "arrivalPoint": "Ужгород, Залізничний вокзал, Станційна 9",
       "busModel": "Mercedes-Benz",

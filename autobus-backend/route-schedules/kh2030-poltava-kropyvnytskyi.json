@@ -15,7 +15,7 @@
       "departure": "22:20",
       "seats": 30,
       "price": 900,
-      "active": true,
+      "active": false,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Кропивницький Автовокзал, вулиця Олександрівське шосе, 1",
       "busModel": "Mercedes",

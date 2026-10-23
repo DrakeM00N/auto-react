@@ -15,7 +15,7 @@
       "departure": "23:20",
       "seats": 30,
       "price": 500,
-      "active": true,
+      "active": false,
       "departurePoint": "Кропивницький Автовокзал, вулиця Олександрівське шосе, 1",
       "arrivalPoint": "Кременчук А/С \"Привокзальна\", вулиця Халаменюка, 7",
       "busModel": "Mercedes",

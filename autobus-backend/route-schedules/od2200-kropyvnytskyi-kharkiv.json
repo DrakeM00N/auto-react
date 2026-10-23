@@ -15,7 +15,7 @@
       "departure": "02:30",
       "seats": 30,
       "price": 1100,
-      "active": true,
+      "active": false,
       "departurePoint": "Кропивницький Автовокзал, вулиця Олександрівське шосе, 1",
       "arrivalPoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
       "busModel": "Mercedes",

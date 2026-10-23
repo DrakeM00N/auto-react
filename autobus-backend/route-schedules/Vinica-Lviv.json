@@ -7,7 +7,7 @@
       "departure": "23:50",
       "seats": 20,
       "price": 1000,
-      "active": true,
+      "active": false,
       "departurePoint": "Вінниця (АЗС \"БРСМ\"), вулиця Хмельницьке шосе, 114-І",
       "arrivalPoint": "Львів, вулиця Стрийська, 109",
       "busModel": "Mercedes-Benz",

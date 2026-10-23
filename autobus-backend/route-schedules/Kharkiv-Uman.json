@@ -7,7 +7,7 @@
       "departure": "12:00",
       "seats": 10,
       "price": 1500,
-      "active": true,
+      "active": false,
       "departurePoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
       "arrivalPoint": "Умань, автовокзал, вул. Київська",
       "busModel": "Mercedes-Benz",

@@ -7,7 +7,7 @@
       "departure": "12:00",
       "seats": 40,
       "price": 2800,
-      "active": true,
+      "active": false,
       "departurePoint": "Харків, вулиця Євгена Котляра, 15а",
       "arrivalPoint": "Львів, вулиця Стрийська, 109",
       "busModel": "Mercedes-Benz",

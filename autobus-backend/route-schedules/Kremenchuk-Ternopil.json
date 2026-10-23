@@ -7,7 +7,7 @@
       "departure": "16:00",
       "seats": 10,
       "price": 1700,
-      "active": true,
+      "active": false,
       "departurePoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
       "arrivalPoint": "Тернопіль (АЗС \"ОККО\"), Збаразьке кільце, 1",
       "busModel": "Mercedes-Benz",
