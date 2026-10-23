@@ -69,9 +69,15 @@ export const bookingSchema = z.object({
   passengerFirstName: nonEmpty('Введіть імʼя'),
   passengerLastName: nonEmpty('Введіть прізвище'),
   passengerPhone: phoneField,
+  contactEmail: z.string().optional(),
   boardingPoint: nonEmpty('Оберіть зупинку посадки'),
   alightingPoint: nonEmpty('Оберіть зупинку висадки'),
 })
+
+export const bookingSchemaForUser = (isAuthenticated) =>
+  bookingSchema.extend({
+    contactEmail: isAuthenticated ? z.string().trim().optional() : emailField,
+  })
 
 // ---------- admin: route ----------
 

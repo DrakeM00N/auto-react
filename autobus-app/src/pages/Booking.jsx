@@ -3,11 +3,12 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useData } from '../context/DataContext'
+import { useAuth } from '../context/AuthContext'
 import { track } from '../lib/analytics'
 import { apiRequest } from '../lib/api'
 import { formatDate, isDeparted } from '../lib/format'
 import Button from '../components/Button'
-import { bookingSchema } from '../lib/schemas'
+import { bookingSchemaForUser } from '../lib/schemas'
 
 const inputStyle = {
   width: '100%',
@@ -23,6 +24,7 @@ const fieldErrorStyle = { color: '#842029', fontSize: '0.85rem', marginTop: '-4p
 
 function Booking() {
   const { trips, routes } = useData()
+  const { currentUser } = useAuth()
   const [searchParams] = useSearchParams()
   const tripId = Number(searchParams.get('tripId'))
   const [serverError, setServerError] = useState(null)
@@ -36,6 +38,10 @@ function Booking() {
   const [promoState, setPromoState] = useState(null) // { code, discountPercent, originalPrice, discountedPrice } | null
   const [promoError, setPromoError] = useState(null)
   const [promoChecking, setPromoChecking] = useState(false)
+  const resolver = useMemo(
+    () => zodResolver(bookingSchemaForUser(Boolean(currentUser))),
+    [currentUser],
+  )
 
   const {
     register,
@@ -43,7 +49,7 @@ function Booking() {
     setValue,
     formState: { errors, isSubmitting },
   } = useForm({
-    resolver: zodResolver(bookingSchema),
+    resolver,
     defaultValues: {
       passengerFirstName: '',
       passengerLastName: '',
@@ -301,8 +307,15 @@ function Booking() {
                 {errors.passengerPhone && <span style={fieldErrorStyle}>{errors.passengerPhone.message}</span>}
               </label>
               <label style={{ display: 'grid', gap: '8px', color: 'var(--text2)' }}>
-                Email для квитка
-                <input {...register('contactEmail')} type="email" placeholder="name@example.com" style={inputStyle} />
+                Email для квитка{currentUser ? '' : ' *'}
+                <input
+                  {...register('contactEmail')}
+                  type="email"
+                  placeholder="name@example.com"
+                  required={!currentUser}
+                  style={inputStyle}
+                />
+                {errors.contactEmail && <span style={fieldErrorStyle}>{errors.contactEmail.message}</span>}
               </label>
             </div>
 
