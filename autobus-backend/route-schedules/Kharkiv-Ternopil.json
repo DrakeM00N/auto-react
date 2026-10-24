@@ -7,7 +7,7 @@
       "departure": "12:00",
       "seats": 10,
       "price": 2400,
-      "active": true,
+      "active": false,
       "departurePoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
       "arrivalPoint": "Тернопіль (АЗС \"ОККО\"), вул. Збаразьке кільце, 1",
       "busModel": "Mercedes-Benz",

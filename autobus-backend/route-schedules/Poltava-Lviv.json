@@ -7,7 +7,7 @@
       "departure": "14:00",
       "seats": 40,
       "price": 2500,
-      "active": true,
+      "active": false,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Львів, вулиця Стрийська, 109",
       "busModel": "Mercedes-Benz",

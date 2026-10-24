@@ -15,7 +15,7 @@
       "departure": "00:30",
       "seats": 30,
       "price": 700,
-      "active": true,
+      "active": false,
       "departurePoint": "Кропивницький Автовокзал, вулиця Олександрівське шосе, 1",
       "arrivalPoint": "Миколаїв А/С \"Оріон\", Малко-Тирнівська, 96",
       "busModel": "Mercedes",

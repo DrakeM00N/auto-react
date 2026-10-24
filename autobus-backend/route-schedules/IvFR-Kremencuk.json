@@ -7,7 +7,7 @@
       "departure": "14:00",
       "seats": 40,
       "price": 2300,
-      "active": true,
+      "active": false,
       "departurePoint": "Івано-Франківськ, вулиця Горбачевського, 14а",
       "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
       "busModel": "Mercedes-Benz",

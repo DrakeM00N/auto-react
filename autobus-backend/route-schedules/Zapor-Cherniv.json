@@ -7,7 +7,7 @@
       "departure": "11:00",
       "seats": 20,
       "price": 2600,
-      "active": true,
+      "active": false,
       "departurePoint": "Запоріжжя, Запорізька вулиця, 1Б",
       "arrivalPoint": "Чернівці Автовокзал вул. Головна 219",
       "busModel": "Mercedes-Benz",

@@ -15,7 +15,7 @@
       "departure": "00:30",
       "seats": 30,
       "price": 900,
-      "active": true,
+      "active": false,
       "departurePoint": "Кропивницький Автовокзал, вулиця Олександрівське шосе, 1",
       "arrivalPoint": "Одеса А/С \"Старосінна\", вулиця Старосінна площа, 1А",
       "busModel": "Mercedes",

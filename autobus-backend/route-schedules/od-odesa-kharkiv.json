@@ -15,7 +15,7 @@
       "departure": "06:00",
       "seats": 30,
       "price": 1900,
-      "active": true,
+      "active": false,
       "departurePoint": "Одеса А/С \"Старосінна\", вулиця Старосінна площа, 1А",
       "arrivalPoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
       "busModel": "Mercedes",

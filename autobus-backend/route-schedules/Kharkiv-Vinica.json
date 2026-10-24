@@ -7,7 +7,7 @@
       "departure": "11:55",
       "seats": 15,
       "price": 1850,
-      "active": true,
+      "active": false,
       "departurePoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
       "arrivalPoint": "Вінниця, АЗС ВОГ, Хмельницьке шосе, 114-І",
       "busModel": "Mercedes-Benz",

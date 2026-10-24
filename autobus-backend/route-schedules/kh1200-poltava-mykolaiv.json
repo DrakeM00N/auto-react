@@ -11,7 +11,7 @@
       "departure": "14:10",
       "seats": 30,
       "price": 1200,
-      "active": true,
+      "active": false,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Миколаїв А/С \"Оріон\", Малко-Тирнівська, 96",
       "busModel": "Mercedes",

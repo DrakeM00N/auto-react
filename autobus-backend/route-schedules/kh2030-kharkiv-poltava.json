@@ -15,7 +15,7 @@
       "departure": "20:30",
       "seats": 30,
       "price": 500,
-      "active": true,
+      "active": false,
       "departurePoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
       "arrivalPoint": "Полтава, вулиця Великотирнівська, 7",
       "busModel": "Mercedes",

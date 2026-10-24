@@ -7,7 +7,7 @@
       "departure": "16:00",
       "seats": 10,
       "price": 1300,
-      "active": true,
+      "active": false,
       "departurePoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
       "arrivalPoint": "Вінниця (АЗС \"БРСМ\"), вулиця Хмельницьке шосе, 114-І",
       "busModel": "Mercedes-Benz",

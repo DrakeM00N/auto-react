@@ -7,7 +7,7 @@
       "departure": "11:20",
       "seats": 10,
       "price": 1200,
-      "active": true,
+      "active": false,
       "departurePoint": "Запоріжжя, Проспект Соборний, 218а (МакДональдс)",
       "arrivalPoint": "Умань, Автовокзал, вулиця Київська, 1",
       "busModel": "Mercedes-Benz",

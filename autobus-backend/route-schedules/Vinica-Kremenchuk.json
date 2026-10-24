@@ -7,7 +7,7 @@
       "departure": "23:35",
       "seats": 10,
       "price": 1550,
-      "active": true,
+      "active": false,
       "departurePoint": "Вінниця, Автовокзал \"Центральний\", вул. Київська 8",
       "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
       "busModel": "Mercedes-Benz",

@@ -11,7 +11,7 @@
       "departure": "14:10",
       "seats": 30,
       "price": 500,
-      "active": true,
+      "active": false,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Кременчук А/С \"Привокзальна\", вулиця Халаменюка, 7",
       "busModel": "Mercedes",

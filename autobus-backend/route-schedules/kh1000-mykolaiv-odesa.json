@@ -15,7 +15,7 @@
       "departure": "18:00",
       "seats": 30,
       "price": 500,
-      "active": true,
+      "active": false,
       "departurePoint": "Миколаїв А/С \"Оріон\", Малко-Тирнівська, 96",
       "arrivalPoint": "Одеса А/С \"Старосінна\", вулиця Старосінна площа, 1А",
       "busModel": "Mercedes",

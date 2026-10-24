@@ -7,7 +7,7 @@
       "departure": "18:00",
       "seats": 40,
       "price": 2000,
-      "active": true,
+      "active": false,
       "departurePoint": "Чернівці Автовокзал вул. Головна 219",
       "arrivalPoint": "Кременчук ТЦ \"Амстор\" вул. Халаменюка 7",
       "busModel": "Mercedes-Benz",

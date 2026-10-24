@@ -7,7 +7,7 @@
       "departure": "13:00",
       "seats": 20,
       "price": 2200,
-      "active": true,
+      "active": false,
       "departurePoint": "Дніпро, вулиця 128-ї Бригади Тероборони, 10",
       "arrivalPoint": "Чернівці Автовокзал вул. Головна 219",
       "busModel": "Mercedes-Benz",

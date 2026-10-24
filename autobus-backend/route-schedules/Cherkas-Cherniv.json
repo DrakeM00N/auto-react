@@ -7,7 +7,7 @@
       "departure": "18:50",
       "seats": 10,
       "price": 1800,
-      "active": true,
+      "active": false,
       "departurePoint": "Черкаси, Автовокзал Черкаси 2, вулиця Володимира Ложешнікова, 7",
       "arrivalPoint": "Чернівці, Автовокзал, вул. Головна 219",
       "busModel": "Mercedes-Benz",

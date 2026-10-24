@@ -11,7 +11,7 @@
       "departure": "15:50",
       "seats": 30,
       "price": 1300,
-      "active": true,
+      "active": false,
       "departurePoint": "Кременчук А/С \"Привокзальна\", вулиця Халаменюка, 7",
       "arrivalPoint": "Одеса А/С \"Старосінна\", вулиця Старосінна площа, 1А",
       "busModel": "Mercedes",

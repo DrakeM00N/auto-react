@@ -15,7 +15,7 @@
       "departure": "01:30",
       "seats": 30,
       "price": 900,
-      "active": true,
+      "active": false,
       "departurePoint": "Кременчук А/С \"Привокзальна\", вулиця Халаменюка, 7",
       "arrivalPoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
       "busModel": "Mercedes",

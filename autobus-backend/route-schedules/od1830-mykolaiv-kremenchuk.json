@@ -15,7 +15,7 @@
       "departure": "20:50",
       "seats": 30,
       "price": 1100,
-      "active": true,
+      "active": false,
       "departurePoint": "Миколаїв А/С \"Оріон\", Малко-Тирнівська, 96",
       "arrivalPoint": "Кременчук А/С \"Привокзальна\", вулиця Халаменюка, 7",
       "busModel": "Mercedes",

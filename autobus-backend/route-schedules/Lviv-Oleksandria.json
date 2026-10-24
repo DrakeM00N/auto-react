@@ -7,7 +7,7 @@
       "departure": "18:00",
       "seats": 10,
       "price": 1800,
-      "active": true,
+      "active": false,
       "departurePoint": "Львів, вулиця Стрийська, 109",
       "arrivalPoint": "Олександрія, Соборний проспект, 5 (магазин МаркетОпт)",
       "busModel": "Mercedes-Benz",
