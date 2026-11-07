@@ -13,9 +13,9 @@
         "sun"
       ],
       "departure": "05:30",
-      "seats": 30,
+      "seats": 20,
       "price": 1500,
-      "active": false,
+      "active": true,
       "departurePoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
       "arrivalPoint": "Миколаїв А/С \"Оріон\", Малко-Тирнівська, 96",
       "busModel": "Mercedes",
@@ -25,7 +25,7 @@
         "Розетки USB",
         "Місце для багажу"
       ],
-      "validFrom": "2026-10-20",
+      "validFrom": "2026-11-09",
       "validUntil": null,
       "stops": [
         {

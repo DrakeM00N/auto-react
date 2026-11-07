@@ -1,0 +1,55 @@
+{
+  "from": "Харків",
+  "to": "Черкаси",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "12:00",
+      "seats": 20,
+      "price": 1500,
+      "active": true,
+      "departurePoint": "Харків, вул. Євгена Котляра 11, маг. Чемпіон взуття",
+      "arrivalPoint": "Черкаси, вулиця Володимира Ложешнікова, 7",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Харків",
+          "address": "вул. Євгена Котляра 11, маг. Чемпіон взуття",
+          "offsetMin": 0
+        },
+        {
+          "name": "Полтава (АЗС \"АТЛ\")",
+          "address": "вулиця Харківське шосе, 2",
+          "offsetMin": 105
+        },
+        {
+          "name": "Кременчук А/С \"Привокзальна\"",
+          "address": "вулиця Халаменюка, 7",
+          "offsetMin": 220
+        },
+        {
+          "name": "Автовокзал Черкаси 2",
+          "address": "вулиця Володимира Ложешнікова, 7",
+          "offsetMin": 405
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "from": "Умань",
+  "to": "Дніпро",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "02:00",
+      "seats": 20,
+      "price": 1600,
+      "active": true,
+      "departurePoint": "Умань, вулиця Київська, 1",
+      "arrivalPoint": "Дніпро, вулиця 128-ї Бригади Тероборони, 10",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Умань Автовокзал",
+          "address": "вулиця Київська, 1",
+          "offsetMin": 0
+        },
+        {
+          "name": "Автовокзал Черкаси 2",
+          "address": "вулиця Володимира Ложешнікова, 7",
+          "offsetMin": 150
+        },
+        {
+          "name": "Кременчук",
+          "address": "вул. Халаменюка 7",
+          "offsetMin": 270
+        },
+        {
+          "name": "Дніпро",
+          "address": "вулиця 128-ї Бригади Тероборони, 10",
+          "offsetMin": 450
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

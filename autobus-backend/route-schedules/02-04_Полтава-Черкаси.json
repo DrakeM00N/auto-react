@@ -1,0 +1,50 @@
+{
+  "from": "Полтава",
+  "to": "Черкаси",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "14:00",
+      "seats": 20,
+      "price": 1100,
+      "active": true,
+      "departurePoint": "Полтава, вулиця Харківське шосе, 2",
+      "arrivalPoint": "Черкаси, вулиця Володимира Ложешнікова, 7",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Полтава (АЗС \"АТЛ\")",
+          "address": "вулиця Харківське шосе, 2",
+          "offsetMin": 0
+        },
+        {
+          "name": "Кременчук А/С \"Привокзальна\"",
+          "address": "вулиця Халаменюка, 7",
+          "offsetMin": 115
+        },
+        {
+          "name": "Автовокзал Черкаси 2",
+          "address": "вулиця Володимира Ложешнікова, 7",
+          "offsetMin": 300
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

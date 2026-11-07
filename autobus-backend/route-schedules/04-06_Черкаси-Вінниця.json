@@ -1,0 +1,50 @@
+{
+  "from": "Черкаси",
+  "to": "Вінниця",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "18:30",
+      "seats": 20,
+      "price": 1300,
+      "active": true,
+      "departurePoint": "Черкаси, вулиця Володимира Ложешнікова, 7",
+      "arrivalPoint": "Вінниця, вулиця Хмельницьке шосе, 114-І",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Автовокзал Черкаси 2",
+          "address": "вулиця Володимира Ложешнікова, 7",
+          "offsetMin": 0
+        },
+        {
+          "name": "Умань Автовокзал",
+          "address": "вулиця Київська, 1",
+          "offsetMin": 165
+        },
+        {
+          "name": "Вінниця",
+          "address": "вулиця Хмельницьке шосе, 114-І",
+          "offsetMin": 300
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

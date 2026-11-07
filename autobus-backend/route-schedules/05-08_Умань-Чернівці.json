@@ -1,0 +1,55 @@
+{
+  "from": "Умань",
+  "to": "Чернівці",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "21:30",
+      "seats": 20,
+      "price": 1500,
+      "active": true,
+      "departurePoint": "Умань, вулиця Київська, 1",
+      "arrivalPoint": "Чернівці, вулиця Головна 219",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Умань Автовокзал",
+          "address": "вулиця Київська, 1",
+          "offsetMin": 0
+        },
+        {
+          "name": "Вінниця",
+          "address": "вулиця Хмельницьке шосе, 114-І",
+          "offsetMin": 135
+        },
+        {
+          "name": "Кам'янець-Подільський Автовокзал",
+          "address": "вулиця Князів Коріатовичів, 19, Хмельницька область",
+          "offsetMin": 330
+        },
+        {
+          "name": "Чернівці Автовокзал",
+          "address": "вулиця Головна 219",
+          "offsetMin": 450
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

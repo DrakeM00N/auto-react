@@ -1,0 +1,50 @@
+{
+  "from": "Вінниця",
+  "to": "Чернівці",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "23:45",
+      "seats": 20,
+      "price": 1100,
+      "active": true,
+      "departurePoint": "Вінниця, вулиця Хмельницьке шосе, 114-І",
+      "arrivalPoint": "Чернівці, вулиця Головна 219",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Вінниця",
+          "address": "вулиця Хмельницьке шосе, 114-І",
+          "offsetMin": 0
+        },
+        {
+          "name": "Кам'янець-Подільський Автовокзал",
+          "address": "вулиця Князів Коріатовичів, 19, Хмельницька область",
+          "offsetMin": 195
+        },
+        {
+          "name": "Чернівці Автовокзал",
+          "address": "вулиця Головна 219",
+          "offsetMin": 315
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

@@ -1,0 +1,60 @@
+{
+  "from": "Вінниця",
+  "to": "Полтава",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "23:45",
+      "seats": 20,
+      "price": 2100,
+      "active": true,
+      "departurePoint": "Вінниця, вулиця Хмельницьке шосе, 114-І",
+      "arrivalPoint": "Полтава, вулиця Великотирнівська, 7",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Вінниця",
+          "address": "вулиця Хмельницьке шосе, 114-І",
+          "offsetMin": 0
+        },
+        {
+          "name": "Умань Автовокзал",
+          "address": "вулиця Київська, 1",
+          "offsetMin": 135
+        },
+        {
+          "name": "Автовокзал Черкаси 2",
+          "address": "вулиця Володимира Ложешнікова, 7",
+          "offsetMin": 285
+        },
+        {
+          "name": "Кременчук",
+          "address": "вул. Халаменюка 7",
+          "offsetMin": 405
+        },
+        {
+          "name": "Полтава",
+          "address": "вулиця Великотирнівська, 7",
+          "offsetMin": 575
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

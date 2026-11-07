@@ -1,0 +1,59 @@
+{
+  "from": "Тернопіль",
+  "to": "Кропивницький",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "20:00",
+      "seats": 20,
+      "price": 1500,
+      "active": true,
+      "departurePoint": "Тернопіль, вулиця Збаразьке кільце, 1",
+      "arrivalPoint": "Кропивницький, вулиця Олександрівське шосе, 1",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Тернопіль (АЗС \"ОККО\")",
+          "address": "вулиця Збаразьке кільце, 1",
+          "offsetMin": 0
+        },
+        {
+          "name": "Хмельницький (АЗС \"WOG\")",
+          "address": "вулиця Вінницька, 2/2",
+          "offsetMin": 105
+        },
+        {
+          "name": "Вінниця",
+          "address": "вулиця Хмельницьке шосе, 114-І",
+          "offsetMin": 225
+        },
+        {
+          "name": "Умань Автовокзал",
+          "address": "вулиця Київська, 1",
+          "offsetMin": 360
+        },
+        {
+          "name": "Кропивницький Автовокзал",
+          "address": "вулиця Олександрівське шосе, 1",
+          "offsetMin": 510
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

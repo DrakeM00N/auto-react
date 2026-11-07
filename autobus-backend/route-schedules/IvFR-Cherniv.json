@@ -5,9 +5,9 @@
     {
       "days": ["mon", "tue", "wed", "thu", "fri", "sat", "sun"],
       "departure": "14:00",
-      "seats": 40,
+      "seats": 20,
       "price": 400,
-      "active": false,
+      "active": true,
       "departurePoint": "Івано-Франківськ вул. Горбачевського, 14а",
       "arrivalPoint": "Чернівці Автовокзал вул. Головна 219",
       "busModel": "Mercedes-Benz",

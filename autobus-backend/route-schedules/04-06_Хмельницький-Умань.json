@@ -1,0 +1,49 @@
+{
+  "from": "Хмельницький",
+  "to": "Умань",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "21:45",
+      "seats": 20,
+      "price": 900,
+      "active": true,
+      "departurePoint": "Хмельницький, вулиця Вінницька, 2/2",
+      "arrivalPoint": "Умань, вулиця Київська, 1",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Хмельницький (АЗС \"WOG\")",
+          "address": "вулиця Вінницька, 2/2",
+          "offsetMin": 0
+        },
+        {
+          "name": "Вінниця",
+          "address": "вулиця Хмельницьке шосе, 114-І",
+          "offsetMin": 120
+        },
+        {
+          "name": "Умань Автовокзал",
+          "address": "вулиця Київська, 1",
+          "offsetMin": 255
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

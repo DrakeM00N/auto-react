@@ -1,0 +1,50 @@
+{
+  "from": "Кременчук",
+  "to": "Умань",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "16:00",
+      "seats": 20,
+      "price": 1300,
+      "active": true,
+      "departurePoint": "Кременчук, вулиця Халаменюка, 7",
+      "arrivalPoint": "Умань, вулиця Київська, 1",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Кременчук А/С \"Привокзальна\"",
+          "address": "вулиця Халаменюка, 7",
+          "offsetMin": 0
+        },
+        {
+          "name": "Автовокзал Черкаси 2",
+          "address": "вулиця Володимира Ложешнікова, 7",
+          "offsetMin": 170
+        },
+        {
+          "name": "Умань Автовокзал",
+          "address": "вулиця Київська, 1",
+          "offsetMin": 335
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

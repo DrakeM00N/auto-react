@@ -1,0 +1,63 @@
+{
+  "from": "Умань",
+  "to": "Ужгород",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "wed",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "21:30",
+      "seats": 20,
+      "price": 1800,
+      "active": true,
+      "departurePoint": "Умань, вулиця Київська, 1",
+      "arrivalPoint": "Ужгород, Залізничний вокзал, Станційна 9",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Умань Автовокзал",
+          "address": "вулиця Київська, 1",
+          "offsetMin": 0
+        },
+        {
+          "name": "Вінниця",
+          "address": "вулиця Хмельницьке шосе, 114-І",
+          "offsetMin": 140
+        },
+        {
+          "name": "Хмельницький (АЗС \"WOG\")",
+          "address": "вулиця Вінницька, 2/2",
+          "offsetMin": 240
+        },
+        {
+          "name": "Тернопіль (АЗС \"ОККО\")",
+          "address": "вулиця Збаразьке кільце, 1",
+          "offsetMin": 330
+        },
+        {
+          "name": "Львів",
+          "address": "вулиця Стрийська, 109",
+          "offsetMin": 530
+        },
+        {
+          "name": "Ужгород Залізничний вокзал",
+          "address": "Станційна 9",
+          "offsetMin": 810
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}

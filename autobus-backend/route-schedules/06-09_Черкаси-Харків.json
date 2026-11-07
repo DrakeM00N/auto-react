@@ -1,0 +1,55 @@
+{
+  "from": "Черкаси",
+  "to": "Харків",
+  "schedules": [
+    {
+      "days": [
+        "mon",
+        "tue",
+        "wed",
+        "thu",
+        "fri",
+        "sat",
+        "sun"
+      ],
+      "departure": "04:30",
+      "seats": 20,
+      "price": 1500,
+      "active": true,
+      "departurePoint": "Черкаси, вулиця Володимира Ложешнікова, 7",
+      "arrivalPoint": "Харків, вулиця Євгена Котляра, 15а",
+      "busModel": "Mercedes-Benz",
+      "carrier": "BusToRIA",
+      "amenities": [
+        "Клімат-контроль",
+        "Розетки USB",
+        "Місце для багажу"
+      ],
+      "validFrom": "2026-11-09",
+      "validUntil": null,
+      "stops": [
+        {
+          "name": "Автовокзал Черкаси 2",
+          "address": "вулиця Володимира Ложешнікова, 7",
+          "offsetMin": 0
+        },
+        {
+          "name": "Кременчук",
+          "address": "вул. Халаменюка 7",
+          "offsetMin": 120
+        },
+        {
+          "name": "Полтава",
+          "address": "вулиця Великотирнівська, 7",
+          "offsetMin": 290
+        },
+        {
+          "name": "Харків",
+          "address": "вулиця Євгена Котляра, 15а",
+          "offsetMin": 390
+        }
+      ],
+      "exceptions": []
+    }
+  ]
+}
