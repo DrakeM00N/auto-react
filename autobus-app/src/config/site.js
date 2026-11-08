@@ -1,6 +1,8 @@
+const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://bustour.com.ua').replace(/\/$/, '')
+
 export const SITE = {
   name: 'BusToRIA',
-  domain: 'https://bustour.com.ua',
+  domain: SITE_URL,
   description: 'Автобусні квитки онлайн по Україні: актуальний розклад, зручне бронювання та електронний квиток.',
   image: '/og-image.png',
   phone: '+38 (050) 057-06-56',
