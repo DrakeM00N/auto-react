@@ -7,6 +7,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { promisify } from 'node:util'
+import { routePath } from './src/lib/routeSlug.js'
 
 // Реальные публичные маршруты из App.jsx — только то, что имеет смысл
 // индексировать (без авторизации, без динамических :id/:code параметров)
@@ -79,15 +80,8 @@ async function addRoutePages() {
     const response = await fetch(`${apiBase}/routes`)
     if (!response.ok) throw new Error(`API responded with ${response.status}`)
     const routes = await response.json()
-    const transliterate = value => String(value || '')
-      .toLowerCase()
-      .replace(/є/g, 'ye').replace(/ж/g, 'zh').replace(/х/g, 'kh').replace(/ц/g, 'ts')
-      .replace(/ч/g, 'ch').replace(/ш/g, 'sh').replace(/щ/g, 'shch').replace(/ю/g, 'yu')
-      .replace(/я/g, 'ya').replace(/і/g, 'i').replace(/ї/g, 'yi').replace(/й/g, 'y')
-      .replace(/г/g, 'h').replace(/ґ/g, 'g').replace(/ь/g, '')
-      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '')
     for (const route of routes) {
-      const pathName = `/routes/${transliterate(route.from)}-${transliterate(route.to)}`
+      const pathName = routePath(route)
       if (!ROUTES.includes(pathName)) ROUTES.push(pathName)
     }
   } catch (error) {
