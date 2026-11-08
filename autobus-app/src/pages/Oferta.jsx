@@ -1,6 +1,8 @@
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import { SITE } from '../config/site'
 
+const SITE_HOST = new URL(SITE.domain).hostname
+
 const sectionStyle = {
   padding: '24px',
   borderRadius: '18px',
@@ -39,8 +41,8 @@ function Oferta() {
             викладених нижче.
           </p>
           <p style={paragraphStyle}>
-            Акцептом цієї оферти вважається оплата замовлення на сайті
-            bustour.com.ua. З моменту акцепту договір вважається укладеним.
+          Акцептом цієї оферти вважається оплата замовлення на сайті
+           {' '}{SITE_HOST}. З моменту акцепту договір вважається укладеним.
           </p>
         </section>
 
@@ -103,10 +105,10 @@ function Oferta() {
           <h2 style={sectionTitleStyle}>6. Контакти Виконавця</h2>
           <div style={{ display: 'grid', gap: '8px', color: 'var(--text2)', lineHeight: 1.7 }}>
             <div>
-              Сайт:{' '}
-              <a href="https://bustour.com.ua" style={{ color: 'var(--accent)' }}>
-                bustour.com.ua
-              </a>
+            Сайт:{' '}
+            <a href={SITE.domain} style={{ color: 'var(--accent)' }}>
+            {SITE_HOST}
+            </a>
             </div>
             <div>
               Email:{' '}

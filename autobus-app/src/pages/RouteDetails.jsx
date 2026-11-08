@@ -4,6 +4,7 @@ import { useData } from '../context/DataContext'
 import { formatDate, getUpcomingTrips } from '../lib/format'
 import { routePath } from '../lib/routeSlug'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
+import { absoluteUrl } from '../config/site'
 
 const FAQ = [
   {
@@ -51,8 +52,8 @@ function RouteDetails() {
       '@context': 'https://schema.org',
       '@type': 'BreadcrumbList',
       itemListElement: [
-        { '@type': 'ListItem', position: 1, name: 'Головна', item: 'https://bustour.com.ua/' },
-        { '@type': 'ListItem', position: 2, name: 'Маршрути', item: 'https://bustour.com.ua/routes' },
+        { '@type': 'ListItem', position: 1, name: 'Головна', item: absoluteUrl('/') },
+        { '@type': 'ListItem', position: 2, name: 'Маршрути', item: absoluteUrl('/routes') },
         { '@type': 'ListItem', position: 3, name: `${route.from} — ${route.to}` },
       ],
     },

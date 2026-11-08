@@ -98,13 +98,26 @@ async function addRoutePages() {
   }
 }
 
+function getOrigin() {
+  return (process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://bustour.com.ua').replace(/\/$/, '')
+}
+
 function writeSitemap() {
-  const origin = (process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://bustour.com.ua').replace(/\/$/, '')
+  const origin = getOrigin()
   const xml = `<?xml version="1.0" encoding="UTF-8"?>\n` +
     `<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
     ROUTES.map(route => `  <url><loc>${origin}${route}</loc></url>`).join('\n') +
     '\n</urlset>\n'
   fs.writeFileSync(path.join(DIST_DIR, 'sitemap.xml'), xml, 'utf8')
+}
+
+function writeRobots() {
+  const robotsPath = path.join(DIST_DIR, 'robots.txt')
+  if (!fs.existsSync(robotsPath)) return
+  const text = fs.readFileSync(robotsPath, 'utf8')
+    .replace(/^Sitemap:.*\r?\n?/gm, '')
+    .trimEnd() + `\n\nSitemap: ${getOrigin()}/sitemap.xml\n`
+  fs.writeFileSync(robotsPath, text, 'utf8')
 }
 
 ;(async () => {
@@ -158,6 +171,7 @@ function writeSitemap() {
 
     await browser.close()
     writeSitemap()
+    writeRobots()
     await close()
     console.log('🎉 Prerendering completed successfully.')
   } catch (err) {

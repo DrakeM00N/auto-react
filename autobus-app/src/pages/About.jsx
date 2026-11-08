@@ -67,10 +67,10 @@ function About() {
               </a>
             </div>
             <div>
-              Сайт:{' '}
-              <a href="https://bustour.com.ua" style={{ color: 'var(--accent)' }}>
-                bustour.com.ua
-              </a>
+            Сайт:{' '}
+            <a href={SITE.domain} style={{ color: 'var(--accent)' }}>
+            {new URL(SITE.domain).hostname}
+            </a>
             </div>
           </div>
         </section>
