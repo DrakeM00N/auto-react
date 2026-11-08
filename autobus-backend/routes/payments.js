@@ -96,8 +96,8 @@ router.post('/create',
     // unauthenticated /status endpoint from PII enumeration.
     const orderId = `order_${tripId}_${crypto.randomBytes(16).toString('hex')}`
     const destination = `Квиток BusToRIA: ${boardingPoint || route.from_city} → ${alightingPoint || route.to_city}, ${trip.date} ${trip.time}`
-    const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173')
-      .split(',')[0].trim()
+    const frontendUrl = (process.env.FRONTEND_URL || 'https://bustoria.com.ua')
+  .split(',')[0].trim()
 
     const invoice = createInvoice({
       amountUah: finalPrice,
@@ -202,7 +202,7 @@ router.post('/webhook', async (req, res) => {
 // the form body and 302 the browser to the SPA success page — direct
 // returnUrl-to-SPA doesn't work because POST kills client-side routing.
 router.post('/return', (req, res) => {
-  const frontendUrl = (process.env.FRONTEND_URL || 'https://bustour.com.ua')
+  const frontendUrl = (process.env.FRONTEND_URL || 'https://bustoria.com.ua')
     .split(',')[0].trim()
   const orderReference = (req.body && req.body.orderReference) || ''
   const target = orderReference
