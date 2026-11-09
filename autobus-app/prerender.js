@@ -93,7 +93,7 @@ async function addRoutePages() {
 }
 
 function getOrigin() {
-  return (process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://bustour.com.ua').replace(/\/$/, '')
+  return (process.env.SITE_URL || process.env.VITE_SITE_URL || 'https://bustoria.com.ua').replace(/\/$/, '')
 }
 
 function writeSitemap() {

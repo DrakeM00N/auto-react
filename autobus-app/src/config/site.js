@@ -1,4 +1,4 @@
-const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://bustour.com.ua').replace(/\/$/, '')
+const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://bustoria.com.ua').replace(/\/$/, '')
 
 export const SITE = {
   name: 'BusToRIA',
