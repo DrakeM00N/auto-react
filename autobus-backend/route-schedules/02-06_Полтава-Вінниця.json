@@ -16,7 +16,7 @@
       "seats": 20,
       "price": 2100,
       "active": true,
-      "departurePoint": "Полтава, вулиця Харківське шосе, 2",
+      "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Вінниця, вулиця Хмельницьке шосе, 114-І",
       "busModel": "Mercedes-Benz",
       "carrier": "BusToRIA",
@@ -29,8 +29,8 @@
       "validUntil": null,
       "stops": [
         {
-          "name": "Полтава (АЗС \"АТЛ\")",
-          "address": "вулиця Харківське шосе, 2",
+          "name": "Полтава",
+          "address": "вулиця Великотирнівська, 7",
           "offsetMin": 0
         },
         {
