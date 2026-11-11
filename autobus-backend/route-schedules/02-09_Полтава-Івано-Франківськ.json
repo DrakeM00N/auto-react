@@ -15,7 +15,7 @@
       "departure": "14:00",
       "seats": 20,
       "price": 2600,
-      "active": false,
+      "active": true,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Івано-Франківськ, вулиця Горбачевського, 14а",
       "busModel": "Mercedes-Benz",
@@ -25,7 +25,7 @@
         "Розетки USB",
         "Місце для багажу"
       ],
-      "validFrom": "2026-11-09",
+      "validFrom": "2026-11-11",
       "validUntil": null,
       "stops": [
         {
