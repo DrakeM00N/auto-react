@@ -13,7 +13,7 @@
       "departure": "14:00",
       "seats": 20,
       "price": 2100,
-      "active": true,
+      "active": false,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Тернопіль, вулиця Збаразьке кільце, 1",
       "busModel": "Mercedes-Benz",

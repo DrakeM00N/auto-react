@@ -15,7 +15,7 @@
       "departure": "14:00",
       "seats": 20,
       "price": 1700,
-      "active": true,
+      "active": false,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Умань, вулиця Київська, 1",
       "busModel": "Mercedes-Benz",

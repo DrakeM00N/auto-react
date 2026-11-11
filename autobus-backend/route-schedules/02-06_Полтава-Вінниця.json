@@ -15,7 +15,7 @@
       "departure": "14:00",
       "seats": 20,
       "price": 2100,
-      "active": true,
+      "active": false,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Вінниця, вулиця Хмельницьке шосе, 114-І",
       "busModel": "Mercedes-Benz",

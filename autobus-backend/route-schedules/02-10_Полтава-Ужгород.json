@@ -13,7 +13,7 @@
       "departure": "14:00",
       "seats": 20,
       "price": 3400,
-      "active": true,
+      "active": false,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Ужгород, Залізничний вокзал, Станційна 9",
       "busModel": "Mercedes-Benz",

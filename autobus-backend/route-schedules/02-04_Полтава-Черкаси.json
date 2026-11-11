@@ -15,7 +15,7 @@
       "departure": "14:00",
       "seats": 20,
       "price": 1100,
-      "active": true,
+      "active": false,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Черкаси, вулиця Володимира Ложешнікова, 7",
       "busModel": "Mercedes-Benz",
