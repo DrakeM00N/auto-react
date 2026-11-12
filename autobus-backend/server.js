@@ -86,18 +86,28 @@ app.get('/api/health', (req, res) => res.json({ ok: true }))
 
 const PORT = process.env.PORT || 3001
 
-initDB().then(async () => {
-  const generated = await generateUpcomingTrips()
-  log.info(`Generated ${generated} upcoming scheduled trips`)
-  setInterval(() => {
-    generateUpcomingTrips()
-      .then(count => log.info(`Generated ${count} upcoming scheduled trips`))
-      .catch(error => log.error('Scheduled trip generation failed:', error.message))
-  }, 24 * 60 * 60 * 1000).unref()
+let generating = false
+async function runTripGeneration() {
+  if (generating) return // не запускать параллельно
+  generating = true
+  try {
+    const count = await generateUpcomingTrips()
+    log.info(`Generated ${count} upcoming scheduled trips`)
+  } catch (error) {
+    log.error('Scheduled trip generation failed:', error.message)
+  } finally {
+    generating = false
+  }
+}
 
+initDB().then(() => {
   app.listen(PORT, () => {
     log.info(`Server listening on http://localhost:${PORT}`)
     log.info(`API base: http://localhost:${PORT}/api`)
+
+    // Тяжёлая работа уже после старта, в фоне
+    runTripGeneration()
+    setInterval(runTripGeneration, 24 * 60 * 60 * 1000).unref()
   })
 }).catch(err => {
   log.error('Startup failed:', err)
