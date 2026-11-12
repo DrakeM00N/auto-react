@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import { useData } from '../context/DataContext'
 import { formatDate, getUpcomingTrips } from '../lib/format'
 import { routePath } from '../lib/routeSlug'
+import { selectRouteBySlug } from '../lib/routeSelection'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import { absoluteUrl } from '../config/site'
 
@@ -23,8 +24,8 @@ const FAQ = [
 
 function RouteDetails() {
   const { slug } = useParams()
-  const { routes, trips } = useData()
-  const route = routes.find(item => routePath(item).split('/').pop() === slug)
+  const { routes, trips, loading } = useData()
+  const route = selectRouteBySlug(routes, trips, slug)
   const routeTrips = useMemo(
     () => route ? getUpcomingTrips(trips.filter(trip => trip.routeId === route.id)).slice(0, 5) : [],
     [route, trips],
@@ -35,12 +36,20 @@ function RouteDetails() {
     ? `Автобус ${route.from} — ${route.to}: ціна від ${price || '...'} грн, найближчі рейси та онлайн-бронювання квитків.`
     : 'Перегляньте доступні автобусні маршрути BusToRIA та забронюйте квиток онлайн.'
 
-  useDocumentMeta({ title, description, path: route ? routePath(route) : `/routes/${slug}` })
+  useDocumentMeta({
+    title,
+    description,
+    path: route ? routePath(route) : '/routes',
+    robots: !route && !loading ? 'noindex,follow' : 'index,follow',
+  })
   const otherRoutes = route ? routes.filter(item => item.from === route.from && item.id !== route.id).slice(0, 5) : []
 
   if (!route) {
     return (
-      <div style={{ padding: '60px 2rem', maxWidth: '900px', margin: '0 auto' }}>
+      <div
+        data-route-not-found={!loading ? 'true' : undefined}
+        style={{ padding: '60px 2rem', maxWidth: '900px', margin: '0 auto' }}
+      >
         <h1 style={{ fontFamily: 'Unbounded' }}>Маршрут не знайдено</h1>
         <Link to="/routes" className="btn-primary" style={{ marginTop: '24px' }}>До всіх маршрутів</Link>
       </div>

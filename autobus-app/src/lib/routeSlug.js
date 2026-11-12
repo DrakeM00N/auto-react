@@ -17,7 +17,13 @@ export function transliterate(value) {
 }
 
 export function routeSlug(route) {
-  return `${transliterate(route?.from)}-${transliterate(route?.to)}`
+  const citySlug = value => {
+    const city = String(value || '').trim()
+    if (/^(львів|lviv)$/i.test(city)) return 'l-viv'
+    if (/^(київ|kyiv)$/i.test(city)) return 'kyiv'
+    return transliterate(city)
+  }
+  return `${citySlug(route?.from)}-${citySlug(route?.to)}`
 }
 
 export function routePath(route) {

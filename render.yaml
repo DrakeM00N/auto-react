@@ -67,6 +67,8 @@ services:
       # Set to this frontend's own URL (used for ticket QR codes).
       - key: VITE_PUBLIC_URL
         sync: false
+      - key: VITE_SITE_URL
+        value: https://bustoria.com.ua
       # Must match the backend's GOOGLE_CLIENT_ID. Leave blank to hide the
       # "Continue with Google" button (the app handles the empty case).
       - key: VITE_GOOGLE_CLIENT_ID

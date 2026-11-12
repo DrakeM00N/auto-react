@@ -5,6 +5,8 @@ function setMeta(selector, attr, value) {
   let el = document.querySelector(selector)
   if (!el) {
     el = document.createElement('meta')
+    const [, key, keyValue] = selector.match(/^meta\[(name|property)="([^"]+)"\]$/) || []
+    if (key && keyValue) el.setAttribute(key, keyValue)
     document.head.appendChild(el)
   }
   el.setAttribute(attr, value)
@@ -20,7 +22,7 @@ function setLink(rel, href) {
   el.setAttribute('href', href)
 }
 
-export function useDocumentMeta({ title, description, path } = {}) {
+export function useDocumentMeta({ title, description, path, robots = 'index,follow' } = {}) {
   useEffect(() => {
     const nextTitle = title || `${SITE.name} — автобусні квитки онлайн`
     const nextDescription = description || SITE.description
@@ -29,7 +31,7 @@ export function useDocumentMeta({ title, description, path } = {}) {
 
     document.title = nextTitle
     setMeta('meta[name="description"]', 'content', nextDescription)
-    setMeta('meta[name="robots"]', 'content', 'index,follow')
+    setMeta('meta[name="robots"]', 'content', robots)
     setMeta('meta[property="og:title"]', 'content', nextTitle)
     setMeta('meta[property="og:description"]', 'content', nextDescription)
     setMeta('meta[property="og:url"]', 'content', canonical)
@@ -38,5 +40,5 @@ export function useDocumentMeta({ title, description, path } = {}) {
     setMeta('meta[name="twitter:description"]', 'content', nextDescription)
     setMeta('meta[name="twitter:image"]', 'content', image)
     setLink('canonical', canonical)
-  }, [title, description, path])
+  }, [title, description, path, robots])
 }

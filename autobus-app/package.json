@@ -11,7 +11,7 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "test": "node --test src/lib/format.test.js",
+    "test": "node --test src/lib/format.test.js src/lib/routeSlug.test.js src/lib/routeSelection.test.js",
     "preview": "vite preview",
     "postbuild": "node prerender.js"
   },

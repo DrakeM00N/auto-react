@@ -1,7 +1,7 @@
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import { SITE } from '../config/site'
 
-const SITE_HOST = new URL(SITE.domain).hostname
+const SITE_HOST = new URL(SITE.url).hostname
 
 const sectionStyle = {
   padding: '24px',
@@ -106,7 +106,7 @@ function Oferta() {
           <div style={{ display: 'grid', gap: '8px', color: 'var(--text2)', lineHeight: 1.7 }}>
             <div>
             Сайт:{' '}
-            <a href={SITE.domain} style={{ color: 'var(--accent)' }}>
+            <a href={SITE.url} style={{ color: 'var(--accent)' }}>
             {SITE_HOST}
             </a>
             </div>

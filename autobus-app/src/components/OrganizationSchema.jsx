@@ -5,8 +5,8 @@ function OrganizationSchema() {
     '@context': 'https://schema.org',
     '@type': 'Organization',
     name: SITE.name,
-    url: SITE.domain,
-    logo: `${SITE.domain}/favicon-512.png`,
+    url: SITE.url,
+    logo: `${SITE.url}/favicon-512.png`,
     email: SITE.email,
     telephone: SITE.phone,
     address: {

@@ -1,8 +1,8 @@
-const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://bustoria.com.ua').replace(/\/$/, '')
+const SITE_URL = (import.meta.env.VITE_SITE_URL || 'https://bustoria.com.ua').replace(/\/+$/, '')
 
 export const SITE = {
   name: 'BusToRIA',
-  domain: SITE_URL,
+  url: SITE_URL,
   description: 'Автобусні квитки онлайн по Україні: актуальний розклад, зручне бронювання та електронний квиток.',
   image: '/og-image.png',
   phone: '+38 (050) 057-06-56',
@@ -22,5 +22,5 @@ export const PUBLIC_PAGES = [
 ]
 
 export function absoluteUrl(path = '/') {
-  return new URL(path, SITE.domain).toString()
+  return new URL(path, SITE.url).toString()
 }
