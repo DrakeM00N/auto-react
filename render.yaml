@@ -12,7 +12,7 @@ services:
     name: autobus-backend
     runtime: node
     rootDir: autobus-backend
-    plan: free
+    plan: starter
     region: frankfurt
     buildCommand: npm install
     startCommand: node server.js
