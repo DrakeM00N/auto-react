@@ -4,7 +4,53 @@ const DAY_NAMES = ['sun', 'mon', 'tue', 'wed', 'thu', 'fri', 'sat']
 const MINUTES_PER_DAY = 24 * 60
 const BATCH_SIZE = 100
 
-// formatDate, todayInKyiv, addDays, calculateTimeline, parseJson — без изменений
+function formatDate(date) {
+  return date.toISOString().slice(0, 10)
+}
+
+function todayInKyiv() {
+  const formatter = new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Europe/Kyiv',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+  })
+  const parts = Object.fromEntries(formatter.formatToParts(new Date()).map(part => [part.type, part.value]))
+  return new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day)))
+}
+
+function addDays(date, amount) {
+  const next = new Date(date)
+  next.setUTCDate(next.getUTCDate() + amount)
+  return next
+}
+
+function calculateTimeline(date, departureTime, stops) {
+  const [hours, minutes] = departureTime.split(':').map(Number)
+  const departureMinutes = hours * 60 + minutes
+  const timeline = stops.map(stop => {
+    const totalMinutes = departureMinutes + Number(stop.offsetMin)
+    const dayOffset = Math.floor(totalMinutes / MINUTES_PER_DAY)
+    const minuteOfDay = totalMinutes % MINUTES_PER_DAY
+    const time = `${String(Math.floor(minuteOfDay / 60)).padStart(2, '0')}:${String(minuteOfDay % 60).padStart(2, '0')}`
+    return {
+      city: stop.name || stop.city,
+      time,
+      date: formatDate(addDays(date, dayOffset)),
+    }
+  })
+  const finalStop = timeline.at(-1)
+  return { timeline, arrivalDate: finalStop.date, arrivalTime: finalStop.time }
+}
+
+function parseJson(raw, fallback) {
+  try {
+    const value = JSON.parse(raw)
+    return value == null ? fallback : value
+  } catch {
+    return fallback
+  }
+}
 
 async function runBatched(statements) {
   for (let i = 0; i < statements.length; i += BATCH_SIZE) {
