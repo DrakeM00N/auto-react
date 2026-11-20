@@ -5,8 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#FFC93C" />
 
+    <!-- Шрифти: <link> замість @import у CSS (немає ланцюжка CSS → CSS → woff2) і без блокування
+         першого рендера: media=print перемикається на all після завантаження. -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" media="print" onload="this.media='all'"
+      href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Onest:wght@300;400;500;600&display=swap" />
+    <noscript>
+      <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;700&family=Onest:wght@300;400;500;600&display=swap" />
+    </noscript>
 
     <!-- Favicons -->
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
@@ -46,14 +54,31 @@
     }
     </script>
 
-    <!-- Google Analytics / Ads -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-SNL1SBHMHR"></script>
+    <!-- Google Analytics / Ads.
+         gtag() та dataLayer доступні одразу (події ставляться в чергу), а сам gtag.js
+         (~500 КБ із Ads-скриптами) вантажиться після window.load + 3.5 с або при першій
+         взаємодії — щоб не блокувати головний потік під час старту. -->
     <script>
       window.dataLayer = window.dataLayer || [];
       function gtag(){dataLayer.push(arguments);}
       gtag('js', new Date());
       gtag('config', 'G-SNL1SBHMHR');
       gtag('config', 'AW-18248435116');
+      (function () {
+        var loaded = false;
+        function loadGtag() {
+          if (loaded) return;
+          loaded = true;
+          var s = document.createElement('script');
+          s.async = true;
+          s.src = 'https://www.googletagmanager.com/gtag/js?id=G-SNL1SBHMHR';
+          document.head.appendChild(s);
+        }
+        ['pointerdown', 'keydown', 'scroll', 'touchstart'].forEach(function (evt) {
+          window.addEventListener(evt, loadGtag, { once: true, passive: true });
+        });
+        window.addEventListener('load', function () { setTimeout(loadGtag, 3500); });
+      })();
     </script>
   </head>
   <body>

@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { Navigate, Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
+import { useEnsureTrips } from '../lib/useTrips'
 import { formatDate, isDeparted } from '../lib/format'
 
 // Returns true if departure is less than 24 hours away
@@ -15,6 +16,7 @@ function isWithin24Hours(trip) {
 function Profile() {
   const { currentUser, changePassword } = useAuth()
   const { bookings, trips, routes, cancelBooking, updateBooking } = useData()
+  useEnsureTrips() // повний каталог рейсів потрібен лише цій сторінці
   const [editBookingId, setEditBookingId] = useState(null)
   const [editData, setEditData] = useState({ passengerName: '', passengerPhone: '' })
   const [passwords, setPasswords] = useState({ current: '', new: '', confirm: '' })

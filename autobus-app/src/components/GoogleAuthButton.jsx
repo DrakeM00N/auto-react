@@ -1,4 +1,4 @@
-import { GoogleLogin } from '@react-oauth/google'
+import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 
@@ -24,7 +24,10 @@ function GoogleAuthButton({ onError }) {
     navigate('/')
   }
 
+  // GoogleOAuthProvider підтягує gsi/client (~100 КБ), тому живе тут, а не на корені
+  // застосунку: головна та решта сторінок цей скрипт не вантажать.
   return (
+    <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
     <div style={{ display: 'grid', gap: '16px' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', color: 'var(--text2)' }}>
         <span style={{ flex: 1, height: '1px', background: 'var(--border)' }} />
@@ -41,6 +44,7 @@ function GoogleAuthButton({ onError }) {
         />
       </div>
     </div>
+    </GoogleOAuthProvider>
   )
 }
 

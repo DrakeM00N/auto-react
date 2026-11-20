@@ -59,6 +59,8 @@ async function initDB({ seed = true } = {}) {
       FOREIGN KEY (trip_id) REFERENCES trips(id) ON DELETE CASCADE,
       FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL
     )`,
+    `CREATE INDEX IF NOT EXISTS idx_trips_date_time ON trips(date, time)`,
+    `CREATE INDEX IF NOT EXISTS idx_trips_route_date ON trips(route_id, date, time)`,
     `CREATE INDEX IF NOT EXISTS idx_bookings_trip ON bookings(trip_id)`,
     `CREATE INDEX IF NOT EXISTS idx_bookings_user ON bookings(user_id)`,
     `CREATE TABLE IF NOT EXISTS pending_bookings (

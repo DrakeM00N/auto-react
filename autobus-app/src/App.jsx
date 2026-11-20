@@ -8,20 +8,20 @@ import RouteTracker from './components/RouteTracker'
 import ServerErrorBanner from './components/ServerErrorBanner'
 import OrganizationSchema from './components/OrganizationSchema'
 
-// Eagerly loaded — these are on the landing-page path or in the nav.
+// Eagerly loaded — the landing-page path and the pages a visitor browses most.
 import Home from './pages/Home'
 import RoutesPage from './pages/Routes'
 import Schedule from './pages/Schedule'
-import Login from './pages/Login'
-import Register from './pages/Register'
-import About from './pages/About'
-import Oferta from './pages/Oferta'
-import Privacy from './pages/Privacy'
 import RouteDetails from './pages/RouteDetails'
-import BookingSuccess from './pages/BookingSuccess'
 
 // Lazy-loaded — visitors who never reach booking, the admin pages, or a
 // permanent-ticket URL shouldn't pay for the code those pages drag in.
+const Login = lazy(() => import('./pages/Login'))
+const Register = lazy(() => import('./pages/Register'))
+const About = lazy(() => import('./pages/About'))
+const Oferta = lazy(() => import('./pages/Oferta'))
+const Privacy = lazy(() => import('./pages/Privacy'))
+const BookingSuccess = lazy(() => import('./pages/BookingSuccess'))
 const Booking = lazy(() => import('./pages/Booking'))
 const Ticket = lazy(() => import('./pages/Ticket'))
 const Profile = lazy(() => import('./pages/Profile'))

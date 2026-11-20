@@ -4,6 +4,7 @@ import { useData } from '../context/DataContext'
 import { todayLocalISO } from '../lib/format'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import { routePath } from '../lib/routeSlug'
+import { routeMatchesEndpoints } from '../lib/routeMatch'
 
 const UKRAINE_CITIES = [
   'Київ', 'Харків', 'Дніпро', 'Одеса', 'Запоріжжя', 'Львів', 'Кривий Ріг',
@@ -30,23 +31,11 @@ function RoutesPage() {
   const [passengers, setPassengers] = useState('1')
 
 
-  const filteredRoutes = useMemo(() => routes.filter(route => {
-  const allPoints = [route.from, ...(route.stops || []), route.to]
-
-  const fromIndex = fromFilter
-    ? allPoints.findIndex(p => p === fromFilter)
-    : 0
-  const toIndex = toFilter
-    ? allPoints.findLastIndex(p => p === toFilter)
-    : allPoints.length - 1
-
-  if (fromFilter && toFilter) {
-    return fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex
-  }
-  if (fromFilter) return fromIndex !== -1
-  if (toFilter) return toIndex !== -1
-  return true
-}), [routes, fromFilter, toFilter]) 
+  // Шукаємо лише за початковою («Звідки») та кінцевою («Куди») точками, не за проміжними зупинками
+  const filteredRoutes = useMemo(
+    () => routes.filter(route => routeMatchesEndpoints(route, fromFilter, toFilter)),
+    [routes, fromFilter, toFilter],
+  )
 
   const handleSearch = () => {
     const passengersCount = Number(passengers) > 0 ? Number(passengers) : 1

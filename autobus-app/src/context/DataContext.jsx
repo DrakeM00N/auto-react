@@ -1,32 +1,15 @@
-import { createContext, useContext, useState, useEffect, useCallback } from 'react'
+import { createContext, useContext, useState, useEffect, useCallback, useRef } from 'react'
 import { apiRequest as request } from '../lib/api'
+import { mapTrip } from '../lib/tripMapper'
 import { useAuth } from './AuthContext'
 
 const DataContext = createContext(null)
 
-// Normalize a trip coming back from the backend — defensively fill in the
-// extended fields with empty values so consumers can always rely on the
-// shape even on rows added before the busfor-style migration.
-function mapTrip(raw) {
-  return {
-    id: raw.id,
-    routeId: raw.routeId,
-    date: raw.date,
-    time: raw.time,
-    arrivalDate: raw.arrivalDate || '',
-    arrivalTime: raw.arrivalTime || '',
-    price: raw.price,
-    seats: raw.seats,
-    bookedCount: raw.bookedCount || 0,
-    departurePoint: raw.departurePoint || '',
-    arrivalPoint: raw.arrivalPoint || '',
-    busModel: raw.busModel || '',
-    busPlate: raw.busPlate || '',
-    carrier: raw.carrier || '',
-    amenities: Array.isArray(raw.amenities) ? raw.amenities : [],
-    intermediateStops: Array.isArray(raw.intermediateStops) ? raw.intermediateStops : [],
-    stopsTimeline: Array.isArray(raw.stopsTimeline) ? raw.stopsTimeline : [],
-  }
+// Network errors from fetch produce "Failed to fetch" — translate
+// to something a non-technical user understands.
+function describeError(e) {
+  const networkLike = /failed to fetch|networkerror|network request failed/i.test(e.message)
+  return networkLike ? 'Сервер недоступний. Перевірте підключення або спробуйте пізніше.' : e.message
 }
 
 function tripPayload(trip) {
@@ -51,7 +34,12 @@ function tripPayload(trip) {
 export function DataProvider({ children }) {
   const { currentUser } = useAuth()
   const [routes, setRoutes] = useState([])
+  // Повний каталог рейсів (~850 КБ) вантажимо ЛИШЕ на сторінках, яким він потрібен
+  // (адмінка, профіль, «Мої бронювання», розклад без дати) — див. ensureTrips().
   const [trips, setTrips] = useState([])
+  const [tripsLoaded, setTripsLoaded] = useState(false)
+  const [tripsLoading, setTripsLoading] = useState(false)
+  const tripsRequested = useRef(false)
   const [users, setUsers] = useState([])
   const [bookings, setBookings] = useState([])
   const [loading, setLoading] = useState(true)
@@ -63,12 +51,8 @@ export function DataProvider({ children }) {
   const loadData = useCallback(async () => {
     setLoading(true)
     try {
-      const [routesData, tripsData] = await Promise.all([
-        request('GET', '/routes'),
-        request('GET', '/trips'),
-      ])
+      const routesData = await request('GET', '/routes')
       setRoutes(routesData)
-      setTrips(tripsData.map(mapTrip))
 
       if (currentUser) {
         if (currentUser.role === 'admin') {
@@ -89,16 +73,39 @@ export function DataProvider({ children }) {
       setError(null)
     } catch (e) {
       console.error('Помилка завантаження даних:', e.message)
-      // Network errors from fetch produce "Failed to fetch" — translate
-      // to something a non-technical user understands.
-      const networkLike = /failed to fetch|networkerror|network request failed/i.test(e.message)
-      setError(networkLike ? 'Сервер недоступний. Перевірте підключення або спробуйте пізніше.' : e.message)
+      setError(describeError(e))
     } finally {
       setLoading(false)
     }
   }, [currentUser])
 
-  const reload = useCallback(() => loadData(), [loadData])
+  const fetchAllTrips = useCallback(async () => {
+    setTripsLoading(true)
+    try {
+      const tripsData = await request('GET', '/trips')
+      setTrips(tripsData.map(mapTrip))
+      setTripsLoaded(true)
+      setError(null)
+    } catch (e) {
+      console.error('Помилка завантаження рейсів:', e.message)
+      tripsRequested.current = false // дозволити повторну спробу
+      setError(describeError(e))
+    } finally {
+      setTripsLoading(false)
+    }
+  }, [])
+
+  // Ідемпотентно: перший виклик запускає завантаження всіх рейсів, наступні нічого не роблять.
+  const ensureTrips = useCallback(() => {
+    if (tripsRequested.current) return
+    tripsRequested.current = true
+    fetchAllTrips()
+  }, [fetchAllTrips])
+
+  const reload = useCallback(() => {
+    loadData()
+    if (tripsRequested.current) fetchAllTrips()
+  }, [loadData, fetchAllTrips])
 
   // Syncing external state (server data) into React state on auth change
   // is the documented valid use of useEffect — the lint rule fires a
@@ -193,7 +200,7 @@ export function DataProvider({ children }) {
     <DataContext.Provider value={{
       loading, error, reload,
       routes, addRoute, updateRoute, deleteRoute,
-      trips, addTrip, updateTrip, deleteTrip,
+      trips, tripsLoaded, tripsLoading, ensureTrips, addTrip, updateTrip, deleteTrip,
       users, promoteUser, demoteUser,
       bookings, cancelBooking, updateBooking,
     }}>

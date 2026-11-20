@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom'
 import { useState } from 'react'
 import { useData } from '../context/DataContext'
+import { isPrerender, useSiteStats, useUpcomingTrips } from '../lib/useTrips'
 import { formatDate } from '../lib/format'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import { useCountUp } from '../lib/useCountUp'
-import { getUpcomingTrips } from '../lib/format'
 import { routePath } from '../lib/routeSlug'
 
 const FAQ_ITEMS = [
@@ -137,7 +137,7 @@ function Stat({ value, label }) {
   const display = useCountUp(value)
   return (
     <div className="stat">
-      <div style={{ fontFamily: 'Unbounded', fontSize: '2rem', fontWeight: 700, color: 'var(--accent)' }}>{display}</div>
+      <div style={{ fontFamily: 'Unbounded', fontSize: '2rem', fontWeight: 700, color: 'var(--accent)' }}>{value == null ? '—' : display}</div>
       <div style={{ color: 'var(--text2)', fontSize: '0.9rem', marginTop: '4px' }}>{label}</div>
     </div>
   )
@@ -149,9 +149,17 @@ function Home() {
     description: 'Купуйте автобусні квитки онлайн: розклад рейсів, популярні маршрути, бронювання з оплатою картою та електронний квиток на телефон.',
   })
 
-  const { routes, trips, loading } = useData()
-  const upcomingTrips = getUpcomingTrips(trips).slice(0, 3)
-  const citiesCovered = new Set(routes.flatMap(r => [r.from, r.to])).size
+  // Головна НЕ завантажує весь каталог рейсів: три найближчі та лічильники
+  // приходять двома невеликими запитами (/trips/upcoming, /stats).
+  const { routes, loading: routesLoading } = useData()
+  const prerender = isPrerender()
+  const upcoming = useUpcomingTrips({ limit: 3, enabled: !prerender })
+  const { stats } = useSiteStats({ enabled: !prerender })
+  const loading = prerender || routesLoading || upcoming.loading
+  const upcomingTrips = upcoming.trips
+  const routesCount = stats?.routes ?? (routes.length || null)
+  const tripsCount = stats?.trips ?? null
+  const citiesCovered = stats?.cities ?? (routes.length ? new Set(routes.flatMap(r => [r.from, r.to])).size : null)
 
   return (
     <div>
@@ -203,8 +211,8 @@ function Home() {
 
       {/* СТАТИСТИКА */}
       <section style={{ display: 'flex', justifyContent: 'center', gap: '2px', background: 'var(--border)' }}>
-        <Stat value={routes.length} label="Маршрутів" />
-        <Stat value={trips.length} label="Рейсів" />
+        <Stat value={routesCount} label="Маршрутів" />
+        <Stat value={tripsCount} label="Рейсів" />
         <Stat value={citiesCovered} label="Міст у мережі" />
       </section>
 

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useData } from '../context/DataContext'
+import { useTripById } from '../lib/useTrips'
 import { useAuth } from '../context/AuthContext'
 import { track } from '../lib/analytics'
 import { apiRequest } from '../lib/api'
@@ -50,13 +51,14 @@ function StopsTimeline({ stops }) {
 }
 
 function Booking() {
-  const { trips, routes } = useData()
+  const { routes } = useData()
   const { currentUser } = useAuth()
   const [searchParams] = useSearchParams()
   const tripId = Number(searchParams.get('tripId'))
   const [serverError, setServerError] = useState(null)
 
-  const selectedTrip = useMemo(() => trips.find(trip => trip.id === tripId), [trips, tripId])
+  // Один рейс за id (GET /trips/:id) замість завантаження всього каталогу на кроці оплати.
+  const { trip: selectedTrip, loading: tripLoading } = useTripById(tripId)
   const selectedRoute = useMemo(() => routes.find(route => route.id === selectedTrip?.routeId), [routes, selectedTrip])
   const freeSeats = selectedTrip ? selectedTrip.seats - (selectedTrip.bookedCount || 0) : 0
   const departed = selectedTrip ? isDeparted(selectedTrip) : false
@@ -195,7 +197,9 @@ function Booking() {
         <p style={{ color: 'var(--text2)', lineHeight: 1.7 }}>Заповніть дані та перейдіть до оплати.</p>
       </section>
 
-      {!selectedTrip ? (
+      {tripLoading ? (
+        <div style={{ padding: '28px', color: 'var(--text2)' }}>Завантаження рейсу…</div>
+      ) : !selectedTrip ? (
         <div style={{ padding: '28px', borderRadius: '18px', background: 'var(--bg2)', border: '1px solid var(--border)', display: 'grid', gap: '18px', justifyItems: 'start' }}>
           <p style={{ margin: 0, color: 'var(--text2)', lineHeight: 1.6 }}>
             Невірний або відсутній tripId. Спочатку оберіть конкретний рейс у розкладі — натиснення «Забронювати» поряд із потрібним рейсом відкриє цю сторінку з потрібними параметрами.

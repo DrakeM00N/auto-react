@@ -2,11 +2,13 @@ import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
+import { useEnsureTrips } from '../lib/useTrips'
 import { formatDate, isDeparted } from '../lib/format'
 
 function Bookings() {
   const { currentUser } = useAuth()
   const { routes, trips, bookings, cancelBooking } = useData()
+  useEnsureTrips() // повний каталог рейсів потрібен лише цій сторінці
   const [status, setStatus] = useState(null)
   const [filter, setFilter] = useState('upcoming')
 

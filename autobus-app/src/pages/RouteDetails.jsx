@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { useMemo } from 'react'
 import { useData } from '../context/DataContext'
+import { useUpcomingTrips } from '../lib/useTrips'
 import { formatDate, getUpcomingTrips } from '../lib/format'
 import { routePath } from '../lib/routeSlug'
 import { selectRouteBySlug } from '../lib/routeSelection'
@@ -24,8 +25,21 @@ const FAQ = [
 
 function RouteDetails() {
   const { slug } = useParams()
-  const { routes, trips, loading } = useData()
-  const route = selectRouteBySlug(routes, trips, slug)
+  const { routes, loading: routesLoading } = useData()
+  // Рейси тягнемо лише для маршрутів цієї сторінки (кандидати — дублікати з однаковим slug),
+  // а не весь каталог. Кандидатів може бути кілька: серед них обираємо маршрут з найбільшою
+  // кількістю майбутніх рейсів (див. selectRouteBySlug).
+  const candidateIds = useMemo(
+    () => routes.filter(item => routePath(item).split('/').pop() === slug).map(item => item.id),
+    [routes, slug],
+  )
+  const { trips, loading: tripsLoading } = useUpcomingTrips({
+    limit: 200,
+    routeIds: candidateIds,
+    enabled: candidateIds.length > 0,
+  })
+  const loading = routesLoading || tripsLoading
+  const route = tripsLoading ? undefined : selectRouteBySlug(routes, trips, slug)
   const routeTrips = useMemo(
     () => route ? getUpcomingTrips(trips.filter(trip => trip.routeId === route.id)).slice(0, 5) : [],
     [route, trips],
@@ -43,6 +57,10 @@ function RouteDetails() {
     robots: !route && !loading ? 'noindex,follow' : 'index,follow',
   })
   const otherRoutes = route ? routes.filter(item => item.from === route.from && item.id !== route.id).slice(0, 5) : []
+
+  if (!route && loading) {
+    return <div style={{ padding: '60px 2rem', maxWidth: '900px', margin: '0 auto', color: 'var(--text2)' }}>Завантаження…</div>
+  }
 
   if (!route) {
     return (
