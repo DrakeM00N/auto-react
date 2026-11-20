@@ -4,6 +4,7 @@ import { useForm, useFieldArray } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useAuth } from '../context/AuthContext'
 import { useData } from '../context/DataContext'
+import { useEnsureTrips } from '../lib/useTrips'
 import { formatDate, isDeparted } from '../lib/format'
 import Button from '../components/Button'
 import { apiRequest } from '../lib/api'
@@ -203,6 +204,7 @@ function Pager({ currentPage, totalPages, onChange }) {
 function Admin() {
   const { currentUser } = useAuth()
   const { routes, addRoute, deleteRoute, updateRoute, trips, addTrip, deleteTrip, updateTrip, users, bookings } = useData()
+  useEnsureTrips() // повний каталог рейсів потрібен лише цій сторінці
 
   const [editingRouteId, setEditingRouteId] = useState(null)
   const [editingTripId, setEditingTripId] = useState(null)

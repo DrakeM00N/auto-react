@@ -8,6 +8,14 @@
 
 const KYIV_TZ = 'Europe/Kyiv'
 
+// Intl.DateTimeFormat дорого конструювати — створюємо один раз на модуль.
+const KYIV_FORMATTER = new Intl.DateTimeFormat('en-GB', {
+  timeZone: KYIV_TZ,
+  year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit',
+  hourCycle: 'h23',
+})
+
 // Today in the user's local TZ, formatted as 'YYYY-MM-DD'. Used for date-
 // input defaults and the `min` attribute that greys out past days in the
 // native calendar.
@@ -28,13 +36,7 @@ export function formatDate(iso) {
 // Components of "now" as seen in Kyiv. Intl handles DST automatically — no
 // manual ±2/±3 offsets — so this works year-round for any caller TZ.
 function nowInKyivParts(now = new Date()) {
-  const fmt = new Intl.DateTimeFormat('en-GB', {
-    timeZone: KYIV_TZ,
-    year: 'numeric', month: '2-digit', day: '2-digit',
-    hour: '2-digit', minute: '2-digit',
-    hourCycle: 'h23',
-  })
-  const parts = Object.fromEntries(fmt.formatToParts(now).map(p => [p.type, p.value]))
+  const parts = Object.fromEntries(KYIV_FORMATTER.formatToParts(now).map(p => [p.type, p.value]))
   return {
     year: parts.year,
     month: parts.month,
@@ -64,7 +66,20 @@ export function isDepartedAt(trip, now) {
 }
 
 export function getUpcomingTrips(trips, now = new Date()) {
-  return (Array.isArray(trips) ? trips : [])
-    .filter(trip => !isDepartedAt(trip, now))
+  const list = Array.isArray(trips) ? trips : []
+  // «Зараз» рахуємо один раз, а не на кожен рейс (раніше — 13 385 разів new Intl.DateTimeFormat).
+  const n = nowInKyivParts(now)
+  const nowKey = `${n.year}${n.month}${n.day}${n.hour}${n.minute}`
+  const keyOf = (trip) => {
+    if (!trip || typeof trip.date !== 'string' || typeof trip.time !== 'string') return null
+    const d = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trip.date)
+    const t = /^(\d{2}):(\d{2})$/.exec(trip.time)
+    return d && t ? `${d[1]}${d[2]}${d[3]}${t[1]}${t[2]}` : null
+  }
+  return list
+    .filter(trip => {
+      const key = keyOf(trip)
+      return key === null || key > nowKey // як і раніше: «биті» дані не вважаються відправленими
+    })
     .sort((a, b) => `${a.date}T${a.time}`.localeCompare(`${b.date}T${b.time}`))
 }

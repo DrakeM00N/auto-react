@@ -4,6 +4,8 @@ import { useData } from '../context/DataContext'
 import { track } from '../lib/analytics'
 import { formatDate, isDeparted, todayLocalISO } from '../lib/format'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
+import { useTripsByDate } from '../lib/useTrips'
+import { getScheduleDate } from '../lib/scheduleDate'
 
 // One toggleable "Детальніше" panel per trip card. Renders only fields that
 // were actually filled in, so old trips with no extended data don't show
@@ -145,7 +147,7 @@ function Schedule() {
     title: 'Розклад рейсів',
     description: 'Актуальний розклад автобусних рейсів: фільтр за датою, напрямком та часом відправлення. Забронюйте місце онлайн за кілька хвилин.',
   })
-  const { trips, routes } = useData()
+  const { trips: allTrips, tripsLoaded, routes, ensureTrips } = useData()
   const [searchParams, setSearchParams] = useSearchParams()
   const [searchQuery, setSearchQuery] = useState('')
   const resultsRef = useRef(null)
@@ -155,17 +157,14 @@ function Schedule() {
   // removes the set-state-in-effect anti-pattern.
   const filterFrom = searchParams.get('from') || ''
   const filterTo = searchParams.get('to') || ''
-  // No `date` param? Default to today (computed at read time, no effect,
-  // no URL write). An explicit value in the URL — even if empty after the
-  // user clears the picker — still wins on the next render because we
-  // remove the param from the URL when value is '' (see updateFilter).
+  // No `date` param? Default to today; an explicit empty value means all dates.
   const today = todayLocalISO()
-  const filterDate = searchParams.get('date') ?? today
+  const filterDate = getScheduleDate(searchParams, today)
 
   const updateFilter = (key, value) => {
     setSearchParams(prev => {
       const next = new URLSearchParams(prev)
-      if (value) next.set(key, value)
+      if (value || key === 'date') next.set(key, value)
       else next.delete(key)
       return next
     })
@@ -174,9 +173,21 @@ function Schedule() {
   const setFilterTo = (v) => updateFilter('to', v)
   const setFilterDate = (v) => updateFilter('date', v)
 
+  // З датою (за замовчуванням — сьогодні) тягнемо лише рейси цього дня: GET /trips?date=…
+  // Без дати користувач просить «усі рейси» — тоді завантажуємо повний каталог (один раз).
+  const dayTrips = useTripsByDate(filterDate)
+  useEffect(() => {
+    if (!filterDate) ensureTrips()
+  }, [filterDate, ensureTrips])
+  const trips = filterDate ? dayTrips.trips : allTrips
+  const tripsPending = filterDate ? dayTrips.loading : !tripsLoaded
+
+  // routes.find() усередині фільтра по всіх рейсах давав O(рейси × маршрути)
+  const routesById = useMemo(() => new Map(routes.map(r => [r.id, r])), [routes])
+
   const filteredTrips = useMemo(() => {
   return trips.filter(trip => {
-    const route = routes.find(r => r.id === trip.routeId)
+    const route = routesById.get(trip.routeId)
     if (!route) return false
 
     // Повний список точок маршруту: від → зупинки → до
@@ -205,7 +216,7 @@ function Schedule() {
 
     return routeMatch && dateMatch && searchMatch
   })
-}, [trips, routes, filterFrom, filterTo, filterDate, searchQuery])
+}, [trips, routesById, filterFrom, filterTo, filterDate, searchQuery])
 
   // Прошедшие рейсы НЕ скрываем — выводим в конце списка, приглушённо.
   // Сортировка стабильная: внутри каждой группы порядок берётся из data layer
@@ -325,17 +336,17 @@ function Schedule() {
           </button>
         </div>
         <div style={{ color: 'var(--text2)', fontSize: '0.95rem' }}>
-          Показано {filteredTrips.length} з {trips.length} рейсів.
+          {tripsPending ? 'Завантаження…' : `Показано ${filteredTrips.length} з ${trips.length} рейсів.`}
         </div>
       </section>
 
       <div ref={resultsRef} style={{ display: 'grid', gap: '18px' }}>
         {orderedTrips.length === 0 ? (
           <div style={{ padding: '24px', background: 'var(--bg2)', borderRadius: '16px', border: '1px solid var(--border)' }}>
-            Немає доступних рейсів за обраними параметрами.
+            {tripsPending ? 'Завантаження рейсів…' : 'Немає доступних рейсів за обраними параметрами.'}
           </div>
         ) : orderedTrips.map((trip, i) => {
-          const route = routes.find(r => r.id === trip.routeId)
+          const route = routesById.get(trip.routeId)
           const freeSeats = trip.seats - (trip.bookedCount || 0)
           const departed = isDeparted(trip)
 
