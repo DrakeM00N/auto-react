@@ -100,12 +100,75 @@ const SELECT_TRIP_WITH_COUNT = `
   LEFT JOIN bookings b ON b.trip_id = t.id
 `
 
-// GET /api/trips
+const KYIV_FORMATTER = new Intl.DateTimeFormat('en-GB', {
+  timeZone: 'Europe/Kyiv',
+  year: 'numeric', month: '2-digit', day: '2-digit',
+  hour: '2-digit', minute: '2-digit',
+  hourCycle: 'h23',
+})
+
+function kyivNow(now = new Date()) {
+  const p = Object.fromEntries(KYIV_FORMATTER.formatToParts(now).map(part => [part.type, part.value]))
+  return { date: `${p.year}-${p.month}-${p.day}`, time: `${p.hour}:${p.minute}` }
+}
+
+// "12" или "12,15,36" -> [12, 15, 36]; пустое/некорректное значение -> null
+function parseRouteIds(value) {
+  if (typeof value !== 'string' || !value.trim()) return null
+  const ids = value.split(',').map(part => Number(part.trim()))
+  if (ids.length > 20 || ids.some(id => !Number.isInteger(id) || id <= 0)) return null
+  return ids
+}
+
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
+
+// GET /api/trips            — все рейсы (для админки и профиля)
+// GET /api/trips?date=YYYY-MM-DD&routeId=1,2 — только нужные рейсы (расписание)
 router.get('/', async (req, res) => {
   try {
     res.set('Cache-Control', 'public, max-age=120, stale-while-revalidate=60')
+    const where = []
+    const args = []
+    if (req.query.date !== undefined) {
+      if (!DATE_RE.test(String(req.query.date))) return res.status(400).json({ error: 'Некоректна дата' })
+      where.push('t.date = ?')
+      args.push(String(req.query.date))
+    }
+    if (req.query.routeId !== undefined) {
+      const ids = parseRouteIds(req.query.routeId)
+      if (!ids) return res.status(400).json({ error: 'Некоректний routeId' })
+      where.push(`t.route_id IN (${ids.map(() => '?').join(',')})`)
+      args.push(...ids)
+    }
+    const whereSql = where.length ? `WHERE ${where.join(' AND ')}` : ''
     const tripsRes = await db.execute({
-      sql: `${SELECT_TRIP_WITH_COUNT} GROUP BY t.id ORDER BY t.date, t.time`,
+      sql: `${SELECT_TRIP_WITH_COUNT} ${whereSql} GROUP BY t.id ORDER BY t.date, t.time`,
+      args,
+    })
+    res.json(tripsRes.rows.map(mapTripRow))
+  } catch (e) {
+    res.status(500).json({ error: 'Помилка сервера' })
+  }
+})
+
+// GET /api/trips/upcoming?limit=3&routeId=12,15
+// Найближчі рейси (ще не відправлені, за київським часом). Для головної та сторінки маршруту.
+router.get('/upcoming', async (req, res) => {
+  try {
+    res.set('Cache-Control', 'public, max-age=60, stale-while-revalidate=60')
+    const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 6, 1), 200)
+    const now = kyivNow()
+    const where = ['(t.date > ? OR (t.date = ? AND t.time > ?))']
+    const args = [now.date, now.date, now.time]
+    if (req.query.routeId !== undefined) {
+      const ids = parseRouteIds(req.query.routeId)
+      if (!ids) return res.status(400).json({ error: 'Некоректний routeId' })
+      where.push(`t.route_id IN (${ids.map(() => '?').join(',')})`)
+      args.push(...ids)
+    }
+    const tripsRes = await db.execute({
+      sql: `${SELECT_TRIP_WITH_COUNT} WHERE ${where.join(' AND ')} GROUP BY t.id ORDER BY t.date, t.time LIMIT ?`,
+      args: [...args, limit],
     })
     res.json(tripsRes.rows.map(mapTripRow))
   } catch (e) {
@@ -120,6 +183,20 @@ async function fetchTripById(id) {
   })
   return r.rows[0] ? mapTripRow(r.rows[0]) : null
 }
+
+// GET /api/trips/:id — один рейс (сторінка бронювання)
+router.get('/:id', async (req, res) => {
+  try {
+    const id = Number(req.params.id)
+    if (!Number.isInteger(id) || id <= 0) return res.status(400).json({ error: 'Некоректний id' })
+    const trip = await fetchTripById(id)
+    if (!trip) return res.status(404).json({ error: 'Рейс не знайдено' })
+    res.set('Cache-Control', 'no-store') // місця змінюються після кожного бронювання
+    res.json(trip)
+  } catch (e) {
+    res.status(500).json({ error: 'Помилка сервера' })
+  }
+})
 
 // POST /api/trips  (admin)
 router.post('/', adminMiddleware, tripValidators, async (req, res) => {
