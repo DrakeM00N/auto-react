@@ -6,6 +6,7 @@ import { formatDate, isDeparted, todayLocalISO } from '../lib/format'
 import { useDocumentMeta } from '../lib/useDocumentMeta'
 import { useTripsByDate } from '../lib/useTrips'
 import { getScheduleDate } from '../lib/scheduleDate'
+import { routeMatchesEndpoints, routeSearchText } from '../lib/routeMatch'
 
 // One toggleable "Детальніше" panel per trip card. Renders only fields that
 // were actually filled in, so old trips with no extended data don't show
@@ -190,28 +191,11 @@ function Schedule() {
     const route = routesById.get(trip.routeId)
     if (!route) return false
 
-    // Повний список точок маршруту: від → зупинки → до
-    const allPoints = [route.from, ...(route.stops || []), route.to]
-
-    const fromIndex = filterFrom
-      ? allPoints.findIndex(p => p === filterFrom)
-      : 0
-    const toIndex = filterTo
-      ? allPoints.findLastIndex(p => p === filterTo)
-      : allPoints.length - 1
-
-    // Місто "звідки" має бути раніше міста "куди" в маршруті
-    const routeMatch = filterFrom && filterTo
-      ? fromIndex !== -1 && toIndex !== -1 && fromIndex < toIndex
-      : filterFrom
-        ? fromIndex !== -1
-        : filterTo
-          ? toIndex !== -1
-          : true
+    // Місто «звідки» = початок маршруту, «куди» = кінець; проміжні зупинки не шукаємо
+    const routeMatch = routeMatchesEndpoints(route, filterFrom, filterTo)
 
     const dateMatch = filterDate ? trip.date === filterDate : true
-    const stopsText = (route.stops || []).join(' ') || ''
-    const searchText = `${route.from} ${route.to} ${stopsText} ${trip.date} ${trip.time}`.toLowerCase()
+    const searchText = routeSearchText(route, trip.date, trip.time)
     const searchMatch = searchQuery ? searchText.includes(searchQuery.toLowerCase()) : true
 
     return routeMatch && dateMatch && searchMatch
