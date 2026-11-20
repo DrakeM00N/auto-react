@@ -10,6 +10,7 @@ import { promisify } from 'node:util'
 import { loadEnv } from 'vite'
 import { routePath } from './src/lib/routeSlug.js'
 import { selectRoutesBySlug } from './src/lib/routeSelection.js'
+import { getUpcomingTrips } from './src/lib/format.js'
 
 // Реальные публичные маршруты из App.jsx — только то, что имеет смысл
 // индексировать (без авторизации, без динамических :id/:code параметров)
@@ -135,6 +136,39 @@ async function addRoutePages() {
   }
 }
 
+// Ответы «мини-API» для prerender: те же эндпоинты, что и на бэкенде, но поверх
+// уже загруженных списков routes/trips.
+function parseRouteIdFilter(value) {
+  if (!value) return null
+  const ids = value.split(',').map(Number).filter(Number.isInteger)
+  return ids.length ? new Set(ids) : null
+}
+
+function buildApiBody(endpoint, params, routes, trips) {
+  if (endpoint === 'routes') return JSON.stringify(routes)
+  if (endpoint === 'stats') {
+    const cities = new Set(routes.flatMap(route => [route.from, route.to]))
+    return JSON.stringify({ routes: routes.length, trips: trips.length, cities: cities.size })
+  }
+  if (endpoint === 'trips' || endpoint === 'trips/upcoming') {
+    const routeIds = parseRouteIdFilter(params.get('routeId'))
+    let list = routeIds ? trips.filter(trip => routeIds.has(Number(trip.routeId))) : trips
+    if (endpoint === 'trips') {
+      const date = params.get('date')
+      if (date) list = list.filter(trip => trip.date === date)
+      return JSON.stringify(list)
+    }
+    const limit = Math.min(Math.max(parseInt(params.get('limit'), 10) || 6, 1), 200)
+    return JSON.stringify(getUpcomingTrips(list).slice(0, limit))
+  }
+  const tripMatch = /^trips\/(\d+)$/.exec(endpoint)
+  if (tripMatch) {
+    const trip = trips.find(item => Number(item.id) === Number(tripMatch[1]))
+    return trip ? JSON.stringify(trip) : null
+  }
+  return null
+}
+
 function interceptApiRequests(page, apiBase, routes, trips) {
   const apiUrl = new URL(apiBase)
   const apiPath = apiUrl.pathname.replace(/\/+$/, '')
@@ -150,11 +184,9 @@ function interceptApiRequests(page, apiBase, routes, trips) {
     }
 
     const endpoint = requestUrl.pathname.slice(apiPath.length + 1)
-    const body = request.method() === 'GET' && endpoint === 'routes'
-      ? JSON.stringify(routes)
-      : request.method() === 'GET' && endpoint === 'trips'
-        ? JSON.stringify(trips)
-        : null
+    const body = request.method() === 'GET'
+      ? buildApiBody(endpoint, requestUrl.searchParams, routes, trips)
+      : null
     const response = {
       status: body === null ? 204 : 200,
       headers: {
@@ -280,6 +312,8 @@ function writeRobots() {
       try {
         console.log(`🔧 Rendering route: ${route}`)
         page.setDefaultTimeout(30000)
+        // Головна не вантажить «живі» рейси у цьому режимі — у статичний HTML не потрапляють застарілі дані
+        await page.evaluateOnNewDocument(() => { window.__PRERENDER__ = true })
         interceptApiRequests(page, routeSummary.apiBase, routeSummary.routes, routeSummary.trips)
         page.on('console', (msg) => console.log(`   [browser] ${msg.type()}: ${msg.text()}`))
         page.on('pageerror', (err) => console.log(`   [browser error] ${err.message}`))
