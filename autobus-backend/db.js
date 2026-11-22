@@ -144,6 +144,9 @@ async function initDB({ seed = true } = {}) {
   // CREATE TABLE IF NOT EXISTS does not add new columns to existing tables,
   // so we patch them in explicitly. Safe to run on a fresh DB too — the
   // helper is a no-op when the column is already present.
+  // Вхід через Google: у базах, створених до його появи, колонки google_id немає,
+  // а CREATE TABLE IF NOT EXISTS існуючу таблицю не змінює.
+  await addColumnIfMissing('users', 'google_id', 'TEXT')
   await addColumnIfMissing('bookings', 'ticket_code', 'TEXT')
   await addColumnIfMissing('pending_bookings', 'invoice_id', 'TEXT')
   await addColumnIfMissing('pending_bookings', 'user_id', 'INTEGER')
