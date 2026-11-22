@@ -130,7 +130,8 @@ router.post('/login',
       return res.status(401).json({ error: 'Невірний email або пароль' })
     }
 
-    const valid = await bcrypt.compare(password, user.password)
+    // Акаунт, створений через Google, пароля не має — це звичайна невдала спроба входу, а не помилка сервера
+    const valid = user.password ? await bcrypt.compare(password, user.password) : false
     if (!valid) {
       return res.status(401).json({ error: 'Невірний email або пароль' })
     }
@@ -150,6 +151,16 @@ router.post('/login',
     res.status(500).json({ error: 'Помилка сервера' })
   }
 })
+
+// Google-акаунт не має пароля. У нових базах users.password nullable, але в базах,
+// створених до входу через Google, колонка NOT NULL (SQLite не дозволяє змінити це
+// через ALTER). Тоді кладемо порожній рядок: він хибний для hasPassword, а bcrypt.compare
+// з порожнім хешем ніколи не збігається, тож увійти за паролем неможливо.
+async function passwordForGoogleAccount() {
+  const info = await db.execute('PRAGMA table_info(users)')
+  const column = info.rows.find(row => row.name === 'password')
+  return column && Number(column.notnull) === 1 ? '' : null
+}
 
 // POST /api/auth/google
 router.post('/google', async (req, res) => {
@@ -200,13 +211,13 @@ router.post('/google', async (req, res) => {
       // First contact via Google — create a Google-only account (no password).
       // Same atomic role-bootstrap as /register.
       const stmt = insertUserSql(
-        ['name', 'email', 'google_id'],
-        ['?', '?', '?'],
+        ['name', 'email', 'google_id', 'password'],
+        ['?', '?', '?', '?'],
         ADMIN_EMAILS.has(email),
       )
       const result = await db.execute({
         sql: stmt.sql,
-        args: [name, email, googleId, stmt.forceAdminArg],
+        args: [name, email, googleId, await passwordForGoogleAccount(), stmt.forceAdminArg],
       })
       userResult = await db.execute({
         sql: 'SELECT * FROM users WHERE id = ?',
