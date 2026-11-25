@@ -14,7 +14,7 @@
       "departure": "11:50",
       "seats": 20,
       "price": 3600,
-      "active": false,
+      "active": true,
       "departurePoint": "Ужгород, Залізничний вокзал, Станційна 9",
       "arrivalPoint": "Харків, вулиця Євгена Котляра, 15а",
       "busModel": "Mercedes-Benz",
