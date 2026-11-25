@@ -4,17 +4,12 @@
   "schedules": [
     {
       "days": [
-        "mon",
-        "tue",
-        "wed",
-        "fri",
-        "sat",
-        "sun"
+       "mon", "tue", "wed", "thu", "fri", "sat", "sun"
       ],
       "departure": "21:45",
       "seats": 20,
       "price": 2200,
-      "active": false,
+      "active": true,
       "departurePoint": "Хмельницький, вулиця Вінницька, 2/2",
       "arrivalPoint": "Дніпро, вулиця 128-ї Бригади Тероборони, 10",
       "busModel": "Mercedes-Benz",
@@ -24,7 +19,7 @@
         "Розетки USB",
         "Місце для багажу"
       ],
-      "validFrom": "2026-11-09",
+      "validFrom": "2026-11-30",
       "validUntil": null,
       "stops": [
         {

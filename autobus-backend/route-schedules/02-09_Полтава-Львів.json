@@ -4,16 +4,12 @@
   "schedules": [
     {
       "days": [
-        "mon",
-        "wed",
-        "fri",
-        "sat",
-        "sun"
+       "mon", "tue", "wed", "fri", "sat", "sun"
       ],
       "departure": "14:00",
       "seats": 20,
       "price": 2500,
-      "active": false,
+      "active": true,
       "departurePoint": "Полтава, вулиця Великотирнівська, 7",
       "arrivalPoint": "Львів, вулиця Стрийська, 109",
       "busModel": "Mercedes-Benz",
@@ -23,7 +19,7 @@
         "Розетки USB",
         "Місце для багажу"
       ],
-      "validFrom": "2026-11-11",
+      "validFrom": "2026-11-30",
       "validUntil": null,
       "stops": [
         {
@@ -39,32 +35,32 @@
         {
           "name": "Кропивницький Автовокзал",
           "address": "вулиця Олександрівське шосе, 1",
-          "offsetMin": 285
+          "offsetMin": 270
         },
         {
           "name": "Умань Автовокзал",
           "address": "вулиця Київська, 1",
-          "offsetMin": 465
+          "offsetMin": 450
         },
         {
           "name": "Вінниця",
           "address": "вулиця Хмельницьке шосе, 114-І",
-          "offsetMin": 605
+          "offsetMin": 585
         },
         {
           "name": "Хмельницький (АЗС \"WOG\")",
           "address": "вулиця Вінницька, 2/2",
-          "offsetMin": 705
+          "offsetMin": 720
         },
         {
           "name": "Тернопіль (АЗС \"ОККО\")",
           "address": "вулиця Збаразьке кільце, 1",
-          "offsetMin": 795
+          "offsetMin": 780
         },
         {
           "name": "Львів",
           "address": "вулиця Стрийська, 109",
-          "offsetMin": 995
+          "offsetMin": 900
         }
       ],
       "exceptions": []

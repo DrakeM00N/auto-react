@@ -4,16 +4,12 @@
   "schedules": [
     {
       "days": [
-        "mon",
-        "wed",
-        "fri",
-        "sat",
-        "sun"
+       "mon", "tue", "wed", "fri", "sat", "sun"
       ],
       "departure": "16:00",
       "seats": 20,
       "price": 2900,
-      "active": false,
+      "active": true,
       "departurePoint": "Кременчук, вулиця Халаменюка, 7",
       "arrivalPoint": "Ужгород, Залізничний вокзал, Станційна 9",
       "busModel": "Mercedes-Benz",
@@ -23,7 +19,7 @@
         "Розетки USB",
         "Місце для багажу"
       ],
-      "validFrom": "2026-11-09",
+      "validFrom": "2026-11-30",
       "validUntil": null,
       "stops": [
         {
@@ -34,37 +30,37 @@
         {
           "name": "Кропивницький Автовокзал",
           "address": "вулиця Олександрівське шосе, 1",
-          "offsetMin": 155
+          "offsetMin": 150
         },
         {
           "name": "Умань Автовокзал",
           "address": "вулиця Київська, 1",
-          "offsetMin": 335
+          "offsetMin": 330
         },
         {
           "name": "Вінниця",
           "address": "вулиця Хмельницьке шосе, 114-І",
-          "offsetMin": 475
+          "offsetMin": 470
         },
         {
           "name": "Хмельницький (АЗС \"WOG\")",
           "address": "вулиця Вінницька, 2/2",
-          "offsetMin": 575
+          "offsetMin": 600
         },
         {
           "name": "Тернопіль (АЗС \"ОККО\")",
           "address": "вулиця Збаразьке кільце, 1",
-          "offsetMin": 665
+          "offsetMin": 660
         },
         {
           "name": "Львів",
           "address": "вулиця Стрийська, 109",
-          "offsetMin": 865
+          "offsetMin": 780
         },
         {
           "name": "Ужгород Залізничний вокзал",
           "address": "Станційна 9",
-          "offsetMin": 1145
+          "offsetMin": 1140
         }
       ],
       "exceptions": []
