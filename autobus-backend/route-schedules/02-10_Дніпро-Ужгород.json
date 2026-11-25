@@ -13,7 +13,7 @@
       "departure": "12:45",
       "seats": 20,
       "price": 3400,
-      "active": true,
+      "active": false,
       "departurePoint": "Дніпро, вулиця 128-ї Бригади Тероборони, 10",
       "arrivalPoint": "Ужгород, Залізничний вокзал, Станційна 9",
       "busModel": "Mercedes-Benz",

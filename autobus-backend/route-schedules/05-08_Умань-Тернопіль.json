@@ -13,7 +13,7 @@
       "departure": "21:30",
       "seats": 20,
       "price": 1000,
-      "active": true,
+      "active": false,
       "departurePoint": "Умань, вулиця Київська, 1",
       "arrivalPoint": "Тернопіль, вулиця Збаразьке кільце, 1",
       "busModel": "Mercedes-Benz",

@@ -13,7 +13,7 @@
       "departure": "11:20",
       "seats": 20,
       "price": 3500,
-      "active": true,
+      "active": false,
       "departurePoint": "Запоріжжя, Проспект Соборний, 218а (МакДональдс)",
       "arrivalPoint": "Ужгород, Залізничний вокзал, Станційна 9",
       "busModel": "Mercedes-Benz",

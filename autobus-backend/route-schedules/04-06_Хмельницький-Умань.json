@@ -14,7 +14,7 @@
       "departure": "21:45",
       "seats": 20,
       "price": 900,
-      "active": true,
+      "active": false,
       "departurePoint": "Хмельницький, вулиця Вінницька, 2/2",
       "arrivalPoint": "Умань, вулиця Київська, 1",
       "busModel": "Mercedes-Benz",

@@ -13,7 +13,7 @@
       "departure": "12:45",
       "seats": 20,
       "price": 2100,
-      "active": true,
+      "active": false,
       "departurePoint": "Дніпро, вулиця 128-ї Бригади Тероборони, 10",
       "arrivalPoint": "Тернопіль, вулиця Збаразьке кільце, 1",
       "busModel": "Mercedes-Benz",

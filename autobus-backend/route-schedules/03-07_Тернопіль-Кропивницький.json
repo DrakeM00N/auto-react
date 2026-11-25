@@ -14,7 +14,7 @@
       "departure": "20:00",
       "seats": 20,
       "price": 1500,
-      "active": true,
+      "active": false,
       "departurePoint": "Тернопіль, вулиця Збаразьке кільце, 1",
       "arrivalPoint": "Кропивницький, вулиця Олександрівське шосе, 1",
       "busModel": "Mercedes-Benz",

@@ -13,7 +13,7 @@
       "departure": "11:20",
       "seats": 20,
       "price": 2600,
-      "active": true,
+      "active": false,
       "departurePoint": "Запоріжжя, Проспект Соборний, 218а (МакДональдс)",
       "arrivalPoint": "Львів, вулиця Стрийська, 109",
       "busModel": "Mercedes-Benz",

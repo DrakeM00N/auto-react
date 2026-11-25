@@ -14,7 +14,7 @@
       "departure": "11:50",
       "seats": 20,
       "price": 3400,
-      "active": true,
+      "active": false,
       "departurePoint": "Ужгород, Залізничний вокзал, Станційна 9",
       "arrivalPoint": "Полтава, вулиця Харківське шосе, 2",
       "busModel": "Mercedes-Benz",

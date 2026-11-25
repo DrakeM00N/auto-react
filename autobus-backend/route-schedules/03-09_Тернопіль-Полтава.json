@@ -14,7 +14,7 @@
       "departure": "20:00",
       "seats": 20,
       "price": 2100,
-      "active": true,
+      "active": false,
       "departurePoint": "Тернопіль, вулиця Збаразьке кільце, 1",
       "arrivalPoint": "Полтава, вулиця Харківське шосе, 2",
       "busModel": "Mercedes-Benz",

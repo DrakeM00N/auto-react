@@ -14,7 +14,7 @@
       "departure": "06:30",
       "seats": 20,
       "price": 900,
-      "active": true,
+      "active": false,
       "departurePoint": "Кременчук, вулиця Халаменюка, 7",
       "arrivalPoint": "Запоріжжя, Проспект Соборний, 218а (МакДональдс)",
       "busModel": "Mercedes-Benz",

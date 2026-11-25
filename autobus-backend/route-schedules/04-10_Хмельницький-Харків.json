@@ -14,7 +14,7 @@
       "departure": "21:45",
       "seats": 20,
       "price": 2400,
-      "active": true,
+      "active": false,
       "departurePoint": "Хмельницький, вулиця Вінницька, 2/2",
       "arrivalPoint": "Харків, вулиця Євгена Котляра, 15а",
       "busModel": "Mercedes-Benz",
