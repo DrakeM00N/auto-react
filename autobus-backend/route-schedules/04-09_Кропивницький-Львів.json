@@ -13,7 +13,7 @@
       "departure": "18:30",
       "seats": 20,
       "price": 1700,
-      "active": true,
+      "active": false,
       "departurePoint": "Кропивницький, вулиця Олександрівське шосе, 1",
       "arrivalPoint": "Львів, вулиця Стрийська, 109",
       "busModel": "Mercedes-Benz",

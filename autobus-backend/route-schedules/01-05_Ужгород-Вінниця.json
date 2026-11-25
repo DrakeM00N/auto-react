@@ -14,7 +14,7 @@
       "departure": "11:50",
       "seats": 20,
       "price": 1500,
-      "active": true,
+      "active": false,
       "departurePoint": "Ужгород, Залізничний вокзал, Станційна 9",
       "arrivalPoint": "Вінниця, вулиця Хмельницьке шосе, 114-І",
       "busModel": "Mercedes-Benz",

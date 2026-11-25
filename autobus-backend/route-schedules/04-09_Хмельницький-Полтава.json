@@ -14,7 +14,7 @@
       "departure": "21:45",
       "seats": 20,
       "price": 2200,
-      "active": true,
+      "active": false,
       "departurePoint": "Хмельницький, вулиця Вінницька, 2/2",
       "arrivalPoint": "Полтава, вулиця Харківське шосе, 2",
       "busModel": "Mercedes-Benz",

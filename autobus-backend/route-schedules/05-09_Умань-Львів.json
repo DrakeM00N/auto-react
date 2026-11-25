@@ -13,7 +13,7 @@
       "departure": "21:30",
       "seats": 20,
       "price": 1200,
-      "active": true,
+      "active": false,
       "departurePoint": "Умань, вулиця Київська, 1",
       "arrivalPoint": "Львів, вулиця Стрийська, 109",
       "busModel": "Mercedes-Benz",

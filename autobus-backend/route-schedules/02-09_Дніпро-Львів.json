@@ -13,7 +13,7 @@
       "departure": "12:45",
       "seats": 20,
       "price": 2500,
-      "active": true,
+      "active": false,
       "departurePoint": "Дніпро, вулиця 128-ї Бригади Тероборони, 10",
       "arrivalPoint": "Львів, вулиця Стрийська, 109",
       "busModel": "Mercedes-Benz",

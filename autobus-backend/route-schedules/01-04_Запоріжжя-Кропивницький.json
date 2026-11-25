@@ -13,7 +13,7 @@
       "departure": "11:20",
       "seats": 20,
       "price": 1300,
-      "active": true,
+      "active": false,
       "departurePoint": "Запоріжжя, Проспект Соборний, 218а (МакДональдс)",
       "arrivalPoint": "Кропивницький, вулиця Олександрівське шосе, 1",
       "busModel": "Mercedes-Benz",
