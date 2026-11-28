@@ -15,7 +15,7 @@
       "departure": "14:00",
       "seats": 20,
       "price": 2700,
-      "active": false,
+      "active": true,
       "departurePoint": "Івано-Франківськ, вулиця Горбачевського, 14а",
       "arrivalPoint": "Автостанція «Миргород», вул. Воскресенська, 9",
       "busModel": "Mercedes-Benz",
